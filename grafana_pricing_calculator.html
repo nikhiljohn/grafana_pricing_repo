@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Grafana Cloud — Pricing Calculator & Prospecting Guide</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#F5F6FA;color:#1C1C2E;min-height:100vh}
+
+  /* ── SEARCE HEADER ── */
+  header{background:#FFFFFF;border-bottom:3px solid #FF5722;padding:14px 32px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  .searce-logo{display:flex;align-items:center;gap:10px;border-right:1px solid #E0E0E0;padding-right:18px;margin-right:4px}
+  .searce-wordmark{font-size:20px;font-weight:800;letter-spacing:-0.5px}
+  .searce-wordmark .s-orange{color:#FF5722}
+  .searce-wordmark .s-dark{color:#1C1C2E}
+  .grafana-badge{display:flex;align-items:center;gap:8px}
+  .grafana-badge svg{width:28px;height:28px}
+  .grafana-badge h1{font-size:17px;font-weight:700;color:#1C1C2E}
+  .grafana-badge span{font-size:12px;color:#888;margin-left:4px;font-weight:400}
+  header .right-note{margin-left:auto;font-size:11px;color:#999;text-align:right;line-height:1.5}
+
+  /* ── TABS ── */
+  .tabs{display:flex;background:#FFFFFF;border-bottom:2px solid #E8E8EE;padding:0 32px;overflow-x:auto;gap:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+  .tab{padding:13px 18px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;color:#666;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:6px;margin-bottom:-2px}
+  .tab:hover{color:#FF5722;background:#FFF5F2}
+  .tab.active{color:#FF5722;border-bottom-color:#FF5722;font-weight:700}
+  .tab.tab-prospect{color:#5C6BC0}
+  .tab.tab-prospect:hover{background:#EEF0FB;color:#3949AB}
+  .tab.tab-prospect.active{color:#3949AB;border-bottom-color:#3949AB}
+  .tab-icon{font-size:14px}
+
+  /* ── LAYOUT ── */
+  .main{padding:28px 32px;max-width:1040px;margin:0 auto}
+  .layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  /* ── CARDS ── */
+  .card{background:#FFFFFF;border:1px solid #E8E8EE;border-radius:10px;padding:22px;margin-bottom:18px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+  .card h3{font-size:13px;font-weight:700;color:#444;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #F0F0F5;text-transform:uppercase;letter-spacing:.4px}
+  .section-title{font-size:14px;font-weight:700;color:#FF5722;margin-bottom:16px;display:flex;align-items:center;gap:8px;letter-spacing:.2px}
+
+  /* ── FORM ELEMENTS ── */
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:14px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  label{font-size:12px;color:#777;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  input[type=number],select{background:#FAFBFC;border:1px solid #DDE0E8;color:#1C1C2E;padding:8px 12px;border-radius:6px;font-size:13px;width:100%;outline:none;transition:border-color .2s}
+  input[type=number]:focus,select:focus{border-color:#FF5722;box-shadow:0 0 0 3px rgba(255,87,34,.1)}
+  .unit{font-size:11px;color:#AAA;margin-top:2px}
+
+  /* ── PLAN CARDS ── */
+  .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+  .plan-card{background:#FAFBFC;border:2px solid #E8E8EE;border-radius:8px;padding:16px;cursor:pointer;transition:all .2s}
+  .plan-card:hover{border-color:#FFCCBC;box-shadow:0 2px 8px rgba(255,87,34,.1)}
+  .plan-card.selected{border-color:#FF5722;background:#FFF5F2}
+  .plan-card h4{font-size:13px;font-weight:700;color:#1C1C2E;margin-bottom:4px}
+  .plan-card .price{font-size:18px;font-weight:700;color:#FF5722;margin-bottom:6px}
+  .plan-card .desc{font-size:11px;color:#888;line-height:1.6}
+  .info-box{background:#F8F9FD;border:1px solid #E3E6F0;border-radius:6px;padding:11px 14px;font-size:12px;color:#666;line-height:1.7;margin-top:8px}
+  .info-box strong{color:#444}
+
+  /* ── SUMMARY PANEL ── */
+  .summary-panel{background:#FFFFFF;border:1px solid #E8E8EE;border-radius:10px;padding:0;overflow:hidden;position:sticky;top:58px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+  .summary-header{background:linear-gradient(135deg,#FF5722,#FF7043);padding:15px 18px;font-size:14px;font-weight:700;color:#FFF}
+  .summary-row{display:flex;justify-content:space-between;align-items:center;padding:9px 18px;border-bottom:1px solid #F4F4F8;font-size:13px}
+  .summary-row:last-child{border-bottom:none}
+  .summary-label{color:#888}
+  .summary-val{color:#1C1C2E;font-weight:600}
+  .summary-val.orange{color:#FF5722}
+  .total-row{background:#FFF5F2;padding:15px 18px;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #FF5722}
+  .total-label{font-size:14px;font-weight:700;color:#444}
+  .total-val{font-size:22px;font-weight:800;color:#FF5722}
+
+  /* ── PILLS & BADGES ── */
+  .pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
+  .pill-orange{background:#FBE9E7;color:#E64A19}
+  .pill-green{background:#E8F5E9;color:#388E3C}
+  .pill-blue{background:#E8EAF6;color:#3949AB}
+  .pill-red{background:#FFEBEE;color:#C62828}
+  .free-badge{display:inline-block;font-size:10px;background:#E8F5E9;color:#388E3C;padding:2px 7px;border-radius:4px;margin-left:6px;font-weight:700}
+  .divider{height:1px;background:#F0F0F5;margin:14px 0}
+
+  /* ── BUTTONS ── */
+  .btn{padding:10px 20px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .2s;letter-spacing:.2px}
+  .btn-primary{background:#FF5722;color:#FFF}
+  .btn-primary:hover{background:#E64A19}
+  .btn-secondary{background:transparent;color:#FF5722;border:2px solid #FF5722}
+  .btn-secondary:hover{background:#FFF5F2}
+  .actions{display:flex;gap:10px;margin-top:16px}
+
+  /* ── PROSPECTING TAB ── */
+  .prospect-hero{background:linear-gradient(135deg,#3949AB 0%,#5C6BC0 100%);border-radius:10px;padding:22px 26px;margin-bottom:22px;color:#FFF}
+  .prospect-hero h2{font-size:18px;font-weight:800;margin-bottom:6px}
+  .prospect-hero p{font-size:13px;opacity:.85;line-height:1.6}
+  .prospect-hero .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .prospect-hero .tag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600}
+
+  .q-section{background:#FFFFFF;border:1px solid #E8E8EE;border-radius:10px;margin-bottom:18px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+  .q-section-header{background:#F8F9FD;padding:14px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;border-bottom:1px solid #E8E8EE}
+  .q-section-header:hover{background:#F0F2FA}
+  .q-section-icon{font-size:18px}
+  .q-section-title{font-size:13px;font-weight:700;color:#1C1C2E;flex:1;text-transform:uppercase;letter-spacing:.4px}
+  .q-section-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .q-chevron{color:#BBB;font-size:12px;transition:transform .2s}
+  .q-section.open .q-chevron{transform:rotate(180deg)}
+  .q-body{padding:20px;display:none}
+  .q-section.open .q-body{display:block}
+
+  .q-item{border:1px solid #EEF0F8;border-radius:8px;padding:14px 16px;margin-bottom:12px;background:#FAFBFE}
+  .q-item:last-child{margin-bottom:0}
+  .q-item .q-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .q-item .q-text{font-size:14px;font-weight:600;color:#1C1C2E;margin-bottom:6px;line-height:1.4}
+  .q-item .q-why{font-size:12px;color:#888;line-height:1.6;font-style:italic;border-left:3px solid #E0E3F0;padding-left:10px;margin-top:6px}
+  .q-item .q-signals{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .q-item .q-signal{font-size:10px;background:#FFF;border:1px solid #DDE0E8;border-radius:4px;padding:2px 8px;color:#666}
+  .q-item textarea{width:100%;background:#FFF;border:1px solid #DDE0E8;border-radius:6px;padding:8px 10px;font-size:12px;color:#333;resize:vertical;min-height:52px;margin-top:8px;font-family:inherit;outline:none;transition:border-color .2s}
+  .q-item textarea:focus{border-color:#3949AB}
+  .q-item textarea::placeholder{color:#CCC}
+
+  .migration-banner{background:linear-gradient(135deg,#E53935,#EF5350);border-radius:8px;padding:14px 18px;color:#FFF;margin-bottom:16px;font-size:13px;display:flex;align-items:flex-start;gap:10px}
+  .migration-banner strong{display:block;font-size:14px;margin-bottom:4px}
+  .migration-banner p{opacity:.9;line-height:1.5}
+
+  .greenfield-banner{background:linear-gradient(135deg,#2E7D32,#43A047);border-radius:8px;padding:14px 18px;color:#FFF;margin-bottom:16px;font-size:13px;display:flex;align-items:flex-start;gap:10px}
+  .greenfield-banner strong{display:block;font-size:14px;margin-bottom:4px}
+  .greenfield-banner p{opacity:.9;line-height:1.5}
+
+  .cheat-sheet{background:#FFFDE7;border:1px solid #F9A825;border-radius:8px;padding:16px 18px;margin-bottom:20px}
+  .cheat-sheet h4{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#F57F17;margin-bottom:10px}
+  .cheat-sheet ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+  .cheat-sheet li{font-size:12px;color:#555;padding-left:16px;position:relative;line-height:1.5}
+  .cheat-sheet li::before{content:"⚡";position:absolute;left:0;font-size:10px}
+
+  /* ── SCORE PANEL ── */
+  .score-panel{background:#FFFFFF;border:1px solid #E8E8EE;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-top:0}
+  .score-header{background:linear-gradient(135deg,#3949AB,#5C6BC0);padding:14px 18px;color:#FFF;font-size:13px;font-weight:700}
+  .score-row{padding:10px 16px;border-bottom:1px solid #F4F4F8;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+  .score-row:last-child{border-bottom:none}
+  .score-label{color:#888}
+  .score-val{font-weight:700;color:#3949AB}
+  .score-total-row{background:#EEF0FB;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-top:2px solid #3949AB}
+  .score-total-label{font-size:13px;font-weight:700;color:#444}
+  .score-total-val{font-size:20px;font-weight:800;color:#3949AB}
+
+  @media(max-width:720px){
+    .layout{grid-template-columns:1fr}
+    .row,.row3{grid-template-columns:1fr}
+    .plan-grid{grid-template-columns:1fr}
+    .tabs{padding:0 12px}
+    .main{padding:16px}
+    header{padding:12px 16px}
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar{height:4px;width:4px}
+  ::-webkit-scrollbar-track{background:#F0F0F5}
+  ::-webkit-scrollbar-thumb{background:#CCC;border-radius:4px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header>
+  <div class="searce-logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="6" fill="#FF5722"/>
+      <text x="7" y="23" font-family="Arial" font-weight="900" font-size="18" fill="#FFF">S</text>
+    </svg>
+    <div class="searce-wordmark"><span class="s-orange">Searce</span></div>
+  </div>
+  <div class="grafana-badge">
+    <svg viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="6" fill="#1C1C2E"/>
+      <path d="M14 5C9.03 5 5 9.03 5 14s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 1.5c4.14 0 7.5 3.36 7.5 7.5s-3.36 7.5-7.5 7.5S6.5 18.14 6.5 14 9.86 6.5 14 6.5zM12.5 9v5.38l4.24 4.24-1.06 1.06L11.5 15.5H13V9h-0.5z" fill="#FF5722"/>
+    </svg>
+    <h1>Grafana Cloud <span>Pricing Calculator &amp; Prospecting Guide</span></h1>
+  </div>
+  <div class="right-note">Estimates in USD/month<br><span style="color:#FF5722;font-weight:600">Powered by Searce</span></div>
+</header>
+
+<!-- ══════════════════ TABS ══════════════════ -->
+<div class="tabs" id="tabBar">
+  <div class="tab active" onclick="switchTab('plan')"><span class="tab-icon">☁️</span>Plan</div>
+  <div class="tab" onclick="switchTab('metrics')"><span class="tab-icon">📊</span>Metrics</div>
+  <div class="tab" onclick="switchTab('logs')"><span class="tab-icon">📋</span>Logs</div>
+  <div class="tab" onclick="switchTab('traces')"><span class="tab-icon">🔗</span>Traces</div>
+  <div class="tab" onclick="switchTab('profiles')"><span class="tab-icon">🔬</span>Profiles</div>
+  <div class="tab" onclick="switchTab('alerting')"><span class="tab-icon">🔔</span>Alerting</div>
+  <div class="tab" onclick="switchTab('users')"><span class="tab-icon">👥</span>Users</div>
+  <div class="tab" onclick="switchTab('k8s')"><span class="tab-icon">⚙️</span>K8s Monitor</div>
+  <div class="tab" onclick="switchTab('summary')"><span class="tab-icon">💰</span><strong>Summary</strong></div>
+  <div class="tab tab-prospect" onclick="switchTab('prospect')" style="margin-left:auto"><span class="tab-icon">🎯</span><strong>Prospecting Q&amp;A</strong></div>
+</div>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<div class="main">
+<div class="layout">
+<div>
+
+<!-- ────────────────── PLAN ────────────────── -->
+<div id="tab-plan" class="tab-content active">
+  <div class="section-title">☁️ Choose Your Plan</div>
+  <div class="plan-grid">
+    <div class="plan-card selected" id="plan-free" onclick="selectPlan('free')">
+      <h4>Free</h4>
+      <div class="price">$0<span style="font-size:11px;font-weight:400;color:#AAA">/mo</span></div>
+      <div class="desc">3 users · 10k metric series · 50 GB logs · 50 GB traces · Community support</div>
+    </div>
+    <div class="plan-card" id="plan-pro" onclick="selectPlan('pro')">
+      <h4>Pro</h4>
+      <div class="price">Pay-as-you-go</div>
+      <div class="desc">Unlimited users · Usage-based · Standard support · SSO add-on</div>
+    </div>
+    <div class="plan-card" id="plan-advanced" onclick="selectPlan('advanced')">
+      <h4>Advanced</h4>
+      <div class="price">Custom</div>
+      <div class="desc">Enterprise SLAs · Dedicated support · Custom contracts · Advanced security</div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Billing Preference</h3>
+    <div class="row">
+      <div class="field">
+        <label>Billing Cycle</label>
+        <select onchange="setBilling(this.value)">
+          <option value="monthly">Monthly</option>
+          <option value="annual">Annual (save ~16%)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Currency</label>
+        <select>
+          <option>USD</option>
+          <option>EUR</option>
+          <option>GBP</option>
+          <option>INR</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>Free tier inclusions (always):</strong> 10,000 series metrics · 50 GB logs · 50 GB traces · 500 profiles/month · 10k frontend sessions · 10k SLO-hours · 3 active users
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── METRICS ────────────────── -->
+<div id="tab-metrics" class="tab-content">
+  <div class="section-title">📊 Metrics (Prometheus / Graphite)</div>
+  <div class="card">
+    <h3>Active Series</h3>
+    <div class="row">
+      <div class="field">
+        <label>Total Active Metric Series</label>
+        <input type="number" id="metric_series" value="10000" min="0" step="1000" oninput="calc()"/>
+        <div class="unit">First 10,000 series are FREE</div>
+      </div>
+      <div class="field">
+        <label>Scrape Interval</label>
+        <select id="scrape_interval" onchange="calc()">
+          <option value="60">60s (standard)</option>
+          <option value="30">30s</option>
+          <option value="15">15s</option>
+          <option value="10">10s</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Retention Period</label>
+        <select id="metric_retention" onchange="calc()">
+          <option value="13">13 months (default)</option>
+          <option value="25">25 months (+cost)</option>
+          <option value="37">37 months (+cost)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>DPM Overrides (optional)</label>
+        <input type="number" id="dpm" value="0" min="0" oninput="calc()"/>
+        <div class="unit">Data points per minute (advanced)</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>Pricing:</strong> $8 per 1,000 active series/month beyond free tier · Shorter scrape intervals increase DPM (not series count) · Extended retention billed separately
+    </div>
+  </div>
+  <div class="card">
+    <h3>Cardinality &amp; Growth</h3>
+    <div class="row">
+      <div class="field">
+        <label>Expected Monthly Growth (%)</label>
+        <input type="number" id="metric_growth" value="0" min="0" max="200" oninput="calc()"/>
+      </div>
+      <div class="field">
+        <label>Number of Hosts / Nodes</label>
+        <input type="number" id="hosts" value="0" min="0" oninput="calc()"/>
+        <div class="unit">~300–500 series per host (estimated)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── LOGS ────────────────── -->
+<div id="tab-logs" class="tab-content">
+  <div class="section-title">📋 Logs (Loki)</div>
+  <div class="card">
+    <h3>Log Ingestion</h3>
+    <div class="row">
+      <div class="field">
+        <label>Daily Ingestion Volume (GB/day)</label>
+        <input type="number" id="log_gb_day" value="0" min="0" step="0.5" oninput="calc()"/>
+        <div class="unit">First ~1.6 GB/day (50 GB/mo) is FREE</div>
+      </div>
+      <div class="field">
+        <label>Retention Period</label>
+        <select id="log_retention" onchange="calc()">
+          <option value="30">30 days (default)</option>
+          <option value="90">90 days</option>
+          <option value="180">180 days</option>
+          <option value="365">365 days</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Number of Log Sources / Apps</label>
+        <input type="number" id="log_sources" value="0" min="0" oninput="calc()"/>
+      </div>
+      <div class="field">
+        <label>Avg Log Line Size (bytes)</label>
+        <input type="number" id="log_line_size" value="256" min="0" oninput="calc()"/>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>Pricing:</strong> $0.50 per GB ingested beyond free tier · Extended retention available · Compression typically reduces stored size by 5–10×
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── TRACES ────────────────── -->
+<div id="tab-traces" class="tab-content">
+  <div class="section-title">🔗 Traces (Tempo)</div>
+  <div class="card">
+    <h3>Distributed Tracing</h3>
+    <div class="row">
+      <div class="field">
+        <label>Traces per Month</label>
+        <input type="number" id="traces_month" value="0" min="0" step="100000" oninput="calc()"/>
+        <div class="unit">First 50 GB/mo storage FREE</div>
+      </div>
+      <div class="field">
+        <label>Avg Spans per Trace</label>
+        <input type="number" id="spans_per_trace" value="20" min="1" oninput="calc()"/>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Avg Span Size (bytes)</label>
+        <input type="number" id="span_size" value="300" min="0" oninput="calc()"/>
+      </div>
+      <div class="field">
+        <label>Retention Period</label>
+        <select id="trace_retention" onchange="calc()">
+          <option value="14">14 days (default)</option>
+          <option value="30">30 days</option>
+          <option value="90">90 days</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>Pricing:</strong> $0.50 per GB stored beyond free tier · Calculated as traces × spans × span_size · Supports OpenTelemetry, Jaeger, Zipkin
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── PROFILES ────────────────── -->
+<div id="tab-profiles" class="tab-content">
+  <div class="section-title">🔬 Profiles (Pyroscope)</div>
+  <div class="card">
+    <h3>Continuous Profiling</h3>
+    <div class="row">
+      <div class="field">
+        <label>Profiled Services / Targets</label>
+        <input type="number" id="profile_services" value="0" min="0" oninput="calc()"/>
+      </div>
+      <div class="field">
+        <label>Profiles per Month</label>
+        <input type="number" id="profiles_month" value="0" min="0" step="1000" oninput="calc()"/>
+        <div class="unit">First 500 profiles/mo FREE</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Avg Profile Size (KB)</label>
+        <input type="number" id="profile_size_kb" value="50" min="0" oninput="calc()"/>
+      </div>
+      <div class="field">
+        <label>Retention (days)</label>
+        <input type="number" id="profile_retention" value="14" min="1" oninput="calc()"/>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>Pricing:</strong> $0.016 per profile-hour beyond free tier · Pyroscope supports Go, Java, Python, Ruby, .NET, Node.js
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── ALERTING ────────────────── -->
+<div id="tab-alerting" class="tab-content">
+  <div class="section-title">🔔 Alerting &amp; Synthetic Monitoring</div>
+  <div class="card">
+    <h3>Alert Rules</h3>
+    <div class="row">
+      <div class="field">
+        <label>Number of Active Alert Rules</label>
+        <input type="number" id="alert_rules" value="0" min="0" oninput="calc()"/>
+        <div class="unit">First 100 rules FREE</div>
+      </div>
+      <div class="field">
+        <label>Evaluation Frequency</label>
+        <select id="alert_freq" onchange="calc()">
+          <option value="60">Every 60s</option>
+          <option value="30">Every 30s</option>
+          <option value="10">Every 10s</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Synthetic Monitoring</h3>
+    <div class="row">
+      <div class="field">
+        <label>Number of Checks</label>
+        <input type="number" id="sm_checks" value="0" min="0" oninput="calc()"/>
+        <div class="unit">First 10,000 executions/mo FREE</div>
+      </div>
+      <div class="field">
+        <label>Check Frequency (minutes)</label>
+        <input type="number" id="sm_freq" value="5" min="1" oninput="calc()"/>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>Pricing:</strong> Alerting: $0.01 per rule-month beyond 100 free · Synthetic: $1 per 10,000 check executions beyond free tier
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── USERS ────────────────── -->
+<div id="tab-users" class="tab-content">
+  <div class="section-title">👥 Users &amp; Access</div>
+  <div class="card">
+    <h3>Team Size</h3>
+    <div class="row">
+      <div class="field">
+        <label>Total Grafana Users</label>
+        <input type="number" id="total_users" value="3" min="1" oninput="calc()"/>
+        <div class="unit">First 3 users FREE (Free plan)</div>
+      </div>
+      <div class="field">
+        <label>Admin Users</label>
+        <input type="number" id="admin_users" value="1" min="0" oninput="calc()"/>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>SSO / SAML Required?</label>
+        <select id="sso" onchange="calc()">
+          <option value="0">No</option>
+          <option value="1">Yes (Pro/Advanced)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>OnCall Users (Incident Mgmt)</label>
+        <input type="number" id="oncall_users" value="0" min="0" oninput="calc()"/>
+        <div class="unit">$15/user/month (Pro feature)</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>Pricing:</strong> Free plan: 3 users included · Pro plan: $20/user/month for additional users beyond 3 · OnCall: $15/user/month
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── K8s ────────────────── -->
+<div id="tab-k8s" class="tab-content">
+  <div class="section-title">⚙️ Kubernetes Monitoring</div>
+  <div class="card">
+    <h3>Cluster Details</h3>
+    <div class="row">
+      <div class="field">
+        <label>Number of Clusters</label>
+        <input type="number" id="k8s_clusters" value="0" min="0" oninput="calc()"/>
+      </div>
+      <div class="field">
+        <label>Total Nodes (across all clusters)</label>
+        <input type="number" id="k8s_nodes" value="0" min="0" oninput="calc()"/>
+        <div class="unit">~400 series/node estimated</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Total Pods (avg running)</label>
+        <input type="number" id="k8s_pods" value="0" min="0" oninput="calc()"/>
+        <div class="unit">~20 series/pod estimated</div>
+      </div>
+      <div class="field">
+        <label>Kubernetes Monitoring Add-on?</label>
+        <select id="k8s_addon" onchange="calc()">
+          <option value="0">No (use raw metrics)</option>
+          <option value="1">Yes ($299/cluster/mo)</option>
+        </select>
+      </div>
+    </div>
+    <div class="info-box">
+      <strong>Note:</strong> K8s monitoring series are counted toward your total metrics quota. The $299/cluster add-on includes pre-built dashboards, auto-discovery, and advanced workload insights.
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────── SUMMARY ────────────────── -->
+<div id="tab-summary" class="tab-content">
+  <div class="section-title">💰 Cost Breakdown</div>
+  <div class="card" id="breakdown-card">
+    <h3>Line-item breakdown</h3>
+    <div id="breakdown-rows"></div>
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px">
+      <span style="font-size:13px;color:#888">Subtotal (usage beyond free tier)</span>
+      <span id="subtotal-val" style="font-weight:700;color:#1C1C2E"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px">
+      <span style="font-size:13px;color:#388E3C">Free tier deductions</span>
+      <span id="free-val" style="font-weight:700;color:#388E3C"></span>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Annual Projection</h3>
+    <div id="annual-projection"></div>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="alert('In a live app this would export a PDF/CSV quote.')">Export Quote</button>
+    <button class="btn btn-secondary" onclick="alert('In a live app this would open Grafana Cloud sign-up with pre-filled params.')">Start Free Trial</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--                  PROSPECTING Q&A TAB                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="tab-prospect" class="tab-content">
+
+  <div class="prospect-hero">
+    <h2>🎯 Grafana Prospecting &amp; Discovery Guide</h2>
+    <p>Use this before any Grafana Cloud sales call. Covers greenfield deployments <em>and</em> DataDog / New Relic replacement scenarios. Click each section to expand. Use the notes fields to capture answers live.</p>
+    <div class="tags">
+      <span class="tag">📦 Greenfield</span>
+      <span class="tag">🔄 DataDog Replacement</span>
+      <span class="tag">🔄 New Relic Migration</span>
+      <span class="tag">☁️ Cloud-Native</span>
+      <span class="tag">🏢 Enterprise</span>
+    </div>
+  </div>
+
+  <div class="cheat-sheet">
+    <h4>⚡ Pre-call quick checks</h4>
+    <ul>
+      <li>Look up customer on LinkedIn/web — team size, tech stack, cloud provider</li>
+      <li>Check G2 / Gartner reviews they've posted for DataDog / New Relic</li>
+      <li>Check their job postings — mention of Grafana, Prometheus, OpenTelemetry = strong signal</li>
+      <li>Check contract renewal date if they're a public company (10-K, procurement notices)</li>
+      <li>Look for GitHub repos using Prometheus exporters or Loki — shows existing familiarity</li>
+    </ul>
+  </div>
+
+  <!-- ── SECTION 1: Discovery ── -->
+  <div class="q-section open">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">🔭</span>
+      <span class="q-section-title">1 — Current State Discovery</span>
+      <span class="q-section-badge pill pill-blue">Foundation</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">Greenfield &amp; Migration</span></div>
+        <div class="q-text">What observability tools are you currently running — and who owns them?</div>
+        <div class="q-why">Surfaces the decision-maker, champion, and potential blockers (existing vendor relationships). Reveals if IT/FinOps controls tooling vs. engineering.</div>
+        <div class="q-signals"><span class="q-signal">DataDog</span><span class="q-signal">New Relic</span><span class="q-signal">Dynatrace</span><span class="q-signal">Splunk</span><span class="q-signal">CloudWatch</span><span class="q-signal">Elastic</span><span class="q-signal">Prometheus+Grafana OSS</span></div>
+        <textarea placeholder="Notes: tools named, who owns them, decentralised vs central…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">How many services/microservices are you monitoring today? Roughly how many hosts / containers?</div>
+        <div class="q-why">Sizing input for the calculator. Also reveals if they're early-stage or at enterprise scale.</div>
+        <div class="q-signals"><span class="q-signal">&lt;50 services = SMB</span><span class="q-signal">50–500 = mid-market</span><span class="q-signal">500+ = enterprise</span></div>
+        <textarea placeholder="Notes: service count, host count, container / pod count…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What clouds / infra are you on — AWS, GCP, Azure, on-prem, or hybrid?</div>
+        <div class="q-why">Determines integration path (CloudWatch exporter, Azure Monitor, etc.) and data egress cost implications.</div>
+        <textarea placeholder="Notes: cloud provider, hybrid split, data residency requirements…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">Are you using Kubernetes? How many clusters, nodes, namespaces?</div>
+        <div class="q-why">K8s workloads drive high metric cardinality — key sizing lever. Grafana K8s Monitoring add-on is a strong differentiator.</div>
+        <textarea placeholder="Notes: clusters, nodes, managed K8s (EKS/GKE/AKS), namespaces…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What are your primary observability pillars in scope — metrics, logs, traces, profiling, synthetics, or all?</div>
+        <div class="q-why">Helps scope which Grafana products apply and avoids over- or under-pricing.</div>
+        <textarea placeholder="Notes: pillars confirmed in scope, ones deprioritised, future roadmap…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: Pain Points ── -->
+  <div class="q-section">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">😤</span>
+      <span class="q-section-title">2 — Pain Points &amp; Buying Triggers</span>
+      <span class="q-section-badge pill pill-orange">High Value</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="migration-banner">
+        <span style="font-size:22px">🔄</span>
+        <div>
+          <strong>Migration scenario — listen for these triggers</strong>
+          <p>Bill shock at renewal · Per-host pricing becoming unsustainable · Feature lock-in frustration · Vendor pushing upsells · Data privacy / residency concerns · Agent performance overhead · Slow query performance on logs</p>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">What's driving you to look at alternatives to [DataDog / New Relic]? Was there a specific event — a bill, a renewal, a technical incident?</div>
+        <div class="q-why">The "inciting incident" is your strongest closing lever. If it's cost, anchor the Grafana cost estimate here. If it's technical, lead with capabilities.</div>
+        <div class="q-signals"><span class="q-signal">Bill spike at renewal</span><span class="q-signal">Forced platform consolidation</span><span class="q-signal">DBAs/Platform blocked by vendor</span><span class="q-signal">Cardinality limits hit</span></div>
+        <textarea placeholder="Notes: triggering event, timeline, who raised it internally…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">How much are you spending today on [DataDog / New Relic] per month or per year? Is that on contract or month-to-month?</div>
+        <div class="q-why">Critical for ROI framing. Grafana is often 40–70% cheaper for equivalent workloads. Knowing contract end date sets urgency.</div>
+        <div class="q-signals"><span class="q-signal">Annual contract end date</span><span class="q-signal">Current MRR/ARR</span><span class="q-signal">Overage penalties</span></div>
+        <textarea placeholder="Notes: current spend, contract end date, budget for replacement…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">What features or workflows are you 100% dependent on in [DataDog / New Relic] that you cannot lose?</div>
+        <div class="q-why">Surfaces potential gaps and migration complexity. APM, RUM, Error Tracking, and Incident Management have direct Grafana equivalents — map them explicitly.</div>
+        <div class="q-signals"><span class="q-signal">APM / traces</span><span class="q-signal">RUM / browser monitoring</span><span class="q-signal">Error tracking</span><span class="q-signal">Incident management</span><span class="q-signal">SLO tracking</span><span class="q-signal">Custom dashboards</span></div>
+        <textarea placeholder="Notes: must-have features, nice-to-haves, current gaps in existing tool…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-orange">Greenfield</span></div>
+        <div class="q-text">What's the biggest observability challenge you're trying to solve right now — reliability, cost, dev productivity, or compliance?</div>
+        <div class="q-why">Frames the business case. Reliability → SLOs. Cost → Grafana free tier + OSS. Dev productivity → rich dashboards, alerting. Compliance → data residency, audit logs.</div>
+        <textarea placeholder="Notes: primary pain, secondary pain, who feels it (dev, ops, leadership)…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">Have you had any production incidents in the last 6 months where lack of observability was a contributing factor?</div>
+        <div class="q-why">Anchors the conversation in business impact (downtime cost, SLA breaches). A strong emotional hook for the champion to justify budget.</div>
+        <textarea placeholder="Notes: incident description, business impact, MTTR, escalations…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: Technical Environment ── -->
+  <div class="q-section">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">🛠️</span>
+      <span class="q-section-title">3 — Technical Environment &amp; Stack</span>
+      <span class="q-section-badge pill pill-blue">Sizing &amp; Fit</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What languages / runtimes is your application built on? Any polyglot services?</div>
+        <div class="q-why">Determines Pyroscope profiling language support and OpenTelemetry SDK availability. Polyglot stacks benefit most from OTel's unified approach.</div>
+        <div class="q-signals"><span class="q-signal">Go</span><span class="q-signal">Java</span><span class="q-signal">Python</span><span class="q-signal">.NET</span><span class="q-signal">Node.js</span><span class="q-signal">Ruby</span><span class="q-signal">PHP</span></div>
+        <textarea placeholder="Notes: primary language, polyglot services, legacy runtimes…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">Are you already using Prometheus, OpenTelemetry, or any open standards for instrumentation?</div>
+        <div class="q-why">Existing Prometheus/OTel usage = near-zero migration friction. This is a key differentiator vs. vendor-lock-in agents (DataDog agent, New Relic APM).</div>
+        <textarea placeholder="Notes: existing OTel/Prometheus usage, custom exporters, vendor agents deployed…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">How many custom dashboards, alert rules, and monitors do you have in DataDog / New Relic today?</div>
+        <div class="q-why">Migration effort estimator. Large numbers (500+ dashboards) = need for automated migration tooling. Grafana has import tools for many DataDog dashboards.</div>
+        <textarea placeholder="Notes: dashboard count, alert count, who built them, any standard templates used…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">Which DataDog / New Relic agents are deployed, and at what version? Are any baked into container images or CI/CD pipelines?</div>
+        <div class="q-why">Agent replacement is often the highest-effort migration task. Embedded agents in images require image rebuild cycles — set realistic timelines.</div>
+        <textarea placeholder="Notes: agent types, deployment method (Helm, DaemonSet, sidecar), version, baked into images…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What does your log volume look like — GB per day from all sources? What log formats (JSON, plaintext, syslog)?</div>
+        <div class="q-why">Loki is label-based, not full-text indexed — different query model than Splunk/Elastic/DataDog Logs. Understanding format + volume ensures correct sizing and sets expectations.</div>
+        <textarea placeholder="Notes: GB/day, log format, high-cardinality label risks, log shipping method…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">Do you have any data residency, GDPR, or compliance requirements that affect where telemetry data can be stored?</div>
+        <div class="q-why">Grafana Cloud offers EU and US regions. On-prem / private cloud deployments (Grafana Enterprise) may be needed for strict data residency. This is a competitive differentiator vs. DataDog.</div>
+        <textarea placeholder="Notes: data residency region, compliance frameworks (SOC2, ISO27001, HIPAA), private cloud preference…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: DataDog/New Relic Specific ── -->
+  <div class="q-section">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">🔄</span>
+      <span class="q-section-title">4 — DataDog / New Relic Replacement Deep-Dive</span>
+      <span class="q-section-badge pill pill-red">Migration Only</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="migration-banner">
+        <span style="font-size:22px">⚠️</span>
+        <div>
+          <strong>Use this section only when the customer has confirmed they're evaluating migration</strong>
+          <p>These questions go deeper on competitive positioning. They help you map DataDog/NR features 1:1 to Grafana equivalents and surface migration risk early.</p>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">Which DataDog / New Relic modules are active on your contract — APM, Infrastructure, Logs, Synthetics, RUM, Error Tracking, Incident Management, Security Monitoring?</div>
+        <div class="q-why">Maps each module to its Grafana equivalent. Unused modules = cost savings opportunity. Active modules = migration workstreams.</div>
+        <div class="q-signals">
+          <span class="q-signal">APM → Tempo + Pyroscope</span>
+          <span class="q-signal">Infra → Alloy + Mimir</span>
+          <span class="q-signal">Logs → Loki</span>
+          <span class="q-signal">Synthetics → Grafana Synthetics</span>
+          <span class="q-signal">RUM → Faro</span>
+          <span class="q-signal">Incidents → OnCall</span>
+        </div>
+        <textarea placeholder="Notes: confirmed active modules, contract line items, renewal date per module…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">How are you billed — per host, per GB ingested, per user, or a combination? Have you hit any cardinality limits or sampling caps?</div>
+        <div class="q-why">DataDog's per-host model punishes elastic cloud infra. New Relic's per-GB model punishes high-volume log ingestion. Grafana's model is transparent usage-based — frame the comparison explicitly.</div>
+        <textarea placeholder="Notes: billing model, cardinality limits hit, surprise bills, sampling forced to reduce cost…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">How long do you retain telemetry data today, and are you hitting storage cost issues with long-retention requirements?</div>
+        <div class="q-why">DataDog retains logs for 15 days by default; longer retention is very expensive. Grafana + object storage (S3/GCS) enables cheap long-term retention — powerful differentiator.</div>
+        <textarea placeholder="Notes: current retention periods, cost per retention tier, compliance requirements driving retention…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">Do your developers self-service their dashboards and alerts, or is there a central platform team that gates access?</div>
+        <div class="q-why">DataDog's UI is more approachable for non-technical users; Grafana's strength is power-user flexibility and OSS extensibility. Understand who the end users are to frame the right benefit.</div>
+        <textarea placeholder="Notes: self-service vs gated, Grafana familiarity, training appetite, existing OSS Grafana deployments…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">Are you also running a self-hosted / OSS Grafana stack (Prometheus + Grafana OSS) alongside DataDog/NR? If so, what would it take to consolidate?</div>
+        <div class="q-why">Many orgs run both (DataDog for APM, Prometheus+Grafana for infra). Grafana Cloud consolidates both — strong consolidation story with immediate cost and operational savings.</div>
+        <textarea placeholder="Notes: parallel OSS stack details, who maintains it, consolidation appetite, OSS dashboards already built…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Migration</span></div>
+        <div class="q-text">What's your tolerance for a phased migration vs. a hard cutover? Is there an acceptable parallel-run period?</div>
+        <div class="q-why">Grafana supports dual-shipping from OTel collectors — customers can run both stacks simultaneously. This de-risks migration and is a common objection handler vs. "too risky to switch".</div>
+        <textarea placeholder="Notes: acceptable parallel-run duration, cutover appetite, release freeze windows, on-call concerns…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: Greenfield ── -->
+  <div class="q-section">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">🌱</span>
+      <span class="q-section-title">5 — Greenfield / New Deployment Questions</span>
+      <span class="q-section-badge pill pill-green">Greenfield</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="greenfield-banner">
+        <span style="font-size:22px">🚀</span>
+        <div>
+          <strong>Use this section for new observability programs or teams starting fresh</strong>
+          <p>Greenfield is an opportunity to set the architecture right from day one with OpenTelemetry + Grafana Cloud. Focus on time-to-value and avoiding future lock-in.</p>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-green">Greenfield</span></div>
+        <div class="q-text">Are you starting from zero or do you have some basic monitoring (CloudWatch, Azure Monitor, basic Prometheus) today?</div>
+        <div class="q-why">Existing cloud-native monitoring = quick wins via Grafana data source integrations. True greenfield = focus on OTel instrumentation and getting to first dashboard fast.</div>
+        <textarea placeholder="Notes: baseline monitoring in place, quick-win integrations available, first use case to show value…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-green">Greenfield</span></div>
+        <div class="q-text">What's driving the decision to invest in observability now — an incident, a growth milestone, a compliance requirement, or a new engineering initiative?</div>
+        <div class="q-why">The trigger shapes urgency and budget justification. Incident-driven = urgent. Compliance = budget already allocated. Growth milestone = tie to engineering OKRs.</div>
+        <textarea placeholder="Notes: trigger event, urgency level, budget status (approved / TBD), exec sponsor…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-green">Greenfield</span></div>
+        <div class="q-text">How many engineering / SRE / platform teams will consume the observability platform? Will it be a shared service or per-team deployment?</div>
+        <div class="q-why">Shared service = centralised Grafana Cloud org with RBAC. Per-team = multiple stacks or multi-tenancy with isolated data sources. Sizing and governance model differs significantly.</div>
+        <textarea placeholder="Notes: team count, team ownership model, RBAC requirements, chargeback / showback needed…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-green">Greenfield</span></div>
+        <div class="q-text">Do you have a preference for a managed SaaS model (Grafana Cloud) vs. self-hosted (Grafana Enterprise / OSS)?</div>
+        <div class="q-why">Cloud = faster time to value, no ops burden. Self-hosted = data sovereignty, existing GCP/AWS/Azure compute already paid for. Both can be positioned by Searce.</div>
+        <textarea placeholder="Notes: SaaS vs self-hosted preference, reasons, IT policy constraints, GCP marketplace preference…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 6: Business & Commercial ── -->
+  <div class="q-section">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">💼</span>
+      <span class="q-section-title">6 — Business, Budget &amp; Commercial</span>
+      <span class="q-section-badge pill pill-orange">Deal Qualify</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What's the budget range you're working with for observability tooling — and has it been formally approved?</div>
+        <div class="q-why">Budget confirmation separates qualified opportunities from interest. Unapproved budget = longer sales cycle. Tie to existing DataDog/NR spend to frame cost-neutrality.</div>
+        <textarea placeholder="Notes: budget range, approval status, fiscal year timing, who approves…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">Who else is involved in this decision — engineering lead, CISO, FinOps, procurement?</div>
+        <div class="q-why">Multi-stakeholder map prevents surprises. CISO involvement = security review needed. FinOps = ROI / TCO deck required. Procurement = contract format and vendor eligibility.</div>
+        <textarea placeholder="Notes: stakeholders, decision-maker, influencer, blocker, champion…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What's your preferred buying route — direct with Grafana, via a cloud marketplace (AWS, GCP, Azure), or via a partner like Searce?</div>
+        <div class="q-why">GCP Marketplace procurement can consume committed spend (CUDS/credits), making it highly attractive. Searce as a Google Cloud partner can facilitate this.</div>
+        <div class="q-signals"><span class="q-signal">GCP Marketplace = consume committed spend</span><span class="q-signal">AWS Marketplace available</span><span class="q-signal">Partner-led = Searce margin + services</span></div>
+        <textarea placeholder="Notes: buying preference, marketplace spend available, GCP committed use discount status…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What does success look like for you 6 months after going live with Grafana Cloud?</div>
+        <div class="q-why">Defines measurable success criteria to reference in the proposal and post-sale. Typical answers: MTTR reduction, cost savings, developer adoption rate, alert noise reduction.</div>
+        <textarea placeholder="Notes: success metrics, KPIs, exec-level outcomes expected, reporting cadence…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 7: Decision Process ── -->
+  <div class="q-section">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">🗺️</span>
+      <span class="q-section-title">7 — Decision Process &amp; Timeline</span>
+      <span class="q-section-badge pill pill-orange">Sales Cycle</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What is your target go-live date, and are there any hard deadlines (contract expiry, product launch, compliance audit)?</div>
+        <div class="q-why">Hard deadlines create urgency and compress evaluation timelines. Contract expiry is the most actionable — set a migration plan that ends before the contract auto-renews.</div>
+        <textarea placeholder="Notes: target date, hard deadlines, risks to timeline (approvals, procurement lead times)…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">Are you evaluating any other vendors alongside Grafana — e.g., Elastic, Dynatrace, Victoria Metrics, Coralogix, Chronosphere?</div>
+        <div class="q-why">Competitive awareness shapes how you position Grafana. OSS-first competitors (VictoriaMetrics, Thanos) compete on cost; Dynatrace competes on AI/AIOps; Coralogix on logs.</div>
+        <div class="q-signals"><span class="q-signal">vs Elastic = full-text log search</span><span class="q-signal">vs Dynatrace = AIOps / automation</span><span class="q-signal">vs VictoriaMetrics = raw cost/perf</span><span class="q-signal">vs Coralogix = log-heavy</span></div>
+        <textarea placeholder="Notes: vendors in evaluation, weighted criteria (cost, features, support, OSS), POC status…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">Would a Proof of Concept (POC) help you evaluate fit? If so, what would the POC need to prove?</div>
+        <div class="q-why">A scoped POC is the fastest path to a signed deal. Define exit criteria upfront — e.g., "dashboard parity with DataDog for 3 services in 2 weeks" — to avoid POC scope creep.</div>
+        <textarea placeholder="Notes: POC appetite, POC scope, success criteria, timeline, resource availability…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-blue">All scenarios</span></div>
+        <div class="q-text">What support tier do you need — community, standard, or enterprise SLA (with dedicated CSE)?</div>
+        <div class="q-why">Support tier drives plan selection (Pro vs. Advanced). Enterprise SLA + dedicated CSE = Advanced plan minimum. Helps qualify deal size and sets correct expectations post-sale.</div>
+        <textarea placeholder="Notes: support tier needed, SLA requirements (99.9% vs 99.99%), support language, timezone…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 8: Red Flags ── -->
+  <div class="q-section">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">🚩</span>
+      <span class="q-section-title">8 — Red Flags &amp; Objection Handlers</span>
+      <span class="q-section-badge pill pill-red">Risk &amp; Objections</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Watch for</span></div>
+        <div class="q-text">"Grafana doesn't have full-text log search like Splunk / DataDog Logs."</div>
+        <div class="q-why"><strong>Response:</strong> Loki uses label-based querying (LogQL) which is faster and cheaper for structured / semi-structured logs. For compliance/audit use cases, Grafana integrates with Elastic for full-text. For most cloud-native workloads, LogQL is sufficient — and Grafana is 80% cheaper than Splunk for equivalent log volumes.</div>
+        <textarea placeholder="Notes from this objection in the call…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Watch for</span></div>
+        <div class="q-text">"Our developers only know DataDog — migration effort is too high."</div>
+        <div class="q-why"><strong>Response:</strong> Grafana supports DataDog-compatible API endpoints (Alloy can forward to Grafana Cloud directly). Most DataDog dashboards can be imported with the DataDog-to-Grafana migration tool. A phased migration with dual-shipping means zero downtime risk. Searce provides migration services to reduce internal effort.</div>
+        <textarea placeholder="Notes from this objection in the call…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Watch for</span></div>
+        <div class="q-text">"New Relic gives us free 100GB/month data ingestion — Grafana can't match that."</div>
+        <div class="q-why"><strong>Response:</strong> New Relic's free 100 GB is on their standard platform but charges $0.30/GB beyond that with limited retention. Grafana's free tier is smaller but the pricing is more transparent and predictable. For &gt;500 GB/month, Grafana Cloud is typically significantly cheaper. Run the calculator live to compare.</div>
+        <textarea placeholder="Notes from this objection in the call…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Watch for</span></div>
+        <div class="q-text">"We need AI/AIOps anomaly detection — does Grafana have that?"</div>
+        <div class="q-why"><strong>Response:</strong> Grafana Machine Learning (available on Pro/Advanced) provides anomaly detection and forecasting on metrics. It's not as deep as Dynatrace Davis AI, but covers 80% of use cases. For AI-first requirements, position Grafana + Google Cloud Vertex AI / Cloud Monitoring as a complementary stack via Searce.</div>
+        <textarea placeholder="Notes from this objection in the call…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-red">Watch for</span></div>
+        <div class="q-text">"We have an existing multi-year DataDog contract we can't break."</div>
+        <div class="q-why"><strong>Response:</strong> Explore if any modules are unused and can be dropped at renewal. Start a parallel Grafana Cloud POC for new services — plant the seed for migration at renewal. Early termination fees are sometimes negotiable; Grafana/Searce can sometimes help with the business case for early exit.</div>
+        <textarea placeholder="Notes from this objection in the call…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 9: Call Summary ── -->
+  <div class="q-section">
+    <div class="q-section-header" onclick="toggleSection(this)">
+      <span class="q-section-icon">📝</span>
+      <span class="q-section-title">9 — Call Summary &amp; Next Steps</span>
+      <span class="q-section-badge pill pill-green">Close</span>
+      <span class="q-chevron">▼</span>
+    </div>
+    <div class="q-body">
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-green">Post-call</span></div>
+        <div class="q-text">Scenario Type</div>
+        <div class="q-signals"><span class="q-signal">Greenfield</span><span class="q-signal">DataDog migration</span><span class="q-signal">New Relic migration</span><span class="q-signal">Consolidation</span><span class="q-signal">POC only</span></div>
+        <textarea placeholder="Select scenario and add context…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-green">Post-call</span></div>
+        <div class="q-text">Key pain points captured</div>
+        <textarea placeholder="List the 2-3 most important pains the customer expressed…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-green">Post-call</span></div>
+        <div class="q-text">Estimated deal size &amp; Grafana plan</div>
+        <textarea placeholder="e.g. ~$3,500/mo Pro plan, 120k metric series, 50 GB logs/day, 15 users…"></textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label"><span class="pill pill-green">Post-call</span></div>
+        <div class="q-text">Agreed next steps</div>
+        <textarea placeholder="e.g. Share pricing estimate by Friday, schedule 2-week POC kickoff, loop in CISO for security review…"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end prospect tab -->
+
+</div><!-- left col -->
+
+<!-- ══════════════════ STICKY RIGHT PANEL ══════════════════ -->
+<div>
+  <!-- Pricing summary (hidden when on prospect tab) -->
+  <div id="pricing-sidebar">
+    <div class="summary-panel">
+      <div class="summary-header">💰 Estimated Monthly Cost</div>
+      <div class="summary-row"><span class="summary-label">Plan</span><span class="summary-val" id="s-plan">Free</span></div>
+      <div class="summary-row"><span class="summary-label">Metrics</span><span class="summary-val orange" id="s-metrics">$0.00</span></div>
+      <div class="summary-row"><span class="summary-label">Logs</span><span class="summary-val orange" id="s-logs">$0.00</span></div>
+      <div class="summary-row"><span class="summary-label">Traces</span><span class="summary-val orange" id="s-traces">$0.00</span></div>
+      <div class="summary-row"><span class="summary-label">Profiles</span><span class="summary-val orange" id="s-profiles">$0.00</span></div>
+      <div class="summary-row"><span class="summary-label">Alerting</span><span class="summary-val orange" id="s-alerting">$0.00</span></div>
+      <div class="summary-row"><span class="summary-label">Users</span><span class="summary-val orange" id="s-users">$0.00</span></div>
+      <div class="summary-row"><span class="summary-label">K8s Monitoring</span><span class="summary-val orange" id="s-k8s">$0.00</span></div>
+      <div class="total-row">
+        <span class="total-label">Total / month</span>
+        <span class="total-val" id="s-total">$0.00</span>
+      </div>
+      <div style="padding:10px 16px;font-size:11px;color:#AAA;border-top:1px solid #F0F0F5">
+        Estimates only. Actual costs may vary.<br>
+        <a href="https://grafana.com/pricing/" style="color:#FF5722;font-weight:600" target="_blank">See official Grafana pricing →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prospecting score panel (shown when on prospect tab) -->
+  <div id="prospect-sidebar" style="display:none">
+    <div class="score-panel">
+      <div class="score-header">🎯 Deal Qualification Signals</div>
+      <div class="score-row"><span class="score-label">Scenario</span><span class="score-val" id="ps-scenario">—</span></div>
+      <div class="score-row"><span class="score-label">Current spend</span><span class="score-val" id="ps-spend">—</span></div>
+      <div class="score-row"><span class="score-label">Contract end</span><span class="score-val" id="ps-contract">—</span></div>
+      <div class="score-row"><span class="score-label">Budget approved?</span><span class="score-val" id="ps-budget">—</span></div>
+      <div class="score-row"><span class="score-label">Decision maker</span><span class="score-val" id="ps-dm">—</span></div>
+      <div style="padding:12px 16px;font-size:11px;color:#888;border-top:1px solid #F4F4F8">
+        Fill in notes to track deal context. Use Summary tab for pricing estimate.
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Grafana ↔ Competitor Map</h3>
+      <div style="font-size:12px;line-height:2;color:#555">
+        <div><span style="color:#E64A19;font-weight:700">DataDog APM</span> → Grafana Tempo + Pyroscope</div>
+        <div><span style="color:#E64A19;font-weight:700">DataDog Logs</span> → Grafana Loki</div>
+        <div><span style="color:#E64A19;font-weight:700">DataDog Infra</span> → Mimir + Alloy</div>
+        <div><span style="color:#E64A19;font-weight:700">DataDog Synthetics</span> → Grafana Synthetics</div>
+        <div><span style="color:#E64A19;font-weight:700">DataDog RUM</span> → Grafana Faro</div>
+        <div><span style="color:#E64A19;font-weight:700">DD Incident Mgmt</span> → Grafana OnCall</div>
+        <div style="margin-top:6px"><span style="color:#3949AB;font-weight:700">New Relic APM</span> → Tempo + OTel SDK</div>
+        <div><span style="color:#3949AB;font-weight:700">NR Logs</span> → Grafana Loki</div>
+        <div><span style="color:#3949AB;font-weight:700">NR Dashboards</span> → Grafana Dashboards</div>
+        <div><span style="color:#3949AB;font-weight:700">NR Alerts</span> → Grafana Alerting</div>
+        <div><span style="color:#3949AB;font-weight:700">NR Error Tracking</span> → Grafana Faro + Sentry integration</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <h3>Searce Services Available</h3>
+      <div style="font-size:12px;line-height:2;color:#555">
+        <div>✅ Grafana Cloud architecture design</div>
+        <div>✅ DataDog / NR migration services</div>
+        <div>✅ OpenTelemetry instrumentation</div>
+        <div>✅ Dashboard &amp; alert migration</div>
+        <div>✅ GCP Marketplace procurement</div>
+        <div>✅ Managed Grafana operations</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- layout -->
+</div><!-- main -->
+
+<script>
+let selectedPlan='free', billing='monthly';
+
+const tabIds = ['plan','metrics','logs','traces','profiles','alerting','users','k8s','summary','prospect'];
+
+function switchTab(name){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach((t,i)=>{ if(tabIds[i]===name) t.classList.add('active'); });
+
+  // Toggle sidebars
+  const isPro = name === 'prospect';
+  document.getElementById('pricing-sidebar').style.display = isPro ? 'none' : 'block';
+  document.getElementById('prospect-sidebar').style.display = isPro ? 'block' : 'none';
+}
+
+function selectPlan(p){
+  selectedPlan=p;
+  ['free','pro','advanced'].forEach(x=>document.getElementById('plan-'+x).classList.remove('selected'));
+  document.getElementById('plan-'+p).classList.add('selected');
+  calc();
+}
+
+function setBilling(v){ billing=v; calc(); }
+
+function v(id){ return parseFloat(document.getElementById(id).value)||0; }
+
+function fmt(n){ return '$'+n.toFixed(2); }
+
+function toggleSection(header){
+  const section = header.parentElement;
+  section.classList.toggle('open');
+}
+
+function calc(){
+  const disc = billing==='annual' ? 0.84 : 1.0;
+
+  // Metrics
+  const series = v('metric_series');
+  const k8s_nodes = v('k8s_nodes');
+  const k8s_pods = v('k8s_pods');
+  const totalSeries = series + k8s_nodes*400 + k8s_pods*20;
+  const billableSeries = Math.max(0, totalSeries - 10000);
+  const metricsCost = (billableSeries/1000)*8*disc;
+
+  // Logs
+  const logGBday = v('log_gb_day');
+  const logGBmo = logGBday*30;
+  const billableLogGB = Math.max(0, logGBmo - 50);
+  const logCost = billableLogGB*0.50*disc;
+
+  // Traces
+  const traces = v('traces_month');
+  const spans = v('spans_per_trace');
+  const spanSize = v('span_size');
+  const traceGB = (traces * spans * spanSize) / (1024*1024*1024);
+  const billableTraceGB = Math.max(0, traceGB - 50);
+  const traceCost = billableTraceGB*0.50*disc;
+
+  // Profiles
+  const profiles = v('profiles_month');
+  const billableProfiles = Math.max(0, profiles - 500);
+  const profileCost = (billableProfiles/1000)*0.016*disc;
+
+  // Alerting
+  const alertRules = v('alert_rules');
+  const billableAlerts = Math.max(0, alertRules - 100);
+  const smChecks = v('sm_checks');
+  const smFreq = v('sm_freq') || 5;
+  const smExec = smChecks * (30*24*60 / smFreq);
+  const billableSMExec = Math.max(0, smExec - 10000);
+  const alertCost = (billableAlerts*0.01 + billableSMExec/10000)*disc;
+
+  // Users
+  const users = v('total_users');
+  const oncall = v('oncall_users');
+  const billableUsers = Math.max(0, users - 3);
+  const userCost = (billableUsers*20 + oncall*15)*disc;
+
+  // K8s add-on
+  const k8sAddon = v('k8s_addon');
+  const clusters = v('k8s_clusters');
+  const k8sCost = k8sAddon ? clusters*299*disc : 0;
+
+  const total = metricsCost+logCost+traceCost+profileCost+alertCost+userCost+k8sCost;
+
+  const coloured = n => n > 0 ? '#FF5722' : '#AAA';
+
+  document.getElementById('s-plan').textContent = selectedPlan.charAt(0).toUpperCase()+selectedPlan.slice(1)+(billing==='annual'?' (Annual)':'');
+  document.getElementById('s-metrics').textContent = fmt(metricsCost); document.getElementById('s-metrics').style.color=coloured(metricsCost);
+  document.getElementById('s-logs').textContent = fmt(logCost); document.getElementById('s-logs').style.color=coloured(logCost);
+  document.getElementById('s-traces').textContent = fmt(traceCost); document.getElementById('s-traces').style.color=coloured(traceCost);
+  document.getElementById('s-profiles').textContent = fmt(profileCost); document.getElementById('s-profiles').style.color=coloured(profileCost);
+  document.getElementById('s-alerting').textContent = fmt(alertCost); document.getElementById('s-alerting').style.color=coloured(alertCost);
+  document.getElementById('s-users').textContent = fmt(userCost); document.getElementById('s-users').style.color=coloured(userCost);
+  document.getElementById('s-k8s').textContent = fmt(k8sCost); document.getElementById('s-k8s').style.color=coloured(k8sCost);
+  document.getElementById('s-total').textContent = fmt(total);
+
+  // Summary tab
+  const rows=[
+    {label:'Metrics ('+Math.round(totalSeries).toLocaleString()+' series)', billable:billableSeries.toLocaleString()+' over free 10k', cost:metricsCost},
+    {label:'Logs ('+logGBmo.toFixed(1)+' GB/mo)', billable:billableLogGB.toFixed(1)+' GB over free 50 GB', cost:logCost},
+    {label:'Traces ('+traceGB.toFixed(2)+' GB storage)', billable:billableTraceGB.toFixed(2)+' GB over free 50 GB', cost:traceCost},
+    {label:'Profiles ('+Math.round(profiles).toLocaleString()+' profiles)', billable:Math.round(billableProfiles)+' over free 500', cost:profileCost},
+    {label:'Alerting ('+alertRules+' rules)', billable:billableAlerts+' over free 100', cost:alertCost},
+    {label:'Users ('+users+' total)', billable:billableUsers+' over free 3 + '+oncall+' OnCall', cost:userCost},
+    {label:'K8s Add-on ('+clusters+' clusters)', billable:k8sAddon?'Active':'Not enabled', cost:k8sCost},
+  ];
+  let html='';
+  rows.forEach(r=>{
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #F4F4F8;font-size:13px">
+      <div><div style="color:#333;font-weight:500">${r.label}</div><div style="font-size:11px;color:#AAA;margin-top:2px">${r.billable}</div></div>
+      <div style="font-weight:700;color:${r.cost>0?'#FF5722':'#388E3C'};min-width:70px;text-align:right">${r.cost>0?fmt(r.cost):'Free'}</div>
+    </div>`;
+  });
+  const bd = document.getElementById('breakdown-rows');
+  if(bd) bd.innerHTML=html;
+  const sv = document.getElementById('subtotal-val');
+  if(sv) sv.textContent=fmt(total);
+  const fv = document.getElementById('free-val');
+  if(fv) fv.textContent='— Included in free tier';
+
+  const annual = total*12;
+  const ap = document.getElementById('annual-projection');
+  if(ap) ap.innerHTML=`
+    <div class="row3">
+      <div style="background:#FAFBFC;border:1px solid #E8E8EE;border-radius:8px;padding:14px;text-align:center">
+        <div style="font-size:11px;color:#AAA;margin-bottom:6px;font-weight:600;text-transform:uppercase">Monthly</div>
+        <div style="font-size:20px;font-weight:800;color:#FF5722">${fmt(total)}</div>
+      </div>
+      <div style="background:#FAFBFC;border:1px solid #E8E8EE;border-radius:8px;padding:14px;text-align:center">
+        <div style="font-size:11px;color:#AAA;margin-bottom:6px;font-weight:600;text-transform:uppercase">Annual total</div>
+        <div style="font-size:20px;font-weight:800;color:#FF5722">${fmt(annual)}</div>
+      </div>
+      <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:14px;text-align:center">
+        <div style="font-size:11px;color:#666;margin-bottom:6px;font-weight:600;text-transform:uppercase">If billed annually</div>
+        <div style="font-size:20px;font-weight:800;color:#2E7D32">${fmt(annual*0.84)}</div>
+        <div style="font-size:10px;color:#388E3C;margin-top:3px;font-weight:700">Save ${fmt(annual*0.16)}</div>
+      </div>
+    </div>`;
+}
+
+calc();
+</script>
+</body>
+</html>
