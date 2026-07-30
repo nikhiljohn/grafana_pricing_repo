@@ -87,16 +87,16 @@ const statusDotColor: Record<string, string> = {
   Completed: "bg-green-500",
   "Needs approval": "bg-yellow-500",
   Provisioning: "bg-blue-500",
-  Rejected: "bg-gray-500",
+  Rejected: "bg-gray-400",
 };
 
 const statusTextColor: Record<string, string> = {
-  Failed: "text-red-400",
-  "Generating plan": "text-green-400",
-  Completed: "text-green-400",
-  "Needs approval": "text-yellow-400",
-  Provisioning: "text-blue-400",
-  Rejected: "text-gray-400",
+  Failed: "text-red-600",
+  "Generating plan": "text-green-600",
+  Completed: "text-green-600",
+  "Needs approval": "text-yellow-600",
+  Provisioning: "text-blue-600",
+  Rejected: "text-slate-500",
 };
 
 export default function CloudOrchestrationPage() {
@@ -129,9 +129,9 @@ export default function CloudOrchestrationPage() {
         });
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-5">
+      <div className="border-b border-slate-200 px-6 py-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
@@ -155,18 +155,18 @@ export default function CloudOrchestrationPage() {
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-white">Cloud Orchestration</h1>
-              <p className="text-sm text-gray-400">
+              <h1 className="text-xl font-semibold text-slate-800">Cloud Orchestration</h1>
+              <p className="text-sm text-slate-500">
                 Self-service provisioning from Freshservice tickets — Terraform + Claude AI
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <select className="rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-300 focus:border-sky-500 focus:outline-none">
+            <select className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 focus:border-sky-500 focus:outline-none">
               <option>searce-sandbox</option>
               <option>production-org</option>
             </select>
-            <button className="rounded-md border border-gray-700 bg-gray-800 p-2 text-gray-400 transition-colors hover:bg-gray-700 hover:text-gray-200">
+            <button className="rounded-md border border-slate-200 bg-white p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path
                   strokeLinecap="round"
@@ -175,7 +175,7 @@ export default function CloudOrchestrationPage() {
                 />
               </svg>
             </button>
-            <button className="rounded-md border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white">
+            <button className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-800">
               Configure
             </button>
           </div>
@@ -185,49 +185,49 @@ export default function CloudOrchestrationPage() {
       <div className="p-6">
         {/* Stats Row */}
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
-            <p className="text-sm text-gray-400">Total</p>
-            <p className="mt-1 text-2xl font-bold text-white">36</p>
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <p className="text-sm text-slate-500">Total</p>
+            <p className="mt-1 text-2xl font-bold text-slate-800">36</p>
           </div>
-          <div className="rounded-lg border border-yellow-900/50 bg-yellow-950/20 p-4">
-            <p className="text-sm text-gray-400">Pending approval</p>
-            <p className="mt-1 text-2xl font-bold text-yellow-400">4</p>
+          <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+            <p className="text-sm text-slate-500">Pending approval</p>
+            <p className="mt-1 text-2xl font-bold text-yellow-600">4</p>
           </div>
-          <div className="rounded-lg border border-blue-900/50 bg-blue-950/20 p-4">
-            <p className="text-sm text-gray-400">Provisioning</p>
-            <p className="mt-1 text-2xl font-bold text-blue-400">0</p>
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <p className="text-sm text-slate-500">Provisioning</p>
+            <p className="mt-1 text-2xl font-bold text-blue-600">0</p>
           </div>
-          <div className="rounded-lg border border-green-900/50 bg-green-950/20 p-4">
-            <p className="text-sm text-gray-400">Completed</p>
-            <p className="mt-1 text-2xl font-bold text-green-400">8</p>
+          <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+            <p className="text-sm text-slate-500">Completed</p>
+            <p className="mt-1 text-2xl font-bold text-green-600">8</p>
           </div>
-          <div className="rounded-lg border border-red-900/50 bg-red-950/20 p-4">
-            <p className="text-sm text-gray-400">Failed</p>
-            <p className="mt-1 text-2xl font-bold text-red-400">7</p>
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+            <p className="text-sm text-slate-500">Failed</p>
+            <p className="mt-1 text-2xl font-bold text-red-600">7</p>
           </div>
         </div>
 
         {/* Warning Banner */}
-        <div className="mb-6 flex items-center justify-between rounded-lg border border-yellow-800/50 bg-yellow-950/30 px-5 py-3">
+        <div className="mb-6 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-5 py-3">
           <div className="flex items-center gap-2">
-            <svg className="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
               />
             </svg>
-            <span className="text-sm font-medium text-yellow-300">
+            <span className="text-sm font-medium text-amber-800">
               4 requests waiting for approval
             </span>
           </div>
-          <button className="text-sm font-medium text-yellow-400 transition-colors hover:text-yellow-300">
+          <button className="text-sm font-medium text-amber-600 transition-colors hover:text-amber-700">
             Review now &gt;
           </button>
         </div>
 
         {/* Filter Tabs */}
-        <div className="mb-4 flex gap-1 rounded-lg border border-gray-800 bg-gray-900 p-1">
+        <div className="mb-4 flex gap-1 rounded-xl border border-slate-200 bg-white p-1">
           {filterTabs.map((tab) => (
             <button
               key={tab.key}
@@ -235,7 +235,7 @@ export default function CloudOrchestrationPage() {
               className={`flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 activeFilter === tab.key
                   ? "bg-sky-600 text-white"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
               }`}
             >
               {tab.label}
@@ -244,7 +244,7 @@ export default function CloudOrchestrationPage() {
                   className={`ml-0.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-semibold ${
                     activeFilter === tab.key
                       ? "bg-white/20 text-white"
-                      : "bg-gray-700 text-gray-300"
+                      : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {tab.badge}
@@ -255,91 +255,91 @@ export default function CloudOrchestrationPage() {
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden rounded-lg border border-gray-800">
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800 bg-gray-900">
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <tr className="border-b border-slate-200 bg-slate-50">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Ticket
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Request
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Resource
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Provider
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Cost
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Risk
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Date
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-slate-200">
               {filteredRows.map((row) => (
                 <tr
                   key={row.ticket}
-                  className="transition-colors hover:bg-gray-900/50"
+                  className="transition-colors hover:bg-slate-50"
                 >
                   <td className="whitespace-nowrap px-4 py-3.5">
-                    <span className="text-sm font-medium text-sky-400">{row.ticket}</span>
+                    <span className="text-sm font-medium text-sky-600">{row.ticket}</span>
                   </td>
                   <td className="px-4 py-3.5">
                     <div>
-                      <p className="text-sm text-gray-200">{row.request}</p>
-                      <p className="text-xs text-gray-500">{row.email}</p>
+                      <p className="text-sm text-slate-800">{row.request}</p>
+                      <p className="text-xs text-slate-500">{row.email}</p>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3.5">
-                    <span className="inline-flex items-center rounded-md bg-teal-600/20 px-2.5 py-1 text-xs font-medium text-teal-400">
+                    <span className="inline-flex items-center rounded-md bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-700">
                       {row.resource}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3.5">
-                    <span className="inline-flex items-center rounded-md bg-orange-600/20 px-2.5 py-1 text-xs font-medium text-orange-400">
+                    <span className="inline-flex items-center rounded-md bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
                       {row.provider}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-gray-500">
+                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-slate-500">
                     {row.cost ?? "—"}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-gray-500">
+                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-slate-500">
                     {row.risk ?? "—"}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3.5">
                     <div className="flex items-center gap-2">
                       <span
                         className={`inline-block h-2 w-2 rounded-full ${
-                          statusDotColor[row.status] ?? "bg-gray-500"
+                          statusDotColor[row.status] ?? "bg-gray-400"
                         }`}
                       />
                       <span
                         className={`text-sm font-medium ${
-                          statusTextColor[row.status] ?? "text-gray-400"
+                          statusTextColor[row.status] ?? "text-slate-500"
                         }`}
                       >
                         {row.status}
                       </span>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-gray-400">
+                  <td className="whitespace-nowrap px-4 py-3.5 text-sm text-slate-500">
                     {row.date}
                   </td>
                 </tr>
               ))}
               {filteredRows.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-slate-500">
                     No requests match this filter.
                   </td>
                 </tr>

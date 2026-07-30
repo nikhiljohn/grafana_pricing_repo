@@ -102,17 +102,17 @@ function getHeatmapColor(status: string) {
     case "critical":
       return "bg-red-500";
     case "nodata":
-      return "bg-gray-600";
+      return "bg-gray-300";
     default:
-      return "bg-gray-600";
+      return "bg-gray-300";
   }
 }
 
 function StatusBadge({ status }: { status: "NORMAL" | "CRITICAL" | "WARNING" }) {
   const styles = {
-    NORMAL: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    CRITICAL: "bg-red-500/15 text-red-400 border-red-500/30",
-    WARNING: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+    NORMAL: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    CRITICAL: "bg-red-50 text-red-700 border-red-200",
+    WARNING: "bg-amber-50 text-amber-700 border-amber-200",
   };
   return (
     <span
@@ -121,10 +121,10 @@ function StatusBadge({ status }: { status: "NORMAL" | "CRITICAL" | "WARNING" }) 
       <span
         className={`h-1.5 w-1.5 rounded-full ${
           status === "NORMAL"
-            ? "bg-emerald-400"
+            ? "bg-emerald-500"
             : status === "CRITICAL"
-            ? "bg-red-400"
-            : "bg-yellow-400"
+            ? "bg-red-500"
+            : "bg-amber-500"
         }`}
       />
       {status}
@@ -144,36 +144,36 @@ export default function PredictiveOpsPage() {
   ];
 
   const stats = [
-    { label: "Monitored Metrics", value: "11", color: "text-slate-100" },
-    { label: "Critical Anomalies", value: "1", color: "text-red-400" },
-    { label: "Warnings", value: "0", color: "text-yellow-400" },
-    { label: "Breach in 24h", value: "0", color: "text-slate-300" },
-    { label: "Breach in 7 days", value: "0", color: "text-slate-300" },
-    { label: "Normal", value: "10", color: "text-emerald-400" },
+    { label: "Monitored Metrics", value: "11", color: "text-slate-800" },
+    { label: "Critical Anomalies", value: "1", color: "text-red-500" },
+    { label: "Warnings", value: "0", color: "text-amber-500" },
+    { label: "Breach in 24h", value: "0", color: "text-slate-600" },
+    { label: "Breach in 7 days", value: "0", color: "text-slate-600" },
+    { label: "Normal", value: "10", color: "text-emerald-500" },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen text-slate-800">
       {/* Header */}
-      <div className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-sm">
+      <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-5">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/15 text-violet-400">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-500">
                 <Zap className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-800">
                   Predictive Operations
                 </h1>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-slate-500">
                   AIOps &middot; Statistical anomaly detection &middot; Trend
                   extrapolation &middot; Predictive threshold alerts
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1.5 text-xs text-slate-500">
+              <span className="flex items-center gap-1.5 text-xs text-slate-400">
                 <Clock className="h-3.5 w-3.5" />
                 Last poll: 12m ago
               </span>
@@ -181,13 +181,13 @@ export default function PredictiveOpsPage() {
               <div className="relative">
                 <button
                   onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-                  className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-300 transition hover:border-slate-600 hover:bg-slate-750"
+                  className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
                 >
                   {selectedOrg}
-                  <ChevronDown className="h-4 w-4 text-slate-500" />
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
                 </button>
                 {orgDropdownOpen && (
-                  <div className="absolute right-0 z-50 mt-1 w-48 rounded-lg border border-slate-700 bg-slate-800 py-1 shadow-xl">
+                  <div className="absolute right-0 z-50 mt-1 w-48 rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
                     {orgs.map((org) => (
                       <button
                         key={org}
@@ -195,10 +195,10 @@ export default function PredictiveOpsPage() {
                           setSelectedOrg(org);
                           setOrgDropdownOpen(false);
                         }}
-                        className={`block w-full px-3 py-2 text-left text-sm transition hover:bg-slate-700 ${
+                        className={`block w-full px-3 py-2 text-left text-sm transition hover:bg-slate-50 ${
                           org === selectedOrg
-                            ? "text-violet-400"
-                            : "text-slate-300"
+                            ? "text-violet-600"
+                            : "text-slate-600"
                         }`}
                       >
                         {org}
@@ -214,15 +214,15 @@ export default function PredictiveOpsPage() {
 
       <div className="mx-auto max-w-7xl px-6 py-6">
         {/* Tabs */}
-        <div className="mb-6 flex gap-1 rounded-lg border border-slate-800 bg-slate-900/50 p-1">
+        <div className="mb-6 flex gap-1 rounded-lg bg-slate-100 p-1">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition ${
                 activeTab === tab.key
-                  ? "bg-slate-800 text-white shadow-sm"
-                  : "text-slate-400 hover:text-slate-300"
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
               <tab.icon className="h-4 w-4" />
@@ -236,12 +236,12 @@ export default function PredictiveOpsPage() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-3.5 text-center"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-center"
             >
               <div className={`text-2xl font-bold ${stat.color}`}>
                 {stat.value}
               </div>
-              <div className="mt-1 text-xs text-slate-500">{stat.label}</div>
+              <div className="mt-1 text-xs text-slate-400">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -250,7 +250,7 @@ export default function PredictiveOpsPage() {
         <div className="mb-8">
           <div className="mb-4 flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-400" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
               Top Risks — Prioritised by Urgency
             </h2>
           </div>
@@ -259,39 +259,39 @@ export default function PredictiveOpsPage() {
             {risks.map((risk, index) => (
               <div
                 key={risk.id}
-                className={`rounded-xl border bg-slate-900/50 p-5 transition hover:bg-slate-900/80 ${
+                className={`rounded-xl border bg-white p-5 transition hover:bg-slate-50 ${
                   risk.status === "CRITICAL"
-                    ? "border-red-500/30"
-                    : "border-slate-800"
+                    ? "border-red-300"
+                    : "border-slate-200"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="mb-2 flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-slate-400">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
                         {index + 1}
                       </span>
-                      <span className="font-semibold text-white">
+                      <span className="font-semibold text-slate-800">
                         {risk.instance}
                       </span>
-                      <span className="rounded bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-400">
+                      <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
                         {risk.metric}
                       </span>
                       <StatusBadge status={risk.status} />
                       {risk.breachTime && (
-                        <span className="flex items-center gap-1 text-xs font-medium text-red-400">
+                        <span className="flex items-center gap-1 text-xs font-medium text-red-500">
                           <Clock className="h-3.5 w-3.5" />
                           breach in {risk.breachTime}
                         </span>
                       )}
                     </div>
-                    <p className="ml-9 text-sm text-slate-400">
+                    <p className="ml-9 text-sm text-slate-500">
                       {risk.description}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5">
-                    <ArrowUpRight className="h-3.5 w-3.5 text-red-400" />
-                    <span className="text-sm font-semibold text-red-400">
+                  <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
+                    <ArrowUpRight className="h-3.5 w-3.5 text-red-500" />
+                    <span className="text-sm font-semibold text-red-500">
                       {risk.trendPercent}
                     </span>
                   </div>
@@ -305,12 +305,12 @@ export default function PredictiveOpsPage() {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-cyan-400" />
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+              <Shield className="h-5 w-5 text-cyan-500" />
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
                 Anomaly Heatmap
               </h2>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-500">
+            <div className="flex items-center gap-3 text-xs text-slate-400">
               <Info className="h-3.5 w-3.5" />
               <span className="flex items-center gap-1.5">
                 <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-500" />
@@ -325,23 +325,23 @@ export default function PredictiveOpsPage() {
                 Red = critical
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-gray-600" />
+                <span className="inline-block h-2.5 w-2.5 rounded-sm bg-gray-300" />
                 Grey = no data
               </span>
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50">
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-800">
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <tr className="border-b border-slate-200 bg-slate-50">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Instance
                   </th>
                   {heatmapColumns.map((col) => (
                     <th
                       key={col}
-                      className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500"
+                      className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-400"
                     >
                       {col}
                     </th>
@@ -352,9 +352,9 @@ export default function PredictiveOpsPage() {
                 {heatmapData.map((row) => (
                   <tr
                     key={row.instance}
-                    className="border-b border-slate-800/50 last:border-0"
+                    className="border-b border-slate-200 last:border-0"
                   >
-                    <td className="px-4 py-3 text-sm font-medium text-slate-300">
+                    <td className="px-4 py-3 text-sm font-medium text-slate-600">
                       {row.instance}
                     </td>
                     {[
