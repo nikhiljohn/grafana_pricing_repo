@@ -22,55 +22,55 @@ const stats = [
     label: "Total AI Calls",
     value: "48",
     icon: Hash,
-    color: "text-slate-100",
-    bgColor: "bg-slate-500/10",
-    iconColor: "text-slate-400",
-    borderColor: "border-slate-800",
+    color: "text-slate-800",
+    bgColor: "bg-slate-100",
+    iconColor: "text-slate-500",
+    borderColor: "border-slate-200",
   },
   {
     label: "Tokens Used",
     value: "480.7K",
     icon: Cpu,
-    color: "text-emerald-400",
-    bgColor: "bg-emerald-500/10",
-    iconColor: "text-emerald-400",
-    borderColor: "border-emerald-500/20",
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    iconColor: "text-emerald-500",
+    borderColor: "border-emerald-200",
   },
   {
     label: "Total Cost",
     value: "$2.4252",
     icon: Coins,
-    color: "text-yellow-400",
-    bgColor: "bg-yellow-500/10",
-    iconColor: "text-yellow-400",
-    borderColor: "border-yellow-500/20",
+    color: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    iconColor: "text-yellow-500",
+    borderColor: "border-yellow-200",
   },
   {
     label: "Avg Cost/Call",
     value: "$0.05053",
     icon: Coins,
-    color: "text-yellow-400",
-    bgColor: "bg-yellow-500/10",
-    iconColor: "text-yellow-400",
-    borderColor: "border-yellow-500/20",
+    color: "text-yellow-600",
+    bgColor: "bg-yellow-50",
+    iconColor: "text-yellow-500",
+    borderColor: "border-yellow-200",
   },
   {
     label: "Avg Latency",
     value: "15791ms",
     icon: Clock,
-    color: "text-orange-400",
-    bgColor: "bg-orange-500/10",
-    iconColor: "text-orange-400",
-    borderColor: "border-orange-500/20",
+    color: "text-orange-600",
+    bgColor: "bg-orange-50",
+    iconColor: "text-orange-500",
+    borderColor: "border-orange-200",
   },
   {
     label: "Security Events",
     value: "0",
     icon: ShieldAlert,
-    color: "text-emerald-400",
-    bgColor: "bg-emerald-500/10",
-    iconColor: "text-emerald-400",
-    borderColor: "border-emerald-500/20",
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    iconColor: "text-emerald-500",
+    borderColor: "border-emerald-200",
   },
 ];
 
@@ -143,20 +143,20 @@ export default function AIUsagePage() {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen text-slate-800">
       {/* Header */}
-      <div className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-sm">
+      <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-5">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/15 text-blue-400">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
                 <Brain className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-800">
                   AI Usage &amp; Costs
                 </h1>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-slate-500">
                   Token consumption, cost breakdown, and security events across
                   all AI features
                 </p>
@@ -167,13 +167,13 @@ export default function AIUsagePage() {
               <div className="relative">
                 <button
                   onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-                  className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-300 transition hover:border-slate-600"
+                  className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 transition hover:border-slate-300"
                 >
                   {selectedOrg}
-                  <ChevronDown className="h-4 w-4 text-slate-500" />
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
                 </button>
                 {orgDropdownOpen && (
-                  <div className="absolute right-0 z-50 mt-1 w-48 rounded-lg border border-slate-700 bg-slate-800 py-1 shadow-xl">
+                  <div className="absolute right-0 z-50 mt-1 w-48 rounded-lg border border-slate-200 bg-white py-1 shadow-xl">
                     {orgs.map((org) => (
                       <button
                         key={org}
@@ -181,10 +181,10 @@ export default function AIUsagePage() {
                           setSelectedOrg(org);
                           setOrgDropdownOpen(false);
                         }}
-                        className={`block w-full px-3 py-2 text-left text-sm transition hover:bg-slate-700 ${
+                        className={`block w-full px-3 py-2 text-left text-sm transition hover:bg-slate-50 ${
                           org === selectedOrg
-                            ? "text-blue-400"
-                            : "text-slate-300"
+                            ? "text-blue-600"
+                            : "text-slate-600"
                         }`}
                       >
                         {org}
@@ -194,7 +194,7 @@ export default function AIUsagePage() {
                 )}
               </div>
               {/* Time Range */}
-              <div className="flex rounded-lg border border-slate-700 bg-slate-800 p-0.5">
+              <div className="flex rounded-lg border border-slate-200 bg-slate-100 p-0.5">
                 {timeRanges.map((range) => (
                   <button
                     key={range}
@@ -202,7 +202,7 @@ export default function AIUsagePage() {
                     className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
                       selectedRange === range
                         ? "bg-blue-600 text-white shadow-sm"
-                        : "text-slate-400 hover:text-slate-300"
+                        : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
                     {range}
@@ -210,7 +210,7 @@ export default function AIUsagePage() {
                 ))}
               </div>
               {/* Refresh */}
-              <button className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-300 transition hover:border-slate-600 hover:bg-slate-750">
+              <button className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 transition hover:border-slate-300 hover:bg-slate-50">
                 <RefreshCw className="h-4 w-4" />
                 Refresh
               </button>
@@ -225,7 +225,7 @@ export default function AIUsagePage() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className={`rounded-xl border ${stat.borderColor} bg-slate-900/50 px-4 py-4`}
+              className={`rounded-xl border ${stat.borderColor} bg-white px-4 py-4`}
             >
               <div className="mb-2 flex items-center gap-2">
                 <div
@@ -243,20 +243,20 @@ export default function AIUsagePage() {
         </div>
 
         {/* Model Info Bar */}
-        <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/50 px-5 py-3">
-          <Info className="h-4 w-4 text-slate-500" />
-          <span className="text-sm text-slate-400">
-            <span className="font-medium text-slate-300">Model:</span>{" "}
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3">
+          <Info className="h-4 w-4 text-slate-400" />
+          <span className="text-sm text-slate-500">
+            <span className="font-medium text-slate-700">Model:</span>{" "}
             claude-haiku-4-5-20251001
           </span>
-          <span className="text-slate-700">|</span>
-          <span className="text-sm text-slate-400">
-            <span className="font-medium text-slate-300">Input:</span> $3/M
+          <span className="text-slate-300">|</span>
+          <span className="text-sm text-slate-500">
+            <span className="font-medium text-slate-700">Input:</span> $3/M
             tokens
           </span>
-          <span className="text-slate-700">&middot;</span>
-          <span className="text-sm text-slate-400">
-            <span className="font-medium text-slate-300">Output:</span> $15/M
+          <span className="text-slate-300">&middot;</span>
+          <span className="text-sm text-slate-500">
+            <span className="font-medium text-slate-700">Output:</span> $15/M
             tokens
           </span>
         </div>
@@ -264,29 +264,29 @@ export default function AIUsagePage() {
         {/* Charts Row */}
         <div className="mb-6 grid grid-cols-2 gap-4">
           {/* Daily Token Usage Chart */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-5">
+          <div className="rounded-xl border border-slate-200 bg-white p-5">
             <div className="mb-4 flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-blue-400" />
-              <h3 className="text-sm font-semibold text-slate-300">
+              <BarChart3 className="h-4 w-4 text-blue-500" />
+              <h3 className="text-sm font-semibold text-slate-700">
                 Daily Token Usage
               </h3>
             </div>
             <div className="relative h-52">
               {/* Y-axis labels */}
               <div className="absolute left-0 top-0 flex h-full flex-col justify-between text-right">
-                <span className="text-[10px] text-slate-600">
+                <span className="text-[10px] text-slate-400">
                   {formatTokens(maxTokens)}
                 </span>
-                <span className="text-[10px] text-slate-600">
+                <span className="text-[10px] text-slate-400">
                   {formatTokens(maxTokens / 2)}
                 </span>
-                <span className="text-[10px] text-slate-600">0</span>
+                <span className="text-[10px] text-slate-400">0</span>
               </div>
               {/* Grid lines */}
               <div className="absolute inset-x-10 top-0 h-full">
-                <div className="absolute inset-x-0 top-0 border-t border-dashed border-slate-800/80" />
-                <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-slate-800/80" />
-                <div className="absolute inset-x-0 bottom-0 border-t border-slate-800/80" />
+                <div className="absolute inset-x-0 top-0 border-t border-dashed border-slate-200" />
+                <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-slate-200" />
+                <div className="absolute inset-x-0 bottom-0 border-t border-slate-200" />
               </div>
               {/* Bars */}
               <div className="absolute inset-x-10 bottom-0 flex h-full items-end gap-[2px]">
@@ -303,7 +303,7 @@ export default function AIUsagePage() {
                     >
                       {/* Tooltip */}
                       {hoveredBar === i && d.tokens > 0 && (
-                        <div className="absolute -top-8 z-10 whitespace-nowrap rounded-md bg-slate-700 px-2 py-1 text-xs font-medium text-white shadow-lg">
+                        <div className="absolute -top-8 z-10 whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-xs font-medium text-white shadow-lg">
                           {d.date}: {formatTokens(d.tokens)} tokens
                         </div>
                       )}
@@ -328,7 +328,7 @@ export default function AIUsagePage() {
               {dailyTokenData
                 .filter((_, i) => i % 5 === 0)
                 .map((d) => (
-                  <span key={d.date} className="text-[10px] text-slate-600">
+                  <span key={d.date} className="text-[10px] text-slate-400">
                     {d.date}
                   </span>
                 ))}
@@ -336,10 +336,10 @@ export default function AIUsagePage() {
           </div>
 
           {/* Cost by Feature Chart */}
-          <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-5">
+          <div className="rounded-xl border border-slate-200 bg-white p-5">
             <div className="mb-4 flex items-center gap-2">
-              <Coins className="h-4 w-4 text-yellow-400" />
-              <h3 className="text-sm font-semibold text-slate-300">
+              <Coins className="h-4 w-4 text-yellow-500" />
+              <h3 className="text-sm font-semibold text-slate-700">
                 Cost by Feature
               </h3>
             </div>
@@ -350,14 +350,14 @@ export default function AIUsagePage() {
                 return (
                   <div key={item.feature} className="group">
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-400">
+                      <span className="text-xs font-medium text-slate-500">
                         {item.feature}
                       </span>
-                      <span className="text-xs font-semibold text-slate-300">
+                      <span className="text-xs font-semibold text-slate-700">
                         ${item.cost.toFixed(2)}
                       </span>
                     </div>
-                    <div className="h-6 w-full overflow-hidden rounded-md bg-slate-800/50">
+                    <div className="h-6 w-full overflow-hidden rounded-md bg-slate-100">
                       <div
                         className={`h-full rounded-md ${item.color} transition-all duration-500`}
                         style={{ width: `${Math.max(widthPct, 2)}%` }}
@@ -371,16 +371,16 @@ export default function AIUsagePage() {
         </div>
 
         {/* Feature Breakdown Table */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/50">
-          <div className="border-b border-slate-800 px-5 py-4">
-            <h3 className="text-sm font-semibold text-slate-300">
+        <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="border-b border-slate-200 px-5 py-4">
+            <h3 className="text-sm font-semibold text-slate-700">
               Feature Breakdown
             </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-800">
+                <tr className="border-b border-slate-200 bg-slate-50">
                   <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Feature
                   </th>
@@ -408,29 +408,29 @@ export default function AIUsagePage() {
                 {featureBreakdown.map((row) => (
                   <tr
                     key={row.feature}
-                    className="border-b border-slate-800/50 transition hover:bg-slate-800/30"
+                    className="border-b border-slate-100 transition hover:bg-slate-50"
                   >
-                    <td className="px-5 py-3.5 text-sm font-medium text-slate-300">
+                    <td className="px-5 py-3.5 text-sm font-medium text-slate-700">
                       {row.feature}
                     </td>
-                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-300">
+                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-600">
                       {row.calls}
                     </td>
-                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-300">
+                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-600">
                       {row.inputTokens.toLocaleString()}
                     </td>
-                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-300">
+                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-600">
                       {row.outputTokens.toLocaleString()}
                     </td>
-                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-300">
+                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-600">
                       {row.totalTokens.toLocaleString()}
                     </td>
                     <td className="px-5 py-3.5 text-right text-sm tabular-nums">
-                      <span className="font-medium text-emerald-400">
+                      <span className="font-medium text-emerald-600">
                         ${row.cost.toFixed(4)}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-300">
+                    <td className="px-5 py-3.5 text-right text-sm tabular-nums text-slate-600">
                       {row.avgLatency}
                     </td>
                   </tr>
