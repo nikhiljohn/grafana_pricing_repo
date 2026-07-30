@@ -4,29 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import {
-  LayoutDashboard,
-  Database,
-  GitCompareArrows,
-  Bell,
-  DollarSign,
-  Network,
-  Waypoints,
-  MessageSquareMore,
-  Sparkles,
-  Shield,
+  Command,
   Cloud,
-  Zap,
-  BarChart3,
-  Settings2,
-  PackageCheck,
-  Bot,
-  ShieldAlert,
-  AlertTriangle,
-  MessageCircle,
-  Gem,
+  DollarSign,
+  Shield,
+  GitBranch,
+  Sparkles,
+  Database,
+  Bell,
+  Brain,
   Moon,
   LogOut,
-  KeyRound,
 } from "lucide-react";
 
 type NavItem =
@@ -34,28 +22,17 @@ type NavItem =
   | { section: string };
 
 const nav: NavItem[] = [
-  { section: "INFRASTRUCTURE" },
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/assets", label: "Assets / CMDB", icon: Database },
-  { href: "/changes", label: "Change Log", icon: GitCompareArrows },
-  { href: "/alerts", label: "Alerts", icon: Bell, badge: "3" },
-  { href: "/cost-analysis", label: "Cost Analysis", icon: DollarSign },
-  { href: "/service-map", label: "Service Map", icon: Network },
-  { href: "/architecture", label: "Architecture", icon: Waypoints },
-  { href: "/cmdb-assistant", label: "CMDB Assistant", icon: MessageSquareMore },
-  { href: "/ai-hub", label: "AI Hub", icon: Sparkles, badge: "Beta" },
-  { href: "/iam", label: "IAM", icon: KeyRound },
+  { section: "INTELLIGENCE" },
+  { href: "/", label: "Command Center", icon: Command },
   { href: "/cloudops", label: "CloudOps", icon: Cloud },
-  { href: "/predictive-ops", label: "Predictive Ops", icon: Zap },
-  { href: "/ai-usage", label: "AI Usage", icon: BarChart3 },
-  { href: "/orchestration", label: "Orchestration", icon: Settings2 },
-  { href: "/patch-manager", label: "Patch Manager", icon: PackageCheck },
-  { href: "/agent", label: "Agent", icon: Bot },
-  { section: "SECURITY (CSPM)" },
-  { href: "/security", label: "Security Dashboard", icon: ShieldAlert },
-  { href: "/security/findings", label: "Findings", icon: AlertTriangle, badge: "99+" },
-  { href: "/security/remediation", label: "AI Remediation", icon: MessageCircle },
-  { href: "/security/gemini", label: "Gemini Security", icon: Gem },
+  { href: "/finops", label: "FinOps", icon: DollarSign },
+  { href: "/secops", label: "SecOps", icon: Shield, badge: "12" },
+  { href: "/devops", label: "DevOps", icon: GitBranch },
+  { href: "/aiops", label: "AIOps", icon: Sparkles, badge: "Beta" },
+  { section: "REFERENCE" },
+  { href: "/assets", label: "Assets / CMDB", icon: Database },
+  { href: "/alerts", label: "Alerts", icon: Bell, badge: "3" },
+  { href: "/memory", label: "Memory", icon: Brain },
 ];
 
 export function Sidebar() {
@@ -69,7 +46,7 @@ export function Sidebar() {
         </div>
         <div>
           <span className="text-sm font-semibold text-slate-800">Intellicore</span>
-          <span className="ml-1 text-[10px] font-medium bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">b1</span>
+          <span className="ml-1 text-[10px] font-medium bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">CMP</span>
         </div>
       </div>
 
@@ -103,10 +80,10 @@ export function Sidebar() {
               {"badge" in item && item.badge && (
                 <span className={clsx(
                   "text-[10px] font-medium px-1.5 py-0.5 rounded-full",
-                  item.badge === "99+"
-                    ? "bg-emerald-100 text-emerald-700"
-                    : item.badge === "3"
+                  item.badge === "12"
                     ? "bg-red-100 text-red-600"
+                    : item.badge === "3"
+                    ? "bg-amber-100 text-amber-600"
                     : "bg-slate-100 text-slate-500"
                 )}>
                   {item.badge}
@@ -118,6 +95,11 @@ export function Sidebar() {
       </nav>
 
       <div className="border-t border-slate-200 p-3">
+        <div className="px-2.5 py-1.5 mb-2">
+          <div className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Managed by</div>
+          <div className="text-[11px] font-medium text-emerald-700">Searce CSRE Squad</div>
+          <div className="text-[10px] text-slate-400">Last review: 2h ago</div>
+        </div>
         <button className="flex items-center gap-2.5 px-2.5 py-[7px] w-full rounded-lg text-[13px] text-slate-600 hover:bg-slate-50">
           <Moon className="w-4 h-4" />
           <span>Dark mode</span>

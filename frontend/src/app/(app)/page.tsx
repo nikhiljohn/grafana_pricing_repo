@@ -5,281 +5,198 @@ import { Card } from "@/components/charts";
 
 /* ── static data ─────────────────────────────────────────────────────── */
 
-const costByService = [
-  { label: "Compute Engine", value: 161, color: "#3b82f6" },
-  { label: "Cloud Storage", value: 145, color: "#8b5cf6" },
-  { label: "Cloud Functions", value: 86, color: "#10b981" },
-  { label: "Cloud SQL", value: 68, color: "#f59e0b" },
-  { label: "Cloud Run", value: 48, color: "#ef4444" },
+const intelligenceScores = [
+  { pillar: "CloudOps", score: 94, status: "healthy", note: "" },
+  { pillar: "FinOps", score: 78, status: "warning", note: "cost anomaly detected" },
+  { pillar: "SecOps", score: 89, status: "healthy", note: "" },
+  { pillar: "DevOps", score: 96, status: "healthy", note: "" },
+  { pillar: "AIOps", score: null, status: "active", note: "3 agents running" },
 ];
 
-const costTrend = [
-  { month: "Feb", cost: 480 },
-  { month: "Mar", cost: 520 },
-  { month: "Apr", cost: 510 },
-  { month: "May", cost: 560 },
-  { month: "Jun", cost: 590 },
-  { month: "Jul", cost: 637 },
-];
-
-const workloads = [
+const attentionItems = [
   {
-    icon: "🖥️",
-    name: "Compute / VMs",
-    count: 23,
-    unit: "instances",
-    healthy: 21,
-    warning: 2,
-    critical: 0,
-    cost: 368,
-    status: "CPU spike on clens-dev auto-resolved 3d ago",
+    severity: "red" as const,
+    pillar: "SecOps",
+    title: "5 security groups allow SSH from internet (CIS 5.2)",
+    memory:
+      "Similar finding resolved across 3 accounts last month → remediation script available",
   },
   {
-    icon: "☸️",
-    name: "Kubernetes",
-    count: 0,
-    unit: "clusters",
-    healthy: 0,
-    warning: 0,
-    critical: 0,
-    cost: 0,
-    status: "No clusters discovered — run scan",
+    severity: "amber" as const,
+    pillar: "FinOps",
+    title: "BigQuery cost spike +340% in last 4h",
+    memory:
+      "Matches Jul 15 ETL spike pattern. Root cause last time: unoptimized JOIN on 2TB table. Suggested fix: apply same query optimization",
   },
   {
-    icon: "🗄️",
-    name: "Databases",
-    count: 1,
-    unit: "instance",
-    healthy: 1,
-    warning: 0,
-    critical: 0,
-    cost: 15,
-    status: "Connection pool fix deployed 7d ago",
+    severity: "amber" as const,
+    pillar: "CloudOps",
+    title: "Bastion-Host network egress anomalous (3.3σ)",
+    memory:
+      "Last occurrence was a false positive from backup job. Confidence: 72% false positive",
   },
   {
-    icon: "⚡",
-    name: "Serverless",
-    count: 12,
-    unit: "functions",
-    healthy: 12,
-    warning: 0,
-    critical: 0,
-    cost: 86,
-    status: "Cold start mitigation active",
-  },
-  {
-    icon: "🧠",
-    name: "Data & AI",
-    count: 3,
-    unit: "pipelines",
-    healthy: 2,
-    warning: 1,
-    critical: 0,
-    cost: 28,
-    status: "BigQuery slot optimization in progress",
+    severity: "blue" as const,
+    pillar: "DevOps",
+    title: "4 orchestration requests pending approval",
+    memory:
+      "Oldest: 2h (CL-36: GCP VM provision, est. $45/mo, low risk)",
   },
 ];
 
-const operationalMemory = [
+const changeItems = [
   {
-    tone: "resolved" as const,
-    text: "CPU auto-scaling policy validated — resolved clens-dev spike in 8 min",
-    time: "3d ago",
+    pillar: "CloudOps",
+    detail:
+      "23 VMs stable, 1 auto-scaled (clens-dev CPU spike → e2-standard-4, resolved 8 min)",
   },
   {
-    tone: "resolved" as const,
-    text: "BigQuery auto-scaling enabled after slot exhaustion — no recurrence",
-    time: "5d ago",
+    pillar: "FinOps",
+    detail:
+      "$637 current month spend, +8% MoM. BigQuery anomaly flagged.",
   },
   {
-    tone: "mitigated" as const,
-    text: "Database connection pool increased 100→200 after saturation event",
-    time: "7d ago",
+    pillar: "SecOps",
+    detail:
+      "342 findings, 12 are recurrences of resolved patterns. Posture score: 89 → 87 (2 new SSH groups)",
   },
   {
-    tone: "mitigated" as const,
-    text: "Serverless min instances configured — cold start p99 reduced from 2.1s to 340ms",
-    time: "14d ago",
+    pillar: "DevOps",
+    detail:
+      "47 deployments, 0 failures. Patch compliance: 78% (3 critical pending)",
   },
   {
-    tone: "noted" as const,
-    text: "Bastion host egress alert threshold adjusted — was false positive from backup job",
-    time: "21d ago",
+    pillar: "AIOps",
+    detail:
+      "847 tokens used, 3 auto-remediations triggered, 2 successful",
+  },
+];
+
+const memoryPatterns = [
+  {
+    pattern: "CPU spike before auto-scale",
+    firstSeen: "45d ago",
+    occurrences: 7,
+    lastResolution: "Right-size + load balance",
+    confidence: 94,
+  },
+  {
+    pattern: "BigQuery ETL cost spike",
+    firstSeen: "30d ago",
+    occurrences: 3,
+    lastResolution: "Query optimization",
+    confidence: 88,
+  },
+  {
+    pattern: "SSH security group creation",
+    firstSeen: "60d ago",
+    occurrences: 12,
+    lastResolution: "Auto-remediation script",
+    confidence: 96,
+  },
+  {
+    pattern: "Connection pool exhaustion",
+    firstSeen: "21d ago",
+    occurrences: 2,
+    lastResolution: "Pool size increase",
+    confidence: 82,
+  },
+  {
+    pattern: "Friday deployment failures",
+    firstSeen: "90d ago",
+    occurrences: 5,
+    lastResolution: "Pre-deploy validation",
+    confidence: 91,
   },
 ];
 
 const whatsWorkingWell = [
-  "22 of 23 VMs within CPU/memory thresholds for 30 days",
-  "All databases encrypted at rest with automated backups",
+  "22/23 VMs within thresholds for 30d",
+  "All databases encrypted, automated backups active",
   "Zero security findings on serverless workloads",
-  "Incident MTTR improved 22% vs last month (13 min avg)",
-  "Cloud costs down 15% on Data & AI after query optimization",
+  "MTTR improved 22% vs last month (13 min avg)",
+  "3 auto-remediations succeeded without human intervention",
 ];
 
-/* ── inline components ───────────────────────────────────────────────── */
+const csreActivity = [
+  { label: "Last review", value: "2h ago by Searce CSRE" },
+  { label: "Next scheduled review", value: "Tomorrow 10:00 AM IST" },
+  { label: "Open tickets", value: "2 (1 remediation, 1 cost optimization)" },
+  { label: "Recommendations applied this month", value: "7" },
+  { label: "Estimated savings from recommendations", value: "$105/mo" },
+];
 
-function StatTile({
-  icon,
-  label,
-  value,
-  sub,
-  color,
-}: {
-  icon: string;
-  label: string;
-  value: string;
-  sub: string;
-  color?: string;
-}) {
-  return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5">
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-xl opacity-60">{icon}</span>
-        <span className="text-xs text-slate-500 uppercase tracking-wider font-medium">
-          {label}
-        </span>
-      </div>
-      <div className={`text-3xl font-semibold ${color || "text-slate-800"}`}>
-        {value}
-      </div>
-      <div className="text-xs text-slate-400 mt-1">{sub}</div>
-    </div>
-  );
+// 30-day timeline: 0 = green (clear), 1 = amber (minor), 2 = red (incident)
+const timelineDays: number[] = [
+  0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+  2, 0, 0, 0, 0,
+];
+
+/* ── helpers ──────────────────────────────────────────────────────────── */
+
+const severityBorder: Record<string, string> = {
+  red: "border-l-red-500",
+  amber: "border-l-amber-500",
+  blue: "border-l-blue-500",
+};
+
+const severityBadgeBg: Record<string, string> = {
+  red: "bg-red-100 text-red-700",
+  amber: "bg-amber-100 text-amber-700",
+  blue: "bg-blue-100 text-blue-700",
+};
+
+function pillarBadgeColor(pillar: string): string {
+  const map: Record<string, string> = {
+    CloudOps: "bg-sky-100 text-sky-700",
+    FinOps: "bg-amber-100 text-amber-700",
+    SecOps: "bg-red-100 text-red-700",
+    DevOps: "bg-violet-100 text-violet-700",
+    AIOps: "bg-indigo-100 text-indigo-700",
+  };
+  return map[pillar] || "bg-slate-100 text-slate-600";
 }
 
-function CostDonut({
-  segments,
-}: {
-  segments: { label: string; value: number; color: string }[];
-}) {
-  const total = segments.reduce((s, x) => s + x.value, 0);
-  const r = 60;
-  const c = 2 * Math.PI * r;
-  let offset = 0;
+function CommandIcon() {
   return (
-    <svg width="160" height="160" viewBox="0 0 160 160">
-      {segments.map((s, i) => {
-        const pct = s.value / total;
-        const dash = c * pct;
-        const el = (
-          <circle
-            key={i}
-            cx="80"
-            cy="80"
-            r={r}
-            fill="none"
-            stroke={s.color}
-            strokeWidth="24"
-            strokeDasharray={`${dash} ${c - dash}`}
-            strokeDashoffset={-offset}
-            transform="rotate(-90 80 80)"
-          />
-        );
-        offset += dash;
-        return el;
-      })}
-      {/* Total in center */}
-      <text
-        x="80"
-        y="74"
-        textAnchor="middle"
-        fontSize="22"
-        fontWeight="700"
-        fill="#1e293b"
-      >
-        ${total}
-      </text>
-      <text
-        x="80"
-        y="94"
-        textAnchor="middle"
-        fontSize="11"
-        fill="#64748b"
-      >
-        /month
-      </text>
+    <svg
+      className="w-7 h-7 text-slate-700"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+      />
     </svg>
-  );
-}
-
-function HealthDots({
-  healthy,
-  warning,
-  critical,
-}: {
-  healthy: number;
-  warning: number;
-  critical: number;
-}) {
-  if (healthy === 0 && warning === 0 && critical === 0) {
-    return <span className="w-2 h-2 rounded-full bg-slate-300 inline-block" />;
-  }
-  return (
-    <span className="flex items-center gap-1">
-      {healthy > 0 && (
-        <span className="flex items-center gap-0.5 text-xs text-emerald-600">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-          {healthy}
-        </span>
-      )}
-      {warning > 0 && (
-        <span className="flex items-center gap-0.5 text-xs text-amber-600">
-          <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-          {warning}
-        </span>
-      )}
-      {critical > 0 && (
-        <span className="flex items-center gap-0.5 text-xs text-red-600">
-          <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
-          {critical}
-        </span>
-      )}
-    </span>
-  );
-}
-
-function MemoryIcon({ tone }: { tone: "resolved" | "mitigated" | "noted" }) {
-  if (tone === "resolved") {
-    return (
-      <span className="shrink-0 w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">
-        ✓
-      </span>
-    );
-  }
-  if (tone === "mitigated") {
-    return (
-      <span className="shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold">
-        i
-      </span>
-    );
-  }
-  return (
-    <span className="shrink-0 w-5 h-5 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-xs">
-      ●
-    </span>
   );
 }
 
 /* ── page ─────────────────────────────────────────────────────────────── */
 
-export default function DashboardPage() {
+export default function CommandCenterPage() {
   const [org, setOrg] = useState("All Organizations");
-
-  const costMax = Math.max(...costTrend.map((d) => d.cost));
-  const barMaxHeight = 140;
 
   return (
     <div className="space-y-6">
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Dashboard</h1>
-          <p className="text-sm text-slate-500">
-            Cloud management intelligence — real-time health, cost, and
-            operational memory
-          </p>
+      {/* ── 1. Header ──────────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-3">
+          <CommandIcon />
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-800">
+              Command Center
+            </h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Intelligence briefing — powered by Memory across CloudOps,
+              FinOps, SecOps, DevOps &amp; AIOps
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <select
             value={org}
             onChange={(e) => setOrg(e.target.value)}
@@ -290,193 +207,215 @@ export default function DashboardPage() {
             <option>AWS CSRE</option>
             <option>Sea-Sbox</option>
           </select>
-          <button className="text-sm text-slate-600 flex items-center gap-1.5 border border-slate-200 rounded-lg px-3 py-2 bg-white hover:bg-slate-50 transition-colors">
-            ↻ Refresh
-          </button>
+          <span className="text-xs text-slate-400 whitespace-nowrap">
+            Last briefing: 12 min ago
+          </span>
         </div>
       </div>
 
-      {/* ── Scan status ────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 text-sm text-slate-500 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2.5">
-        <span className="animate-spin text-emerald-500">◌</span>
-        <span className="text-emerald-700 font-medium">
-          Scan in progress...
-        </span>
-        <span className="text-emerald-600">· 13 assets</span>
+      {/* ── 2. Intelligence Score Bar ──────────────────────────────────── */}
+      <div className="flex gap-3">
+        {intelligenceScores.map((s) => {
+          let pillBg = "bg-emerald-50 border-emerald-200";
+          let scoreFg = "text-emerald-700";
+          let dotBg = "bg-emerald-500";
+
+          if (s.status === "warning") {
+            pillBg = "bg-amber-50 border-amber-200";
+            scoreFg = "text-amber-700";
+            dotBg = "bg-amber-500";
+          } else if (s.status === "active") {
+            pillBg = "bg-blue-50 border-blue-200";
+            scoreFg = "text-blue-700";
+            dotBg = "bg-blue-500";
+          }
+
+          return (
+            <div
+              key={s.pillar}
+              className={`flex-1 flex items-center gap-3 rounded-lg border px-4 py-3 ${pillBg}`}
+            >
+              <span className={`w-2 h-2 rounded-full shrink-0 ${dotBg}`} />
+              <div className="min-w-0">
+                <div className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  {s.pillar}
+                </div>
+                <div className={`text-lg font-bold ${scoreFg} leading-tight`}>
+                  {s.score !== null ? `${s.score}/100` : "Active"}
+                </div>
+                {s.note && (
+                  <div className="text-[11px] text-slate-500 truncate">
+                    {s.note}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* ── Top stats row ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-4 gap-4">
-        <StatTile
-          icon="📋"
-          label="Total Assets"
-          value="5,154"
-          sub="Active resources"
-        />
-        <StatTile
-          icon="💲"
-          label="Monthly Cost"
-          value="$637"
-          sub="+8% vs last month"
-          color="text-emerald-600"
-        />
-        <StatTile
-          icon="🔔"
-          label="Active Alerts"
-          value="3"
-          sub="Require attention"
-          color="text-red-500"
-        />
-        <StatTile
-          icon="⏱️"
-          label="Uptime (30d)"
-          value="99.94%"
-          sub="2 incidents this month"
-          color="text-emerald-600"
-        />
+      {/* ── 3. Needs Your Attention ────────────────────────────────────── */}
+      <div>
+        <h2 className="text-base font-semibold text-slate-800 mb-3">
+          Needs Your Attention
+        </h2>
+        <div className="space-y-3">
+          {attentionItems.map((item, i) => (
+            <div
+              key={i}
+              className={`bg-white border border-slate-200 border-l-4 ${severityBorder[item.severity]} rounded-xl p-4`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span
+                      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${pillarBadgeColor(item.pillar)}`}
+                    >
+                      {item.pillar}
+                    </span>
+                    <span
+                      className={`text-[11px] font-medium px-1.5 py-0.5 rounded ${severityBadgeBg[item.severity]}`}
+                    >
+                      {item.severity === "red"
+                        ? "Critical"
+                        : item.severity === "amber"
+                          ? "Warning"
+                          : "Info"}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-slate-800">
+                    {item.title}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1.5 italic">
+                    <span className="not-italic">&#x1F9E0;</span>{" "}
+                    Memory: {item.memory}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 pt-1">
+                  <button className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors">
+                    Resolve
+                  </button>
+                  <button className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                    Investigate
+                  </button>
+                  <button className="text-xs font-medium px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* ── Two-column layout ──────────────────────────────────────────── */}
+      {/* ── 4. Two-column layout ───────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-4">
         {/* LEFT — col-span-2 */}
         <div className="col-span-2 space-y-4">
-          {/* Operational Health */}
-          <Card title="Operational Health" subtitle="Workload status with incident history">
-            <div className="divide-y divide-slate-100">
-              {workloads.map((w) => {
-                const isInactive = w.count === 0;
-                return (
-                  <div
-                    key={w.name}
-                    className={`flex items-center gap-4 py-3 first:pt-0 last:pb-0 ${
-                      isInactive ? "opacity-50" : ""
-                    }`}
+          {/* What Changed — Last 24h */}
+          <Card title="What Changed — Last 24h" subtitle="8,452 total changes across all pillars">
+            <div className="space-y-3">
+              {changeItems.map((c, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span
+                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0 mt-0.5 ${pillarBadgeColor(c.pillar)}`}
                   >
-                    <span className="text-lg w-7 text-center shrink-0">
-                      {w.icon}
-                    </span>
-                    <div className="w-32 shrink-0">
-                      <div className="text-sm font-medium text-slate-800">
-                        {w.name}
-                      </div>
-                      <div className="text-xs text-slate-400">
-                        {w.count} {w.unit}
-                      </div>
-                    </div>
-                    <div className="w-24 shrink-0">
-                      <HealthDots
-                        healthy={w.healthy}
-                        warning={w.warning}
-                        critical={w.critical}
-                      />
-                    </div>
-                    <div className="w-20 shrink-0 text-sm font-medium text-slate-700 tabular-nums">
-                      {w.cost > 0 ? `$${w.cost}/mo` : "—"}
-                    </div>
-                    <div className="flex-1 text-xs text-slate-500 truncate">
-                      {w.status}
-                    </div>
-                  </div>
-                );
-              })}
+                    {c.pillar}
+                  </span>
+                  <p className="text-sm text-slate-600 leading-snug">
+                    {c.detail}
+                  </p>
+                </div>
+              ))}
             </div>
           </Card>
 
-          {/* Cost Trend */}
-          <Card title="Cost Trend" subtitle="Monthly cloud spend (last 6 months)">
-            <div className="pt-2">
-              <svg
-                viewBox={`0 0 ${costTrend.length * 64} ${barMaxHeight + 40}`}
-                className="w-full"
-                style={{ height: barMaxHeight + 40 }}
-              >
-                {costTrend.map((d, i) => {
-                  const barH =
-                    (d.cost / (costMax * 1.15)) * barMaxHeight;
-                  const x = i * 64 + 8;
-                  const barW = 44;
-                  return (
-                    <g key={d.month}>
-                      <rect
-                        x={x}
-                        y={barMaxHeight - barH}
-                        width={barW}
-                        height={barH}
-                        rx={4}
-                        fill={
-                          i === costTrend.length - 1
-                            ? "#3b82f6"
-                            : "#bfdbfe"
-                        }
-                      />
-                      <text
-                        x={x + barW / 2}
-                        y={barMaxHeight - barH - 8}
-                        textAnchor="middle"
-                        fontSize="12"
-                        fontWeight="600"
-                        fill="#334155"
-                      >
-                        ${d.cost}
-                      </text>
-                      <text
-                        x={x + barW / 2}
-                        y={barMaxHeight + 18}
-                        textAnchor="middle"
-                        fontSize="12"
-                        fill="#64748b"
-                      >
-                        {d.month}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
+          {/* Operational Memory — Patterns Detected */}
+          <Card title="Operational Memory — Patterns Detected">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left">
+                    <th className="pb-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wider">
+                      Pattern
+                    </th>
+                    <th className="pb-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wider">
+                      First Seen
+                    </th>
+                    <th className="pb-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wider text-center">
+                      Occurrences
+                    </th>
+                    <th className="pb-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wider">
+                      Last Resolution
+                    </th>
+                    <th className="pb-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wider text-right">
+                      Confidence
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {memoryPatterns.map((p, i) => (
+                    <tr key={i}>
+                      <td className="py-2.5 text-slate-800 font-medium">
+                        {p.pattern}
+                      </td>
+                      <td className="py-2.5 text-slate-500">{p.firstSeen}</td>
+                      <td className="py-2.5 text-slate-700 font-medium text-center tabular-nums">
+                        {p.occurrences} times
+                      </td>
+                      <td className="py-2.5 text-slate-500">
+                        {p.lastResolution}
+                      </td>
+                      <td className="py-2.5 text-right">
+                        <span
+                          className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full tabular-nums ${
+                            p.confidence >= 90
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {p.confidence}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </Card>
         </div>
 
         {/* RIGHT — col-span-1 */}
         <div className="col-span-1 space-y-4">
-          {/* Cost by Service */}
-          <Card title="Cost by Service">
-            <div className="flex justify-center mb-4">
-              <CostDonut segments={costByService} />
-            </div>
+          {/* What's Working Well */}
+          <Card
+            title="What&apos;s Working Well"
+            className="bg-emerald-50/50 border-emerald-200"
+          >
             <div className="space-y-2.5">
-              {costByService.map((s, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full shrink-0"
-                      style={{ background: s.color }}
-                    />
-                    <span className="text-slate-600">{s.label}</span>
-                  </div>
-                  <span className="font-medium text-slate-800 tabular-nums">
-                    ${s.value}
+              {whatsWorkingWell.map((item, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs mt-0.5">
+                    &#x2713;
+                  </span>
+                  <span className="text-sm text-emerald-800 leading-snug">
+                    {item}
                   </span>
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* Operational Memory */}
-          <Card title="Operational Memory" subtitle="Recent Insights">
+          {/* CSRE Squad Activity */}
+          <Card title="CSRE Squad Activity">
             <div className="space-y-3">
-              {operationalMemory.map((item, i) => (
-                <div key={i} className="flex items-start gap-2.5">
-                  <MemoryIcon tone={item.tone} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-700 leading-snug">
-                      {item.text}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {item.time}
-                    </p>
+              {csreActivity.map((item, i) => (
+                <div key={i}>
+                  <div className="text-xs text-slate-400 uppercase tracking-wider font-medium">
+                    {item.label}
+                  </div>
+                  <div className="text-sm text-slate-700 font-medium mt-0.5">
+                    {item.value}
                   </div>
                 </div>
               ))}
@@ -485,22 +424,47 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── What's Working Well ─────────────────────────────────────────── */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-emerald-800 mb-3">
-          What&apos;s Working Well
-        </h3>
-        <div className="space-y-2">
-          {whatsWorkingWell.map((item, i) => (
-            <div key={i} className="flex items-center gap-2.5">
-              <span className="shrink-0 w-4.5 h-4.5 text-emerald-600 text-sm">
-                ✓
-              </span>
-              <span className="text-sm text-emerald-800">{item}</span>
-            </div>
-          ))}
+      {/* ── 5. Memory Timeline ─────────────────────────────────────────── */}
+      <Card title="Memory Timeline" subtitle="Last 30 days of incident activity">
+        <div className="flex items-end gap-1">
+          {timelineDays.map((level, i) => {
+            let bg = "bg-emerald-400";
+            if (level === 1) bg = "bg-amber-400";
+            if (level === 2) bg = "bg-red-400";
+            return (
+              <div
+                key={i}
+                className={`flex-1 h-6 rounded-sm ${bg} transition-colors`}
+                title={`Day ${i + 1}: ${
+                  level === 0
+                    ? "No incidents"
+                    : level === 1
+                      ? "Minor issue"
+                      : "Incident"
+                }`}
+              />
+            );
+          })}
         </div>
-      </div>
+        <div className="flex items-center gap-4 mt-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-emerald-400" />
+            <span className="text-xs text-slate-500">Clear</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-amber-400" />
+            <span className="text-xs text-slate-500">Minor</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-red-400" />
+            <span className="text-xs text-slate-500">Incident</span>
+          </div>
+          <span className="text-xs text-slate-400 ml-auto">
+            2 incidents in 30d &middot; 99.94% uptime &middot; 26 min total
+            downtime
+          </span>
+        </div>
+      </Card>
     </div>
   );
 }
