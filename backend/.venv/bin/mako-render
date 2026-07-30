@@ -1,8 +1,0 @@
-#!/bin/sh
-'''exec' /tmp/claude-0/-home-user-grafana-pricing-repo/b0c4cc92-d540-5b8f-9825-dd2cd5a2929f/scratchpad/intellicore-cmp/backend/.venv/bin/python3 "$0" "$@"
-' '''
-import sys
-from mako.cmd import cmdline
-if __name__ == '__main__':
-    sys.argv[0] = sys.argv[0].removesuffix('.exe')
-    sys.exit(cmdline())
