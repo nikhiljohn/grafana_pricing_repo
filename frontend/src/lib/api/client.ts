@@ -1,12 +1,16 @@
 /* ------------------------------------------------------------------ */
 /*  Intellicore CMP — API client                                      */
-/*  Abstracts data fetching behind a typed interface.  When            */
-/*  NEXT_PUBLIC_API_URL is set the client talks to the real backend;   */
-/*  otherwise it serves seed data from per-domain mock modules so the  */
-/*  entire frontend runs without a backend.                            */
+/*  Serves seed data from per-domain mock modules by default so every  */
+/*  page has data with no backend. The real pillar endpoints           */
+/*  (/command-center, /cloudops, /finops, …) are opt-in: set           */
+/*  NEXT_PUBLIC_DATA_SOURCE=api once the backend implements them.       */
+/*  NOTE: this is intentionally decoupled from NEXT_PUBLIC_API_URL,     */
+/*  which the production image sets to "/api" for the auth proxy — the  */
+/*  data layer must NOT hit that until those endpoints exist.           */
 /* ------------------------------------------------------------------ */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+const USE_REAL_API = process.env.NEXT_PUBLIC_DATA_SOURCE === "api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 type MockModule = { default: Record<string, unknown> };
 
@@ -39,16 +43,18 @@ const DOMAIN_LOADERS: Record<string, () => Promise<MockModule>> = {
  *   Resolves seed data from the matching ./mock/<domain> module.
  */
 export async function apiFetch<T>(endpoint: string): Promise<T> {
-  if (API_BASE) {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      throw new Error(`API ${endpoint} → ${res.status}`);
+  if (USE_REAL_API) {
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (res.ok) return (await res.json()) as T;
+    } catch {
+      /* fall through to seed data */
     }
-    return res.json() as Promise<T>;
+    // real endpoint missing/failed — fall back to seed data
   }
 
   const domain = endpoint.split("/").filter(Boolean)[0];

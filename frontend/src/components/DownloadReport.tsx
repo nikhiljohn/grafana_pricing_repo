@@ -21,6 +21,9 @@ export function DownloadReport() {
     setBusy(true);
     try {
       await downloadReport(pathname);
+    } catch (err) {
+      console.error("Report generation failed:", err);
+      alert("Could not generate the report. Please try again.");
     } finally {
       setBusy(false);
     }
