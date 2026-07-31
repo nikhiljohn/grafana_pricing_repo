@@ -13,10 +13,10 @@ import {
   Database,
   Bell,
   Brain,
-  Moon,
   LogOut,
   Settings,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type NavItem =
   | { href: string; label: string; icon: React.ElementType; badge?: string }
@@ -102,10 +102,7 @@ export function Sidebar() {
           <div className="text-[11px] font-medium text-emerald-700">Searce CSRE Squad</div>
           <div className="text-[10px] text-slate-400">Last review: 2h ago</div>
         </div>
-        <button className="flex items-center gap-2.5 px-2.5 py-[7px] w-full rounded-lg text-[13px] text-slate-600 hover:bg-slate-50">
-          <Moon className="w-4 h-4" />
-          <span>Dark mode</span>
-        </button>
+        <ThemeToggle />
         <div className="flex items-center gap-2.5 px-2.5 py-2 mt-1">
           <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-semibold">
             N
