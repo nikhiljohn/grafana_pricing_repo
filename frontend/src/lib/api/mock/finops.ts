@@ -32,7 +32,7 @@ const data: Record<string, unknown> = {
       memory: "No direct cost. FinOps tooling and analysis overhead is included in Searce managed services MRR.",
     },
     {
-      name: "SecOps",
+      name: "Cloud Security",
       cost: 42,
       breakdown: "SCC Premium, Wiz",
       sparkData: [40, 41, 42, 42, 42, 42],

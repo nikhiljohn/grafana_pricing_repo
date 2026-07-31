@@ -236,7 +236,11 @@ GitHub Actions pipelines (`.github/workflows/`):
 | `deploy-production.yml` | push to `main` | Deploy to production with health check + auto-rollback |
 | `deploy-customer.yml` | manual dispatch | Provision a **new per-customer** GCP VM (static IP, TLS, Docker, generated `.env.prod`) |
 
-Every new customer gets an isolated single-VM deployment via `deploy-customer.yml`.
+Every new customer gets an isolated single-VM deployment. For a scripted
+**staging → production** onboarding, see **`deploy/NEW_CUSTOMER.md`** — it uses
+`deploy/gcp/provision-customer.sh` (reserves IP, creates the VM, generates
+secrets, deploys, bootstraps the admin) or the `deploy-customer.yml` workflow.
+Env contract: `deploy/gcp/.env.prod.example`.
 
 ## GCP architecture & cost
 

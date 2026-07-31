@@ -45,7 +45,7 @@ function pillarBadgeColor(pillar: string): string {
   const map: Record<string, string> = {
     CloudOps: "bg-sky-100 text-sky-700",
     FinOps: "bg-amber-100 text-amber-700",
-    SecOps: "bg-red-100 text-red-700",
+    "Cloud Security": "bg-red-100 text-red-700",
     DevOps: "bg-violet-100 text-violet-700",
     AIOps: "bg-indigo-100 text-indigo-700",
   };
@@ -116,7 +116,7 @@ export default function CommandCenterPage() {
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
               Intelligence briefing — powered by Memory across CloudOps,
-              FinOps, SecOps, DevOps &amp; AIOps
+              FinOps, Cloud Security, DevOps &amp; AIOps
             </p>
           </div>
         </div>

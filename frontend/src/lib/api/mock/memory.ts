@@ -69,7 +69,7 @@ const data: Record<string, unknown> = {
     {
       id: 6,
       daysAgo: "27d ago",
-      pillar: "SecOps",
+      pillar: "Cloud Security",
       confidence: 96,
       title: "SSH security group remediation",
       context:
@@ -106,7 +106,7 @@ const data: Record<string, unknown> = {
     {
       id: 9,
       daysAgo: "60d ago",
-      pillar: "SecOps",
+      pillar: "Cloud Security",
       confidence: 82,
       title: "Over-privileged service account pattern",
       context:
@@ -179,7 +179,7 @@ const data: Record<string, unknown> = {
       timesApplied: 12,
       successRate: "100%",
       lastApplied: "2h ago",
-      pillar: "SecOps",
+      pillar: "Cloud Security",
     },
     {
       fix: "Block S3 Public Access",
@@ -187,7 +187,7 @@ const data: Record<string, unknown> = {
       timesApplied: 5,
       successRate: "100%",
       lastApplied: "7d ago",
-      pillar: "SecOps",
+      pillar: "Cloud Security",
     },
     {
       fix: "Auto-scale VM on CPU spike",
@@ -219,7 +219,7 @@ const data: Record<string, unknown> = {
       timesApplied: 4,
       successRate: "100%",
       lastApplied: "1d ago",
-      pillar: "SecOps",
+      pillar: "Cloud Security",
     },
     {
       fix: "Set min instances on Functions",
@@ -235,7 +235,7 @@ const data: Record<string, unknown> = {
     {
       insight:
         "IAM changes correlate with 40% of security findings within 48h",
-      crossPillar: "DevOps × SecOps",
+      crossPillar: "DevOps × Cloud Security",
     },
     {
       insight:

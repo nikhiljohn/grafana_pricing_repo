@@ -21,7 +21,7 @@ const data: Record<string, unknown> = {
       changeType: "Role binding added",
       risk: "HIGH",
       memory:
-        "Memory: IAM changes are flagged. deploy-bot already over-privileged (see SecOps).",
+        "Memory: IAM changes are flagged. deploy-bot already over-privileged (see Cloud Security).",
     },
     {
       time: "6h ago",
@@ -102,7 +102,7 @@ const data: Record<string, unknown> = {
       risk: "HIGH",
       status: "Pending",
       memory:
-        "Memory: Editor role is over-privileged. Suggest custom role (SecOps learning)",
+        "Memory: Editor role is over-privileged. Suggest custom role (Cloud Security learning)",
     },
     {
       ticket: "CL-33",

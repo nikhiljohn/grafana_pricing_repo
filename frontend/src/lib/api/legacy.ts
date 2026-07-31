@@ -21,13 +21,19 @@ export type SessionUser = {
  * so null here just means "render a neutral fallback", not "unauthenticated"). */
 export async function fetchMe(): Promise<SessionUser | null> {
   if (typeof window !== "undefined") return null;
-  const { cookies } = await import("next/headers");
-  const response = await fetch(`${API_URL}/auth/me`, {
-    headers: { Cookie: cookies().toString() },
-    cache: "no-store",
-  });
-  if (!response.ok) return null;
-  return response.json();
+  try {
+    const { cookies } = await import("next/headers");
+    const response = await fetch(`${API_URL}/auth/me`, {
+      headers: { Cookie: cookies().toString() },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    // Backend unreachable (restart, cold start) — render a neutral shell
+    // instead of 500-ing every app page.
+    return null;
+  }
 }
 
 export type TimelineEvent = {

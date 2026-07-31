@@ -8,7 +8,7 @@ const data: Record<string, unknown> = {
   "/command-center/scores": [
     { pillar: "CloudOps", score: 94, status: "healthy", note: "" },
     { pillar: "FinOps", score: 78, status: "warning", note: "cost anomaly detected" },
-    { pillar: "SecOps", score: 89, status: "healthy", note: "" },
+    { pillar: "Cloud Security", score: 89, status: "healthy", note: "" },
     { pillar: "DevOps", score: 96, status: "healthy", note: "" },
     { pillar: "AIOps", score: null, status: "active", note: "3 agents running" },
   ],
@@ -16,7 +16,7 @@ const data: Record<string, unknown> = {
   "/command-center/attention": [
     {
       severity: "red",
-      pillar: "SecOps",
+      pillar: "Cloud Security",
       title: "5 security groups allow SSH from internet (CIS 5.2)",
       memory:
         "Similar finding resolved across 3 accounts last month → remediation script available",
@@ -56,7 +56,7 @@ const data: Record<string, unknown> = {
         "$637 current month spend, +8% MoM. BigQuery anomaly flagged.",
     },
     {
-      pillar: "SecOps",
+      pillar: "Cloud Security",
       detail:
         "342 findings, 12 are recurrences of resolved patterns. Posture score: 89 → 87 (2 new SSH groups)",
     },
