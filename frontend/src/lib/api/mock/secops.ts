@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------ */
-/*  Intellicore CMP — SecOps seed data                                */
+/*  Intellicore CMP — Cloud Security seed data                        */
 /*  Served by apiFetch() for endpoints under /secops/ when no backend  */
 /*  is configured.                                                     */
 /* ------------------------------------------------------------------ */

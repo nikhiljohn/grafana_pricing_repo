@@ -129,7 +129,7 @@ export interface Forecast {
   note: string;
 }
 
-/* ── SecOps ─────────────────────────────────────────────────────────── */
+/* ── Cloud Security ─────────────────────────────────────────────────── */
 
 export interface SecurityFinding {
   id: string;

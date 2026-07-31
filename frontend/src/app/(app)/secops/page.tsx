@@ -124,7 +124,7 @@ function severityBadge(s: string) {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export default function SecOpsIntelligencePage() {
+export default function CloudSecurityPage() {
   const [activeTab, setActiveTab] = useState<Tab>("findings");
   const [severityFilter, setSeverityFilter] = useState<Severity>("all");
 
