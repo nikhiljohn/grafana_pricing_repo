@@ -127,9 +127,14 @@ export default function CommandCenterPage() {
             className="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700"
           >
             <option>All Organizations</option>
-            <option>AI</option>
-            <option>AWS CSRE</option>
-            <option>Sea-Sbox</option>
+            <option>Netcore</option>
+            <option>Aarti Industries</option>
+            <option>ShoppersStop</option>
+            <option>DesignX</option>
+            <option>PayNimbus</option>
+            <option>Kiranakart</option>
+            <option>MediSetu</option>
+            <option>ShipEasy</option>
           </select>
           <span className="text-xs text-slate-400 whitespace-nowrap">
             Last briefing: 12 min ago

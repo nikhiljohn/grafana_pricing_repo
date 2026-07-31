@@ -17,30 +17,37 @@ const data: Record<string, unknown> = {
     {
       severity: "red",
       pillar: "Cloud Security",
-      title: "5 security groups allow SSH from internet (CIS 5.2)",
+      title: "Aarti Industries — 5 security groups allow SSH from internet (CIS 5.2)",
       memory:
-        "Similar finding resolved across 3 accounts last month → remediation script available",
+        "Memory: identical finding auto-remediated across 3 Aarti accounts on Jul 12 → restrict to VPN CIDR 10.0.0.0/8. Auto-fix confidence 96%. One-click remediation ready — audit-critical for their pharma compliance.",
     },
     {
       severity: "amber",
       pillar: "FinOps",
-      title: "BigQuery cost spike +340% in last 4h",
+      title: "Netcore — BigQuery cost spike +340% in last 4h",
       memory:
-        "Matches Jul 15 ETL spike pattern. Root cause last time: unoptimized JOIN on 2TB table. Suggested fix: apply same query optimization",
+        "Memory: matches the Jul 15 ETL spike pattern (unoptimized JOIN on a 2TB table, missing partition filter). Root cause + fix already known — flagged in 12 min, not days. Same fix cut $42/run last time.",
     },
     {
       severity: "amber",
       pillar: "CloudOps",
-      title: "Bastion-Host network egress anomalous (3.3σ)",
+      title: "ShoppersStop — checkout-service egress anomalous (3.3σ) ahead of sale",
       memory:
-        "Last occurrence was a false positive from backup job. Confidence: 72% false positive",
+        "Memory: a similar 3.3σ egress on Jun 2 was a false positive (backup job, 72% conf). This signature differs — likely real. Flagged before the sale window to prevent a checkout outage.",
     },
     {
       severity: "blue",
       pillar: "DevOps",
-      title: "4 orchestration requests pending approval",
+      title: "DesignX — deploy-bot granted project Editor (risky IAM change)",
       memory:
-        "Oldest: 2h (CL-36: GCP VM provision, est. $45/mo, low risk)",
+        "Memory: on May 9 an Editor grant to a CI bot led to a privilege-escalation finding. Pre-deploy guardrail flagged this change and suggested a custom least-privilege role before it shipped.",
+    },
+    {
+      severity: "amber",
+      pillar: "Cloud Security",
+      title: "PayNimbus — admin access key unused for 94 days",
+      memory:
+        "Memory: prior key-rotation remediation on 2 fintech accounts. Recommend rotate + scope-down; PCI-DSS evidence auto-attached to the ticket.",
     },
   ],
 
@@ -111,19 +118,19 @@ const data: Record<string, unknown> = {
   ],
 
   "/command-center/working-well": [
-    "22/23 VMs within thresholds for 30d",
-    "All databases encrypted, automated backups active",
-    "Zero security findings on serverless workloads",
-    "MTTR improved 22% vs last month (13 min avg)",
-    "3 auto-remediations succeeded without human intervention",
+    "Kiranakart — order-service CPU predicted to breach at dinner peak; AIOps agent auto-scaled 6 min early. Zero downtime (94% confidence).",
+    "MediSetu — idle GKE node pools + oversized Cloud SQL right-sized from Memory. 18% GCP savings, compliance retained.",
+    "ShipEasy — dispatch latency root-caused in seconds: Memory correlated a Redis connection-pool exhaustion pattern; pool increased.",
+    "MTTR improved 22% vs last month (13 min avg) across the managed book.",
+    "3 auto-remediations succeeded without human intervention this week.",
   ],
 
   "/command-center/csre-activity": [
-    { label: "Last review", value: "2h ago by Searce CSRE" },
-    { label: "Next scheduled review", value: "Tomorrow 10:00 AM IST" },
-    { label: "Open tickets", value: "2 (1 remediation, 1 cost optimization)" },
-    { label: "Recommendations applied this month", value: "7" },
-    { label: "Estimated savings from recommendations", value: "$105/mo" },
+    { label: "Last review", value: "2h ago — Netcore & Aarti by Searce CSRE" },
+    { label: "Next scheduled review", value: "Tomorrow 10:00 AM IST — ShoppersStop pre-sale readiness" },
+    { label: "Open tickets", value: "2 (Aarti SSH remediation, Netcore cost optimization)" },
+    { label: "Recommendations applied this month", value: "7 across 6 accounts" },
+    { label: "Estimated savings from recommendations", value: "₹4.2L/mo across the book" },
   ],
 
   // 30-day timeline: 0 = green (clear), 1 = amber (minor), 2 = red (incident)

@@ -42,15 +42,22 @@ export function Sidebar() {
 
   return (
     <aside className="w-56 bg-white border-r border-slate-200 flex flex-col shrink-0 h-screen sticky top-0">
-      <div className="p-4 pb-3 flex items-center gap-2">
-        <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center">
-          <span className="text-white text-xs font-bold">AI</span>
-        </div>
+      <Link
+        href="/"
+        aria-label="Intellicore CMP — go to Command Center"
+        className="p-4 pb-3 flex items-center gap-2 hover:opacity-90 transition"
+      >
+        <svg viewBox="0 0 32 32" className="w-7 h-7 shrink-0" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#0F2744" />
+          <circle cx="16" cy="16" r="8" fill="none" stroke="#8AB4F8" strokeWidth="2" />
+          <circle cx="16" cy="16" r="2.6" fill="#34D399" />
+          <circle cx="16" cy="6.5" r="1.6" fill="#8AB4F8" />
+        </svg>
         <div>
           <span className="text-sm font-semibold text-slate-800">Intellicore</span>
           <span className="ml-1 text-[10px] font-medium bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">CMP</span>
         </div>
-      </div>
+      </Link>
 
       <nav className="flex-1 overflow-y-auto px-2 pb-4">
         {nav.map((item, i) => {

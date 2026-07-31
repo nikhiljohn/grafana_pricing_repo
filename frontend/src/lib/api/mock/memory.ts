@@ -13,7 +13,7 @@ const data: Record<string, unknown> = {
       confidence: 94,
       title: "CPU spike recovery pattern",
       context:
-        "clens-dev hit 95% CPU sustained. Auto-scaled to e2-standard-4 and added load balancing.",
+        "Kiranakart — order-service hit 95% CPU sustained before the dinner peak. Auto-scaled to e2-standard-4 and added load balancing.",
       learning:
         "Sustained CPU > 85% for 5min triggers auto-scale. Recovery time: 8 min.",
       applied: 7,
@@ -25,7 +25,7 @@ const data: Record<string, unknown> = {
       confidence: 88,
       title: "BigQuery ETL cost spike",
       context:
-        "Scheduled ETL pipeline scanned 2TB due to missing partition filter.",
+        "Netcore — scheduled ETL pipeline scanned 2TB due to a missing partition filter.",
       learning:
         "Always validate partition filters after pipeline changes. Cost impact: $42 per occurrence.",
       applied: 3,
@@ -37,7 +37,7 @@ const data: Record<string, unknown> = {
       confidence: 82,
       title: "Database connection pool exhaustion",
       context:
-        "pgsql hit max connections (100). Application threw connection timeout errors.",
+        "ShipEasy — dispatch-service DB hit max connections (100). Application threw connection timeout errors during a dispatch surge.",
       learning:
         "Monitor active connections. Pool size 200 with connection leak detection prevents recurrence.",
       applied: 2,
@@ -61,7 +61,7 @@ const data: Record<string, unknown> = {
       confidence: 72,
       title: "Network egress false positive",
       context:
-        "Bastion-host egress anomaly (3.3σ from baseline). Investigation showed legitimate backup job.",
+        "ShoppersStop — bastion-host egress anomaly (3.3σ from baseline). Investigation showed a legitimate backup job. This learning now helps distinguish real egress anomalies from backup noise.",
       learning:
         "Backup jobs to cross-region storage trigger egress alerts. Exclude backup CIDR from anomaly detection.",
       applied: 1,
