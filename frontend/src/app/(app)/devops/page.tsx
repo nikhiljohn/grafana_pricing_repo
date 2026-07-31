@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useApiData } from "@/lib/api";
 import {
   GitBranch,
   Brain,
@@ -28,7 +29,7 @@ const TAB_LABELS: Record<Tab, string> = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Data                                                               */
+/*  Data types                                                         */
 /* ------------------------------------------------------------------ */
 interface ChangeRow {
   time: string;
@@ -38,72 +39,6 @@ interface ChangeRow {
   risk: "Low" | "MEDIUM" | "HIGH";
   memory: string;
 }
-
-const CHANGES: ChangeRow[] = [
-  {
-    time: "2h ago",
-    resource: "clens-dev",
-    resourceType: "VM",
-    changeType: "Machine type changed",
-    risk: "Low",
-    memory:
-      "Memory: Auto-scaled after CPU spike. This is a known recovery pattern.",
-  },
-  {
-    time: "4h ago",
-    resource: "deploy-bot",
-    resourceType: "IAM",
-    changeType: "Role binding added",
-    risk: "HIGH",
-    memory:
-      "Memory: IAM changes are flagged. deploy-bot already over-privileged (see SecOps).",
-  },
-  {
-    time: "6h ago",
-    resource: "etl-pipeline",
-    resourceType: "BigQuery",
-    changeType: "Query pattern changed",
-    risk: "MEDIUM",
-    memory:
-      "Memory: New query matches pattern that caused Jul 15 cost spike.",
-  },
-  {
-    time: "8h ago",
-    resource: "process-orders",
-    resourceType: "Function",
-    changeType: "Min instances set to 3",
-    risk: "Low",
-    memory:
-      "Memory: Cold start mitigation from incident 14d ago.",
-  },
-  {
-    time: "12h ago",
-    resource: "pgsql",
-    resourceType: "Cloud SQL",
-    changeType: "Connection pool increased",
-    risk: "Low",
-    memory:
-      "Memory: Post-incident fix for connection exhaustion 7d ago.",
-  },
-  {
-    time: "18h ago",
-    resource: "bastion-host",
-    resourceType: "VM",
-    changeType: "Firewall rule updated",
-    risk: "MEDIUM",
-    memory:
-      "Memory: Egress alert was false positive. Rule adjusted to exclude backup CIDR.",
-  },
-  {
-    time: "1d ago",
-    resource: "testhydpdf",
-    resourceType: "S3",
-    changeType: "Bucket policy modified",
-    risk: "HIGH",
-    memory:
-      "Memory: This bucket has public access finding (CIS 2.1.2). Change needs review.",
-  },
-];
 
 interface OrchRequest {
   ticket: string;
@@ -116,64 +51,6 @@ interface OrchRequest {
   memory: string;
 }
 
-const ORCH_REQUESTS: OrchRequest[] = [
-  {
-    ticket: "CL-36",
-    request: "Provision VM",
-    resource: "e2-standard-2",
-    provider: "GCP",
-    estCost: "$45/mo",
-    risk: "Low",
-    status: "Pending approval",
-    memory:
-      "Memory: Similar VMs provisioned 12 times. Avg approval time: 1.5h",
-  },
-  {
-    ticket: "CL-35",
-    request: "Create GCS bucket",
-    resource: "Standard",
-    provider: "GCP",
-    estCost: "$2/mo",
-    risk: "Low",
-    status: "Pending",
-    memory:
-      "Memory: Recommend lifecycle policy at creation (FinOps learning)",
-  },
-  {
-    ticket: "CL-34",
-    request: "Add IAM role",
-    resource: "Editor",
-    provider: "GCP",
-    estCost: "—",
-    risk: "HIGH",
-    status: "Pending",
-    memory:
-      "Memory: Editor role is over-privileged. Suggest custom role (SecOps learning)",
-  },
-  {
-    ticket: "CL-33",
-    request: "Scale Cloud Run",
-    resource: "10 instances",
-    provider: "GCP",
-    estCost: "$120/mo",
-    risk: "Medium",
-    status: "Pending",
-    memory:
-      "Memory: Current traffic doesn’t justify 10 instances. Suggest autoscaler.",
-  },
-  {
-    ticket: "CL-32",
-    request: "Delete old snapshots",
-    resource: "—",
-    provider: "GCP",
-    estCost: "-$8/mo",
-    risk: "Low",
-    status: "Completed",
-    memory:
-      "Memory: 14 snapshots deleted, matching FinOps recommendation",
-  },
-];
-
 interface PatchRow {
   resource: string;
   type: string;
@@ -184,67 +61,6 @@ interface PatchRow {
   memory: string;
 }
 
-const PATCH_ROWS: PatchRow[] = [
-  {
-    resource: "clens-dev",
-    type: "VM (Ubuntu)",
-    currentVer: "22.04.4",
-    targetVer: "22.04.5",
-    severity: "Critical",
-    daysBehind: "12d",
-    memory:
-      "Memory: Last patched during maintenance window. Requires reboot.",
-  },
-  {
-    resource: "bastion-host",
-    type: "VM (Ubuntu)",
-    currentVer: "22.04.3",
-    targetVer: "22.04.5",
-    severity: "Critical",
-    daysBehind: "28d",
-    memory:
-      "Memory: Patch delayed due to egress investigation. Safe to proceed now.",
-  },
-  {
-    resource: "pgsql",
-    type: "Cloud SQL",
-    currentVer: "POSTGRES_17",
-    targetVer: "POSTGRES_18",
-    severity: "High",
-    daysBehind: "45d",
-    memory:
-      "Memory: Major version upgrade. Tested on staging 30d ago — no issues.",
-  },
-  {
-    resource: "connectiq",
-    type: "VM (Debian)",
-    currentVer: "11.9",
-    targetVer: "12.0",
-    severity: "Medium",
-    daysBehind: "60d",
-    memory:
-      "Memory: Debian 12 upgrade requires app compatibility testing.",
-  },
-  {
-    resource: "monitoring-agent",
-    type: "VM",
-    currentVer: "22.04.4",
-    targetVer: "22.04.5",
-    severity: "Low",
-    daysBehind: "5d",
-    memory:
-      "Memory: Non-critical, scheduled for next maintenance window.",
-  },
-];
-
-const DEPLOYMENT_PATTERNS = [
-  "Deployments on Fridays fail 23% more than weekday average (5 incidents in 90d)",
-  "Cloud Run deployments have 0% failure rate (28 consecutive successes)",
-  "IAM changes correlate with 40% of security findings within 48h",
-  "Average rollback time: 4 min. All rollbacks were on VM deployments.",
-  "Terraform applies succeed 94% of the time. Failures: state lock conflicts (3x).",
-];
-
 interface DeployEvent {
   time: string;
   name: string;
@@ -253,28 +69,10 @@ interface DeployEvent {
   summary: string;
 }
 
-const DEPLOY_TIMELINE: DeployEvent[] = [
-  { time: "Today 09:14", name: "deploy-frontend", target: "Cloud Run", success: true, summary: "v2.8.1 rolled out. 0 errors in canary." },
-  { time: "Today 07:30", name: "terraform-apply", target: "Infra", success: true, summary: "Added monitoring dashboard. No drift detected." },
-  { time: "Yesterday 18:45", name: "deploy-api", target: "Cloud Run", success: true, summary: "v3.2.0 with new /orders endpoint. Latency stable." },
-  { time: "Yesterday 14:20", name: "patch-bastion", target: "VM", success: false, summary: "Patch failed — egress firewall blocked apt update. Rolled back." },
-  { time: "Yesterday 10:00", name: "deploy-etl", target: "Dataflow", success: true, summary: "Pipeline v1.4 — added dedup stage. Throughput +12%." },
-  { time: "Jul 28 16:30", name: "scale-cloud-run", target: "Cloud Run", success: true, summary: "Auto-scaled to 8 instances during traffic spike." },
-  { time: "Jul 28 11:15", name: "terraform-apply", target: "Infra", success: false, summary: "State lock conflict. Resolved after 3 min retry." },
-  { time: "Jul 27 09:00", name: "deploy-ml-model", target: "Vertex AI", success: true, summary: "Model v2.1 deployed. Accuracy 94.2% on validation set." },
-  { time: "Jul 26 15:45", name: "deploy-frontend", target: "Cloud Run", success: true, summary: "v2.8.0 hotfix for checkout bug. MTTR: 22 min." },
-  { time: "Jul 26 08:30", name: "iam-update", target: "IAM", success: true, summary: "Service account key rotated. Old key revoked." },
-];
-
-const VELOCITY_DATA = [
-  { day: "Mon", count: 1120 },
-  { day: "Tue", count: 980 },
-  { day: "Wed", count: 2400 },
-  { day: "Thu", count: 1350 },
-  { day: "Fri", count: 1100 },
-  { day: "Sat", count: 420 },
-  { day: "Sun", count: 310 },
-];
+interface VelocityPoint {
+  day: string;
+  count: number;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -353,14 +151,15 @@ function ComplianceDonut({ percent }: { percent: number }) {
 /*  Bar chart for change velocity                                      */
 /* ------------------------------------------------------------------ */
 function VelocityChart() {
-  const max = Math.max(...VELOCITY_DATA.map((d) => d.count));
+  const { data: velocityData } = useApiData<VelocityPoint[]>("/devops/velocity", []);
+  const max = Math.max(1, ...velocityData.map((d) => d.count));
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5">
       <h3 className="mb-1 text-sm font-semibold text-slate-700">Change Velocity (7 days)</h3>
       <p className="mb-4 text-xs text-slate-500">Changes per day across all monitored resources</p>
       <div className="flex items-end gap-3" style={{ height: 120 }}>
-        {VELOCITY_DATA.map((d, i) => {
+        {velocityData.map((d, i) => {
           const h = (d.count / max) * 100;
           const isSpike = i === 2;
           return (
@@ -491,6 +290,8 @@ export default function DevOpsIntelligencePage() {
 /*  CHANGE INTELLIGENCE TAB                                            */
 /* ================================================================== */
 function ChangesTab() {
+  const { data: changes } = useApiData<ChangeRow[]>("/devops/changes", []);
+
   return (
     <div className="space-y-6">
       {/* Pattern Alert */}
@@ -525,7 +326,7 @@ function ChangesTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {CHANGES.map((c, i) => (
+              {changes.map((c, i) => (
                 <tr key={i} className="hover:bg-slate-50/60">
                   <td className="whitespace-nowrap px-5 py-3 text-slate-500">{c.time}</td>
                   <td className="px-5 py-3">
@@ -557,6 +358,8 @@ function ChangesTab() {
 /*  ORCHESTRATION TAB                                                  */
 /* ================================================================== */
 function OrchestrationTab() {
+  const { data: orchRequests } = useApiData<OrchRequest[]>("/devops/orchestration", []);
+
   return (
     <div className="space-y-6">
       {/* Queue Summary */}
@@ -608,7 +411,7 @@ function OrchestrationTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {ORCH_REQUESTS.map((r, i) => (
+              {orchRequests.map((r, i) => (
                 <tr key={i} className="hover:bg-slate-50/60">
                   <td className="whitespace-nowrap px-5 py-3 font-mono text-xs font-semibold text-indigo-600">
                     {r.ticket}
@@ -643,6 +446,8 @@ function OrchestrationTab() {
 /*  PATCH COMPLIANCE TAB                                               */
 /* ================================================================== */
 function PatchTab() {
+  const { data: patchRows } = useApiData<PatchRow[]>("/devops/patches", []);
+
   return (
     <div className="space-y-6">
       {/* Top stats */}
@@ -696,7 +501,7 @@ function PatchTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {PATCH_ROWS.map((p, i) => (
+              {patchRows.map((p, i) => (
                 <tr key={i} className="hover:bg-slate-50/60">
                   <td className="px-5 py-3 font-medium text-slate-800">{p.resource}</td>
                   <td className="px-5 py-3 text-slate-600">{p.type}</td>
@@ -724,6 +529,9 @@ function PatchTab() {
 /*  DEPLOYMENT MEMORY TAB                                              */
 /* ================================================================== */
 function MemoryTab() {
+  const { data: deploymentPatterns } = useApiData<string[]>("/devops/patterns", []);
+  const { data: deployTimeline } = useApiData<DeployEvent[]>("/devops/deployments", []);
+
   return (
     <div className="space-y-6">
       {/* Deployment Patterns */}
@@ -736,7 +544,7 @@ function MemoryTab() {
           <p className="text-xs text-blue-500">Insights extracted from deployment history</p>
         </div>
         <div className="divide-y divide-blue-100">
-          {DEPLOYMENT_PATTERNS.map((pattern, i) => (
+          {deploymentPatterns.map((pattern, i) => (
             <div key={i} className="flex items-start gap-3 px-5 py-3">
               <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-600">
                 {i + 1}
@@ -754,7 +562,7 @@ function MemoryTab() {
           <p className="text-xs text-slate-400">Last 10 deployments with status and summaries</p>
         </div>
         <div className="divide-y divide-slate-100">
-          {DEPLOY_TIMELINE.map((d, i) => (
+          {deployTimeline.map((d, i) => (
             <div key={i} className="flex items-start gap-4 px-5 py-3">
               {/* Timeline dot */}
               <div className="flex flex-col items-center pt-1">
@@ -763,7 +571,7 @@ function MemoryTab() {
                 ) : (
                   <XCircle className="h-4 w-4 text-red-500" />
                 )}
-                {i < DEPLOY_TIMELINE.length - 1 && (
+                {i < deployTimeline.length - 1 && (
                   <div className="mt-1 h-6 w-px bg-slate-200" />
                 )}
               </div>

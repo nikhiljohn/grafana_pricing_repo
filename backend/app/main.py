@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, memory, cost, events, health, security_module
+from app.api import auth, memory, cost, events, health, security_module, settings as settings_api
 from app.config import get_settings
 from app.core.logging import configure_logging
 from app.db.neo4j import close_neo4j, init_neo4j
@@ -62,6 +62,7 @@ def create_app() -> FastAPI:
     app.include_router(events.router, prefix="/events", tags=["events"])
     app.include_router(cost.router, prefix="/cost", tags=["cost"])
     app.include_router(security_module.router, prefix="/security", tags=["security"])
+    app.include_router(settings_api.router, prefix="/settings", tags=["settings"])
 
     return app
 

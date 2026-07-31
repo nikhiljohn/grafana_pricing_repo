@@ -14,7 +14,42 @@ Intellicore CMP is a managed cloud platform for organizations running production
 2. **Surface your patterns** — behavioral trends unique to your team, not generic best practices
 3. **Prevent your next mistake** — pre-deployment intelligence that fires before you push
 
-Backed by **CSRE** (Cloud Security & Reliability Engineering) — a named Searce squad that operates the platform on your behalf.
+Backed by **CSRE** (Cloud Solutions & Reliability Engineering) — a named Searce squad that operates the platform on your behalf.
+
+---
+
+## Product Surface
+
+Intellicore CMP is organized as **Operational Memory fused with five ops pillars**, plus a Command Center that briefs you on everything at once.
+
+| Area | Route | What it does |
+|------|-------|--------------|
+| **Command Center** | `/` | Executive briefing: pillar health scores, what needs attention, patterns |
+| **CloudOps** | `/cloudops` | Health + operational memory across VMs, Kubernetes, databases, serverless, data & AI |
+| **FinOps** | `/finops` | Cost intelligence, anomalies correlated to past patterns, optimization memory |
+| **Cloud Security** | `/secops` | Cloud security posture, CIS-mapped findings, IAM risk, compliance, remediation memory |
+| **DevOps** | `/devops` | Risk-scored changes, orchestration, patch compliance, deployment memory |
+| **AIOps** | `/aiops` | AI agents, natural-language queries, analysis tools — powered by your own AI key |
+| **Memory** | `/memory` | The knowledge base — entries, incident patterns, remediation library, learnings |
+| **Assets / CMDB** | `/assets` | Cloud resource inventory across GCP & AWS |
+| **Alerts** | `/alerts` | Active / acknowledged / resolved alerts |
+| **Settings** | `/settings` | AI keys (BYOK), in-product user guide, account |
+
+### Bring Your Own AI Key (BYOK)
+
+Every AI feature runs on the **customer's own key**. In **Settings → AI Keys**, customers add an **Anthropic Claude**, **OpenAI**, or **Google Gemini** key and pick one as active. Keys are **encrypted at rest** per-tenant (pgcrypto) and used only for that tenant — nothing is billed to Searce. The backend calls all three providers over their REST APIs (`app/services/llm_client.py`).
+
+### Executive health reports
+
+From any pillar, the top bar's **Download report** button generates a branded, print-to-PDF **executive health report** contextual to that pillar (CloudOps / FinOps / Cloud Security / DevOps / AIOps / Command Center) — ready to hand to a CIO, CISO, or CFO. See `frontend/src/lib/report.ts`.
+
+### In-product user guide
+
+**Settings → User Guide** documents every feature inside the product, so customers who log in can self-serve. Content lives in `frontend/src/lib/guide.ts`.
+
+### Data layer (no hardcoding)
+
+Every page's data flows through a typed data layer (`frontend/src/lib/api/`) via `useApiData(endpoint)` → `apiFetch`. It serves seed data from per-domain mock modules today; setting **`NEXT_PUBLIC_API_URL`** switches every page to the real backend with **zero page changes**.
 
 ---
 
@@ -157,11 +192,13 @@ See `.env.example` for the full list. Critical ones:
 
 | Var | Purpose |
 |---|---|
-| `ANTHROPIC_API_KEY` | Claude API key for Memory chat & narration |
+| `ANTHROPIC_API_KEY` | Platform fallback LLM key. Optional — customers Bring Their Own Key in Settings |
+| `CREDENTIALS_SECRET` | Encrypts tenant-supplied AI keys at rest (falls back to `JWT_SECRET`) |
 | `NEO4J_PASSWORD` | Neo4j admin password |
 | `POSTGRES_PASSWORD` | Postgres admin password |
 | `JWT_SECRET` | JWT signing secret (change in prod) |
 | `TENANT_MODE` | `single` (dev) or `multi` (staging/prod) |
+| `NEXT_PUBLIC_API_URL` | Frontend → real backend. Unset = serve seed/mock data |
 
 ---
 
@@ -188,9 +225,34 @@ CI runs on every PR (`.github/workflows/`).
 
 ---
 
-## Production
+## Deployment & CI/CD
 
-Staging runs on `docker-compose` in a GCP VM (see `infra/terraform/staging/`). Production is out of scope for this repo; the target is GKE Autopilot + Cloud SQL + Aura (managed Neo4j) — captured as a follow-up in `docs/`.
+GitHub Actions pipelines (`.github/workflows/`):
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `ci.yml` | push / PR to `main`, `staging` | Lint + build frontend, syntax-check backend |
+| `deploy-staging.yml` | push to `staging` | Deploy to the staging GCP VM |
+| `deploy-production.yml` | push to `main` | Deploy to production with health check + auto-rollback |
+| `deploy-customer.yml` | manual dispatch | Provision a **new per-customer** GCP VM (static IP, TLS, Docker, generated `.env.prod`) |
+
+Every new customer gets an isolated single-VM deployment via `deploy-customer.yml`.
+
+## GCP architecture & cost
+
+See **`docs/GCP_ARCHITECTURE.md`** for the two deployment topologies (single-VM per
+customer, and production HA with managed services), diagrams, and a full monthly
+cost breakdown. Because of BYOK, LLM inference is never a platform cost.
+
+## Documentation
+
+| Doc | Contents |
+|-----|----------|
+| `docs/USER_GUIDE.md` | End-user guide for every feature |
+| `docs/SETUP_GUIDE.md` | Developer setup, data-layer wiring, API reference |
+| `docs/FEATURE_AUDIT.md` | What's dynamic vs. seed data, per page |
+| `docs/GCP_ARCHITECTURE.md` | GCP topologies + cost to operate |
+| `docs/PRD-intellicore-memory.md` | Product requirements for Intellicore Memory |
 
 ---
 

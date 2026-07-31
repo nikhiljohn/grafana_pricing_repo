@@ -83,6 +83,25 @@ CREATE TABLE IF NOT EXISTS guardrails (
     UNIQUE (tenant_id, pattern_id)
 );
 
+-- ─── Tenant AI credentials (Bring Your Own Key) ───────────────────
+-- Customers supply their own LLM API keys (Anthropic / OpenAI / Gemini)
+-- to power every AI feature. Keys are encrypted at rest with pgcrypto
+-- (pgp_sym_encrypt) using the server credentials secret; only the last
+-- 4 characters are ever returned to the UI.
+CREATE TABLE IF NOT EXISTS tenant_ai_credentials (
+    tenant_id         TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    provider          TEXT NOT NULL
+                      CHECK (provider IN ('anthropic', 'openai', 'gemini')),
+    key_ciphertext    BYTEA NOT NULL,
+    key_last4         TEXT NOT NULL,
+    model             TEXT,
+    is_active         BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (tenant_id, provider)
+);
+CREATE INDEX IF NOT EXISTS idx_ai_creds_tenant ON tenant_ai_credentials(tenant_id);
+
 -- ─── Seed demo tenant ──────────────────────────────────────────────
 INSERT INTO tenants (id, name, tier, data_region)
 VALUES ('demo-tenant', 'Netcore Cloud (Demo)', 'advanced', 'asia-south1')

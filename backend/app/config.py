@@ -41,9 +41,17 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str = Field(default="redis://localhost:6379/0")
 
-    # LLM
+    # LLM — platform default (used only as a fallback when a tenant has not
+    # supplied its own key). In production customers Bring Their Own Key via
+    # Settings → AI Keys, stored per-tenant and encrypted at rest.
     anthropic_api_key: str = Field(default="")
     claude_model: str = Field(default="claude-sonnet-4-5")
+    openai_model: str = Field(default="gpt-4o")
+    gemini_model: str = Field(default="gemini-1.5-pro")
+
+    # Secret used to encrypt tenant-supplied API keys at rest (pgcrypto).
+    # Falls back to jwt_secret when unset so a fresh deploy still works.
+    credentials_secret: str = Field(default="")
 
     # Ingestion
     ingest_worker_interval_seconds: int = Field(default=60)

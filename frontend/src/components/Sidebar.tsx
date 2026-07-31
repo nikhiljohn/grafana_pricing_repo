@@ -15,6 +15,7 @@ import {
   Brain,
   Moon,
   LogOut,
+  Settings,
 } from "lucide-react";
 
 type NavItem =
@@ -26,13 +27,14 @@ const nav: NavItem[] = [
   { href: "/", label: "Command Center", icon: Command },
   { href: "/cloudops", label: "CloudOps", icon: Cloud },
   { href: "/finops", label: "FinOps", icon: DollarSign },
-  { href: "/secops", label: "SecOps", icon: Shield, badge: "12" },
+  { href: "/secops", label: "Cloud Security", icon: Shield, badge: "12" },
   { href: "/devops", label: "DevOps", icon: GitBranch },
   { href: "/aiops", label: "AIOps", icon: Sparkles, badge: "Beta" },
   { section: "REFERENCE" },
   { href: "/assets", label: "Assets / CMDB", icon: Database },
   { href: "/alerts", label: "Alerts", icon: Bell, badge: "3" },
   { href: "/memory", label: "Memory", icon: Brain },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {

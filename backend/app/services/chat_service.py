@@ -19,10 +19,28 @@ Guardrails:
 import logging
 import re
 
+from app.config import get_settings
 from app.db.neo4j import get_driver
-from app.services.claude_client import ask_claude
+from app.services.llm_client import LLMError, ask_llm
+from app.services.settings_service import get_active_credential
 
 logger = logging.getLogger(__name__)
+
+
+async def _resolve_llm(tenant_id: str) -> tuple[str, str, str | None] | None:
+    """Resolve the LLM provider/key/model for a tenant.
+
+    Prefers the tenant's own key (Bring Your Own Key). Falls back to the
+    platform Anthropic key only if one is configured. Returns None when no
+    key is available anywhere.
+    """
+    cred = await get_active_credential(tenant_id)
+    if cred and cred.get("api_key"):
+        return cred["provider"], cred["api_key"], cred.get("model")
+    settings = get_settings()
+    if settings.anthropic_api_key:
+        return "anthropic", settings.anthropic_api_key, settings.claude_model
+    return None
 
 CYPHER_SYSTEM_PROMPT = """You are a Cypher query generator for Intellicore Cloud Management Platform's Memory graph.
 
@@ -60,17 +78,39 @@ CYPHER_TENANT_REQUIRED = re.compile(r"tenant_id\s*:\s*\$tenant_id", re.IGNORECAS
 
 async def answer_memory_question(*, tenant_id: str, question: str) -> dict:
     """Convert a natural-language question into a grounded, cited answer."""
+    # Resolve the tenant's own AI key (BYOK) or the platform fallback.
+    llm = await _resolve_llm(tenant_id)
+    if llm is None:
+        return {
+            "answer": "Memory Chat needs an AI key. Add your own Anthropic, "
+            "OpenAI, or Gemini key in Settings → AI Keys to enable it.",
+            "cited_event_ids": [],
+            "cited_pattern_ids": [],
+            "cypher_used": None,
+        }
+    provider, api_key, model = llm
+
+    async def _ask(system: str, user: str, max_tokens: int) -> str:
+        return await ask_llm(
+            provider=provider,
+            api_key=api_key,
+            model=model,
+            system=system,
+            user=user,
+            max_tokens=max_tokens,
+        )
+
     # Step 1 — generate Cypher
     try:
-        cypher = await ask_claude(
-            system=CYPHER_SYSTEM_PROMPT,
-            user=f"Question: {question}\n\nGenerate the Cypher query:",
-            max_tokens=400,
+        cypher = await _ask(
+            CYPHER_SYSTEM_PROMPT,
+            f"Question: {question}\n\nGenerate the Cypher query:",
+            400,
         )
         cypher = cypher.strip().removeprefix("```cypher").removeprefix("```").removesuffix("```").strip()
-    except RuntimeError as exc:
+    except LLMError as exc:
         return {
-            "answer": f"Memory Chat is not configured: {exc}",
+            "answer": f"Memory Chat could not reach your AI provider: {exc}",
             "cited_event_ids": [],
             "cited_pattern_ids": [],
             "cypher_used": None,
@@ -109,11 +149,19 @@ async def answer_memory_question(*, tenant_id: str, question: str) -> dict:
 
     # Step 3 — narrate
     row_text = "\n".join(str(r) for r in rows[:20])
-    answer = await ask_claude(
-        system=ANSWER_SYSTEM_PROMPT,
-        user=f"Question: {question}\n\nGraph rows:\n{row_text or '(no results)'}",
-        max_tokens=500,
-    )
+    try:
+        answer = await _ask(
+            ANSWER_SYSTEM_PROMPT,
+            f"Question: {question}\n\nGraph rows:\n{row_text or '(no results)'}",
+            500,
+        )
+    except LLMError as exc:
+        return {
+            "answer": f"Memory Chat could not reach your AI provider: {exc}",
+            "cited_event_ids": [],
+            "cited_pattern_ids": [],
+            "cypher_used": cypher,
+        }
 
     # Extract cited ids for the frontend to link
     cited_events = list(set(re.findall(r"\bevt_[a-z0-9]+", answer)))
