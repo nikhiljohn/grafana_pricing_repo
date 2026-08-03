@@ -34,6 +34,7 @@ async def ingest_event(*, tenant_id: str, event: dict[str, Any]) -> str:
         "resource_type": None,
         "raw_payload_ref": None,
         "amount_inr": None,
+        "environment": "production",
     }
     event = {**defaults, **event, "id": event_id, "tenant_id": tenant_id}
 
@@ -53,6 +54,8 @@ async def ingest_event(*, tenant_id: str, event: dict[str, Any]) -> str:
                  e.title      = $title,
                  e.summary    = $summary,
                  e.source     = $source,
+                 e.environment = $environment,
+                 e.amount_inr = $amount_inr,
                  e.raw_payload_ref = $raw_payload_ref
             """,
             **event,

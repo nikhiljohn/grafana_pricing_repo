@@ -1,81 +1,58 @@
 /* ------------------------------------------------------------------ */
-/*  Intellicore CMP — Assets / CMDB seed data                         */
-/*  Served by apiFetch('/assets') when no backend is configured.       */
+/*  Intellicore CMP — Assets / CMDB seed data                          */
+/*  Keyed [tenantId][environmentId]["/assets"]. One rich production     */
+/*  profile per tenant, scaled down for non-prod environments.          */
 /* ------------------------------------------------------------------ */
 
-const data: Record<string, unknown> = {
-  "/assets": [
-    {
-      name: "cloudlens-dev-new",
-      subtitle: "e2-standard-2",
-      service: "VM Instances",
-      project: "138101788",
-      region: "asia-south1-c",
-      state: "RUNNING",
-      costPerMonth: "$53.81",
-      lastSeen: "Jul 28, 12:34",
-    },
-    {
-      name: "cl-icore",
-      subtitle: "e2-standard-2",
-      service: "VM Instances",
-      project: "138101788",
-      region: "asia-south1-c",
-      state: "RUNNING",
-      costPerMonth: "$53.81",
-      lastSeen: "Jul 28, 12:34",
-    },
-    {
-      name: "clens-dev",
-      subtitle: "e2-standard-2",
-      service: "VM Instances",
-      project: "138101788",
-      region: "asia-south1-b",
-      state: "RUNNING",
-      costPerMonth: "$53.81",
-      lastSeen: "Jul 28, 12:34",
-    },
-    {
-      name: "Bastion-Host",
-      subtitle: "t2.small · 52.66.236.205",
-      service: "EC2 Instances",
-      project: "010863548913",
-      region: "ap-south-1b",
-      state: "RUNNING",
-      costPerMonth: "$18.10",
-      lastSeen: "Jul 28, 12:28",
-    },
-    {
-      name: "pgsql",
-      subtitle: "POSTGRES_18 · db-f1-micro",
-      service: "Cloud SQL Instances",
-      project: "1087551233922",
-      region: "us-central1",
-      state: "SUSPENDED",
-      costPerMonth: "$15.33",
-      lastSeen: "Jul 28, 12:35",
-    },
-    {
-      name: "dns-tester",
-      subtitle: "Ready: True",
-      service: "Cloud Run Services",
-      project: "138101788",
-      region: "asia-southeast1",
-      state: "UNKNOWN",
-      costPerMonth: "$5.00",
-      lastSeen: "Jul 28, 12:34",
-    },
-    {
-      name: "awr-migration-automation",
-      subtitle: "Ready: True",
-      service: "Cloud Run Services",
-      project: "138101788",
-      region: "us-central1",
-      state: "UNKNOWN",
-      costPerMonth: "$5.00",
-      lastSeen: "Jul 28, 12:34",
-    },
+import { TENANTS } from "../../tenants";
+import { buildTenantEnvShell, envName, scaleCost } from "./_env";
+
+interface Asset {
+  name: string; subtitle: string; service: string; project: string;
+  region: string; state: string; costPerMonth: string; lastSeen: string;
+}
+
+const PROFILES: Record<string, Asset[]> = {
+  netcore: [
+    { name: "gke-prod-app", subtitle: "e2-standard-4 · 6 nodes", service: "GKE Clusters", project: "netcore-prod-1", region: "asia-south1-b", state: "RUNNING", costPerMonth: "$310.00", lastSeen: "Today, 12:34" },
+    { name: "gke-prod-ml", subtitle: "n2-standard-8 · 3 nodes", service: "GKE Clusters", project: "netcore-prod-1", region: "asia-south1-b", state: "RUNNING", costPerMonth: "$540.00", lastSeen: "Today, 12:34" },
+    { name: "vertex-inference-hero", subtitle: "a2-highgpu-1g", service: "Vertex AI Endpoints", project: "netcore-prod-1", region: "asia-south1-c", state: "RUNNING", costPerMonth: "$890.00", lastSeen: "Today, 12:30" },
+    { name: "cloudsql-prod-primary", subtitle: "db-custom-8-32768", service: "Cloud SQL Instances", project: "netcore-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$410.00", lastSeen: "Today, 12:35" },
+    { name: "aws-eks-analytics", subtitle: "m5.xlarge · 4 nodes", service: "EKS Clusters", project: "429617291000", region: "ap-south-1a", state: "RUNNING", costPerMonth: "$320.00", lastSeen: "Today, 12:20" },
+  ],
+  aarti: [
+    { name: "erp-prod-app", subtitle: "e2-standard-4", service: "VM Instances", project: "aarti-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$210.00", lastSeen: "Today, 11:50" },
+    { name: "cloudsql-erp-primary", subtitle: "db-custom-4-16384", service: "Cloud SQL Instances", project: "aarti-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$260.00", lastSeen: "Today, 11:52" },
+    { name: "batch-processing-vm", subtitle: "e2-standard-2", service: "VM Instances", project: "aarti-prod-1", region: "asia-south1-b", state: "RUNNING", costPerMonth: "$54.00", lastSeen: "Today, 11:40" },
+  ],
+  shopstop: [
+    { name: "checkout-service-prod", subtitle: "n2-standard-4 · 12 instances", service: "VM Instances", project: "shopstop-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$280.00", lastSeen: "Today, 12:10" },
+    { name: "cart-service-prod", subtitle: "e2-standard-4", service: "VM Instances", project: "shopstop-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$210.00", lastSeen: "Today, 12:11" },
+    { name: "eks-analytics-prod", subtitle: "m5.xlarge (AWS)", service: "EKS Clusters", project: "010863548913", region: "ap-south-1a", state: "RUNNING", costPerMonth: "$320.00", lastSeen: "Today, 12:05" },
+  ],
+  designx: [
+    { name: "render-farm-prod", subtitle: "n2-highcpu-8 · 4 nodes", service: "VM Instances", project: "designx-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$390.00", lastSeen: "Today, 09:45" },
+    { name: "asset-store-prod", subtitle: "e2-standard-2", service: "VM Instances", project: "designx-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$54.00", lastSeen: "Today, 09:44" },
+  ],
+  paynimbus: [
+    { name: "payments-api-prod", subtitle: "n2-standard-4 (AWS)", service: "EC2 Instances", project: "paynimbus-prod-1", region: "ap-south-1a", state: "RUNNING", costPerMonth: "$260.00", lastSeen: "Today, 12:00" },
+    { name: "ledger-service-prod", subtitle: "e2-standard-4", service: "VM Instances", project: "paynimbus-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$230.00", lastSeen: "Today, 12:01" },
+    { name: "fraud-detection-prod", subtitle: "n2-standard-2", service: "VM Instances", project: "paynimbus-prod-1", region: "asia-south1-b", state: "RUNNING", costPerMonth: "$150.00", lastSeen: "Today, 12:02" },
   ],
 };
+
+const data = buildTenantEnvShell(TENANTS, (tenant, envId, isProd) => {
+  const assets = PROFILES[tenant.id].map((a) =>
+    isProd
+      ? a
+      : {
+          ...a,
+          name: envName(a.name.replace("-prod", ""), envId),
+          project: envName(a.project.replace("-prod-1", ""), envId),
+          costPerMonth: scaleCost(a.costPerMonth, envId),
+        },
+  );
+  return { "/assets": assets };
+});
 
 export default data;

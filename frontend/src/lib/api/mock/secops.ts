@@ -1,122 +1,131 @@
 /* ------------------------------------------------------------------ */
-/*  Intellicore CMP — SecOps seed data                                */
-/*  Served by apiFetch() for endpoints under /secops/ when no backend  */
-/*  is configured.                                                     */
+/*  Intellicore CMP — SecOps (Cloud Security) seed data                 */
+/*  Keyed [tenantId][environmentId][endpoint]. One rich production      */
+/*  profile per tenant, scaled down for non-prod environments.          */
 /* ------------------------------------------------------------------ */
 
-const data: Record<string, unknown> = {
-  "/secops/findings": [
-    {
-      id: 1,
-      severity: "critical",
-      title: "Security group 'Testing-SSH-Demo' allows SSH from internet",
-      resource: "Testing-SSH-Demo",
-      account: "010863548913",
-      cisCheck: "CIS 5.2",
-      memorySeenCount: 12,
-      memoryLastResolution: "Restricted to VPN CIDR 10.0.0.0/8",
-      memoryConfidence: 96,
-      memoryNote: "Resolved 12 times across 3 accounts. Last fix: Restricted to VPN CIDR 10.0.0.0/8. Auto-fix confidence: 96%",
-      actions: ["Auto-Fix", "Investigate"],
-    },
-    {
-      id: 2,
-      severity: "critical",
-      title: "Security group 'launch-wizard-110' allows SSH from internet",
-      resource: "launch-wizard-110",
-      account: "010863548913",
-      cisCheck: "CIS 5.2",
-      memorySeenCount: 12,
-      memoryLastResolution: "Restricted to VPN CIDR 10.0.0.0/8",
-      memoryConfidence: 96,
-      memoryNote: "Same pattern — auto-fix will apply identical CIDR restriction",
-      actions: ["Auto-Fix"],
-    },
-    {
-      id: 3,
-      severity: "critical",
-      title: "S3 bucket 'testhydpdf' public access not blocked",
-      resource: "testhydpdf",
-      account: "010863548913",
-      cisCheck: "CIS 2.1.2",
-      memorySeenCount: 5,
-      memoryLastResolution: "Enable Block Public Access",
-      memoryConfidence: 94,
-      memoryNote: "Resolved 5 times. Fix: Enable Block Public Access. No data access impact in past applications.",
-      actions: ["Auto-Fix"],
-    },
-    {
-      id: 4,
-      severity: "high",
-      title: "Cloud SQL instance 'pgsql' allows public connections",
-      resource: "pgsql",
-      account: "searce-sandbox",
-      cisCheck: "CIS 6.5",
-      memorySeenCount: 0,
-      memoryLastResolution: "",
-      memoryConfidence: 45,
-      memoryNote: "First occurrence. Similar finding on AWS RDS resolved by adding authorized networks only.",
-      actions: ["Investigate"],
-    },
-    {
-      id: 5,
-      severity: "high",
-      title: "IAM user 'deploy-bot' has admin privileges",
-      resource: "deploy-bot",
-      account: "searce-sandbox",
-      cisCheck: "CIS 1.16",
-      memorySeenCount: 8,
-      memoryLastResolution: "Create custom role with least-privilege",
-      memoryConfidence: 88,
-      memoryNote: "Over-privileged service accounts found 8 times. Resolution: Create custom role with least-privilege. Avg time to resolve: 25 min.",
-      actions: ["Generate Role"],
-    },
-    {
-      id: 6,
-      severity: "medium",
-      title: "Cloud Storage bucket missing lifecycle policy",
-      resource: "14 buckets",
-      account: "searce-sandbox",
-      cisCheck: "CIS 2.2",
-      memorySeenCount: 6,
-      memoryLastResolution: "Moved to Nearline storage class",
-      memoryConfidence: 72,
-      memoryNote: "6 of 14 moved to Nearline in Jun (FinOps finding). 8 require Standard for compliance.",
-      actions: ["Review"],
-    },
-    {
-      id: 7,
-      severity: "medium",
-      title: "Logging not enabled on 3 VPC networks",
-      resource: "3 VPC networks",
-      account: "searce-sandbox",
-      cisCheck: "CIS 3.7",
-      memorySeenCount: 0,
-      memoryLastResolution: "",
-      memoryConfidence: 0,
-      memoryNote: "New finding. No prior resolution history.",
-      actions: ["Investigate"],
-    },
-  ],
-  "/secops/iam": [
-    { name: "deploy-bot", type: "Service Account", risk: "High", riskColor: "text-rose-600 bg-rose-50", lastActive: "2h ago", memory: "Admin since creation. Memory: 8 similar cases resolved with custom roles." },
-    { name: "ci-pipeline", type: "Service Account", risk: "Medium", riskColor: "text-amber-600 bg-amber-50", lastActive: "1d ago", memory: "Has storage.admin, only uses storage.objectViewer" },
-    { name: "test-user@searce.com", type: "User", risk: "Medium", riskColor: "text-amber-600 bg-amber-50", lastActive: "30d ago", memory: "Inactive. Memory: Inactive users disabled after 90d per policy." },
-    { name: "backup-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "6h ago", memory: "Appropriately scoped" },
-    { name: "monitoring-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "1h ago", memory: "Appropriately scoped" },
-  ],
-  "/secops/compliance": [
-    { name: "CIS Benchmark v1.4", pct: 89, passing: 38, failing: 5, notAssessed: 0, total: 43 },
-    { name: "NIST 800-53", pct: 84, passing: 92, failing: 18, notAssessed: 10, total: 120 },
-    { name: "ISO 27001", pct: 91, passing: 104, failing: 10, notAssessed: 0, total: 114 },
-  ],
-  "/secops/remediations": [
-    { date: "Jul 27", finding: "SSH groups (3 accounts)", action: "Restricted to VPN CIDR", result: "All resolved", time: "12 min" },
-    { date: "Jul 20", finding: "S3 public access (2 buckets)", action: "Block Public Access enabled", result: "Resolved, no impact", time: "5 min" },
-    { date: "Jun 15", finding: "Over-privileged SA (deploy-bot-2)", action: "Custom role created", result: "Resolved", time: "25 min" },
-    { date: "Jun 3", finding: "Logging disabled on VPCs", action: "Enabled VPC flow logs", result: "Resolved, +$3/mo cost", time: "8 min" },
-    { date: "May 22", finding: "IAM inactive users (4)", action: "Disabled after review", result: "Resolved", time: "15 min" },
-  ],
+import { TENANTS } from "../../tenants";
+import { buildTenantEnvShell, envName } from "./_env";
+
+interface Finding {
+  id: number; severity: "critical" | "high" | "medium" | "low"; title: string; resource: string;
+  account: string; cisCheck: string; memorySeenCount: number; memoryLastResolution: string;
+  memoryConfidence: number; memoryNote: string; actions: string[];
+}
+interface IamIdentity { name: string; type: string; risk: string; riskColor: string; lastActive: string; memory: string; }
+interface Compliance { name: string; pct: number; passing: number; failing: number; notAssessed: number; total: number; }
+interface Remediation { date: string; finding: string; action: string; result: string; time: string; }
+
+interface SecOpsProfile {
+  findings: Finding[]; iam: IamIdentity[]; compliance: Compliance[]; remediations: Remediation[];
+}
+
+const PROFILES: Record<string, SecOpsProfile> = {
+  netcore: {
+    findings: [
+      { id: 1, severity: "medium", title: "3 GKE service accounts use default compute SA", resource: "gke-prod-app", account: "netcore-prod", cisCheck: "CIS 5.1", memorySeenCount: 2, memoryLastResolution: "Scoped custom SA per workload", memoryConfidence: 74, memoryNote: "Partial fix applied on 2 of 5 clusters.", actions: ["Investigate"] },
+      { id: 2, severity: "low", title: "Cloud Storage bucket missing lifecycle policy", resource: "gcs-user-uploads", account: "netcore-prod", cisCheck: "CIS 2.2", memorySeenCount: 1, memoryLastResolution: "Moved to Nearline after 30d", memoryConfidence: 68, memoryNote: "Recommend lifecycle policy at bucket creation.", actions: ["Review"] },
+    ],
+    iam: [
+      { name: "ci-deploy-sa", type: "Service Account", risk: "Medium", riskColor: "text-amber-600 bg-amber-50", lastActive: "1h ago", memory: "Has storage.admin, only uses storage.objectViewer" },
+      { name: "analytics-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "10m ago", memory: "Appropriately scoped" },
+    ],
+    compliance: [
+      { name: "CIS Benchmark v1.4", pct: 91, passing: 39, failing: 4, notAssessed: 0, total: 43 },
+      { name: "SOC 2 Type II", pct: 94, passing: 47, failing: 3, notAssessed: 0, total: 50 },
+    ],
+    remediations: [
+      { date: "3d ago", finding: "Default compute SA on GKE (2 clusters)", action: "Scoped custom service accounts", result: "Resolved", time: "18 min" },
+    ],
+  },
+  aarti: {
+    findings: [
+      { id: 1, severity: "critical", title: "5 security groups allow SSH from internet", resource: "erp-prod-app", account: "aarti-prod", cisCheck: "CIS 5.2", memorySeenCount: 12, memoryLastResolution: "Restricted to VPN CIDR 10.0.0.0/8", memoryConfidence: 96, memoryNote: "Auto-remediated across 3 Aarti accounts on Jul 12. Auto-fix confidence 96%.", actions: ["Auto-Fix", "Investigate"] },
+      { id: 2, severity: "high", title: "2 service accounts have Editor role by default", resource: "batch-processing-vm", account: "aarti-prod", cisCheck: "CIS 1.16", memorySeenCount: 8, memoryLastResolution: "Created custom least-privilege role", memoryConfidence: 88, memoryNote: "Over-privileged SAs found 8 times. Avg time to resolve: 25 min.", actions: ["Generate Role"] },
+      { id: 3, severity: "medium", title: "Audit logging retention below 1 year", resource: "erp-prod-app", account: "aarti-prod", cisCheck: "CIS 2.7", memorySeenCount: 0, memoryLastResolution: "", memoryConfidence: 0, memoryNote: "New finding, flagged ahead of Q3 audit.", actions: ["Investigate"] },
+    ],
+    iam: [
+      { name: "erp-deploy-sa", type: "Service Account", risk: "High", riskColor: "text-rose-600 bg-rose-50", lastActive: "2h ago", memory: "Editor since creation. Memory: 8 similar cases resolved with custom roles." },
+      { name: "audit-readonly-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "6h ago", memory: "Appropriately scoped" },
+    ],
+    compliance: [
+      { name: "CIS Benchmark v1.4", pct: 78, passing: 34, failing: 9, notAssessed: 0, total: 43 },
+      { name: "NIST 800-53", pct: 84, passing: 92, failing: 18, notAssessed: 10, total: 120 },
+      { name: "ISO 27001", pct: 91, passing: 104, failing: 10, notAssessed: 0, total: 114 },
+    ],
+    remediations: [
+      { date: "2d ago", finding: "SSH groups (3 accounts)", action: "Restricted to VPN CIDR", result: "All resolved", time: "12 min" },
+      { date: "18d ago", finding: "Over-privileged SA (erp-deploy-sa-2)", action: "Custom role created", result: "Resolved", time: "25 min" },
+    ],
+  },
+  shopstop: {
+    findings: [
+      { id: 1, severity: "low", title: "3 VPC networks missing flow logs", resource: "vpc-prod-primary", account: "shopstop-prod", cisCheck: "CIS 3.7", memorySeenCount: 0, memoryLastResolution: "", memoryConfidence: 0, memoryNote: "New finding.", actions: ["Investigate"] },
+    ],
+    iam: [
+      { name: "checkout-deploy-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "20m ago", memory: "Appropriately scoped" },
+    ],
+    compliance: [
+      { name: "CIS Benchmark v1.4", pct: 92, passing: 40, failing: 3, notAssessed: 0, total: 43 },
+      { name: "PCI-DSS (payment pages only)", pct: 96, passing: 48, failing: 2, notAssessed: 0, total: 50 },
+    ],
+    remediations: [
+      { date: "12d ago", finding: "Bastion egress false positive", action: "Adjusted anomaly baseline to exclude backup CIDR", result: "Resolved, no impact", time: "4 min" },
+    ],
+  },
+  designx: {
+    findings: [
+      { id: 1, severity: "high", title: "deploy-bot granted project Editor (risky IAM change)", resource: "deploy-bot", account: "designx-prod", cisCheck: "CIS 1.16", memorySeenCount: 3, memoryLastResolution: "Suggested least-privilege role pre-deploy", memoryConfidence: 87, memoryNote: "On May 9 an Editor grant to a CI bot led to a privilege-escalation finding. Guardrail now catches this pattern before it ships.", actions: ["Generate Role", "Investigate"] },
+    ],
+    iam: [
+      { name: "deploy-bot", type: "Service Account", risk: "Medium", riskColor: "text-amber-600 bg-amber-50", lastActive: "12d ago", memory: "Flagged pre-deploy 3 times. Least-privilege role suggested each time." },
+    ],
+    compliance: [
+      { name: "CIS Benchmark v1.4", pct: 90, passing: 39, failing: 4, notAssessed: 0, total: 43 },
+    ],
+    remediations: [
+      { date: "12d ago", finding: "deploy-bot Editor grant", action: "Guardrail suggested least-privilege role", result: "Blocked pre-deploy", time: "instant" },
+    ],
+  },
+  paynimbus: {
+    findings: [
+      { id: 1, severity: "medium", title: "Admin access key unused for 94 days", resource: "payments-api-prod", account: "paynimbus-prod", cisCheck: "PCI-DSS 8.1.4", memorySeenCount: 3, memoryLastResolution: "Rotated + scoped down, PCI evidence attached", memoryConfidence: 90, memoryNote: "Prior key-rotation remediation on 2 fintech accounts. PCI-DSS evidence auto-attached.", actions: ["Auto-Fix"] },
+      { id: 2, severity: "low", title: "Quarterly PCI-DSS evidence package due in 5 days", resource: "compliance", account: "paynimbus-prod", cisCheck: "PCI-DSS 12.1", memorySeenCount: 4, memoryLastResolution: "Auto-attached from remediation history", memoryConfidence: 100, memoryNote: "100% of remediations this quarter shipped with evidence attached.", actions: ["Review"] },
+    ],
+    iam: [
+      { name: "payments-admin-key", type: "Access Key", risk: "Medium", riskColor: "text-amber-600 bg-amber-50", lastActive: "94d ago", memory: "Stale key pattern. Memory: 3 prior rotations, all within SLA." },
+      { name: "fraud-detection-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "30m ago", memory: "Appropriately scoped" },
+    ],
+    compliance: [
+      { name: "PCI-DSS v4.0", pct: 93, passing: 65, failing: 5, notAssessed: 0, total: 70 },
+      { name: "CIS Benchmark v1.4", pct: 89, passing: 38, failing: 5, notAssessed: 0, total: 43 },
+    ],
+    remediations: [
+      { date: "6h ago", finding: "Stale admin key (94d)", action: "Rotated + scoped down, PCI evidence attached", result: "Resolved", time: "24h SLA" },
+    ],
+  },
 };
+
+function scaleForEnv(p: SecOpsProfile, envId: string, isProd: boolean): SecOpsProfile {
+  if (isProd) return p;
+  return {
+    findings: p.findings
+      .filter((f) => f.severity !== "critical")
+      .map((f) => ({ ...f, resource: envName(f.resource, envId) })),
+    iam: p.iam.map((i) => ({ ...i, risk: i.risk === "High" ? "Medium" : i.risk, riskColor: i.risk === "High" ? "text-amber-600 bg-amber-50" : i.riskColor })),
+    compliance: p.compliance.map((c) => ({ ...c, pct: Math.min(99, c.pct + 4) })),
+    remediations: p.remediations,
+  };
+}
+
+const data = buildTenantEnvShell(TENANTS, (tenant, envId, isProd) => {
+  const scaled = scaleForEnv(PROFILES[tenant.id], envId, isProd);
+  return {
+    "/secops/findings": scaled.findings,
+    "/secops/iam": scaled.iam,
+    "/secops/compliance": scaled.compliance,
+    "/secops/remediations": scaled.remediations,
+  };
+});
 
 export default data;

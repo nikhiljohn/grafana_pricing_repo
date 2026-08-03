@@ -7,9 +7,11 @@
 
 import { useState, useEffect } from 'react';
 import { apiFetch } from './client';
+import { useOrg } from '@/lib/org-context';
 
 /**
- * Generic hook that fetches data from an Intellicore CMP endpoint.
+ * Generic hook that fetches data from an Intellicore CMP endpoint, scoped to
+ * whichever customer + environment is currently selected in the org switcher.
  *
  * @param endpoint  API path, e.g. '/command-center/scores'
  * @param initialData  Value to use while the request is in flight
@@ -24,14 +26,16 @@ export function useApiData<T>(
   endpoint: string,
   initialData: T,
 ): { data: T; loading: boolean; error: string | null } {
+  const { tenantId, environment } = useOrg();
   const [data, setData] = useState<T>(initialData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
 
-    apiFetch<T>(endpoint)
+    apiFetch<T>(endpoint, { tenantId, environment })
       .then((d) => {
         if (!cancelled) {
           setData(d);
@@ -48,7 +52,7 @@ export function useApiData<T>(
     return () => {
       cancelled = true;
     };
-  }, [endpoint]);
+  }, [endpoint, tenantId, environment]);
 
   return { data, loading, error };
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Card } from "@/components/charts";
 import { useApiData } from "@/lib/api";
+import { useOrg } from "@/lib/org-context";
 import type { ChangeItem, OpsScore } from "@/lib/api";
 
 /* ── data shapes served through the abstraction layer ─────────────────── */
@@ -73,7 +73,7 @@ function CommandIcon() {
 /* ── page ─────────────────────────────────────────────────────────────── */
 
 export default function CommandCenterPage() {
-  const [org, setOrg] = useState("All Organizations");
+  const { tenant, environment } = useOrg();
 
   const { data: intelligenceScores } = useApiData<OpsScore[]>(
     "/command-center/scores",
@@ -115,22 +115,12 @@ export default function CommandCenterPage() {
               Command Center
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              Intelligence briefing — powered by Memory across CloudOps,
-              FinOps, SecOps, DevOps &amp; AIOps
+              Intelligence briefing for <span className="font-medium text-slate-700">{tenant.name}</span> ({environment}) — powered
+              by Memory across CloudOps, FinOps, SecOps, DevOps &amp; AIOps
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <select
-            value={org}
-            onChange={(e) => setOrg(e.target.value)}
-            className="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700"
-          >
-            <option>All Organizations</option>
-            <option>AI</option>
-            <option>AWS CSRE</option>
-            <option>Sea-Sbox</option>
-          </select>
           <span className="text-xs text-slate-400 whitespace-nowrap">
             Last briefing: 12 min ago
           </span>

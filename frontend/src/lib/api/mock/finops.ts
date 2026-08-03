@@ -1,199 +1,182 @@
 /* ------------------------------------------------------------------ */
-/*  Intellicore CMP — FinOps seed data                                */
-/*  Served by apiFetch() when no backend is configured.                */
+/*  Intellicore CMP — FinOps seed data                                 */
+/*  Keyed [tenantId][environmentId][endpoint]. One rich production      */
+/*  profile per tenant, scaled down for non-prod environments.          */
 /* ------------------------------------------------------------------ */
 
-const data: Record<string, unknown> = {
-  "/finops/monthly-trend": [
-    { month: "Feb", cost: 480 },
-    { month: "Mar", cost: 520 },
-    { month: "Apr", cost: 510 },
-    { month: "May", cost: 560 },
-    { month: "Jun", cost: 590 },
-    { month: "Jul", cost: 637 },
-  ],
+import { TENANTS } from "../../tenants";
+import { buildTenantEnvShell, envFactor } from "./_env";
 
-  "/finops/costs": [
-    {
-      name: "CloudOps",
-      cost: 368,
-      breakdown: "Compute $280, Networking $58, Storage $30",
-      sparkData: [290, 310, 320, 340, 355, 368],
-      sparkColor: "#3b82f6",
-      memory:
-        "Committed use discounts saved $67/mo on project A since applying in May. Compute costs stabilized after right-sizing in April.",
-    },
-    {
-      name: "FinOps overhead",
-      cost: 0,
-      breakdown: "Platform cost absorbed in MRR",
-      sparkData: [0, 0, 0, 0, 0, 0],
-      sparkColor: "#94a3b8",
-      memory: "No direct cost. FinOps tooling and analysis overhead is included in Searce managed services MRR.",
-    },
-    {
-      name: "SecOps",
-      cost: 42,
-      breakdown: "SCC Premium, Wiz",
-      sparkData: [40, 41, 42, 42, 42, 42],
-      sparkColor: "#10b981",
-      memory: "Stable, no anomalies. SCC Premium enabled since Feb. Wiz license fixed cost, renews in Q1.",
-    },
-    {
-      name: "DevOps",
-      cost: 86,
-      breakdown: "Cloud Build, Artifact Registry, Functions",
-      sparkData: [95, 98, 96, 94, 98, 86],
-      sparkColor: "#8b5cf6",
-      memory:
-        "Switched to 2nd gen Functions in June, saved $12/mo on cold starts. Build minutes stable after caching improvements.",
-    },
-    {
-      name: "AIOps",
-      cost: 28,
-      breakdown: "Vertex AI, BigQuery ML",
-      sparkData: [18, 20, 22, 24, 25, 28],
-      sparkColor: "#f59e0b",
-      memory:
-        "Active anomaly on BigQuery (see above). Vertex AI spend growing with increased model training runs. Review reserved slots by Q4.",
-    },
-  ],
+interface MonthlyTrend { month: string; cost: number; }
+interface PillarCost { name: string; cost: number; breakdown: string; sparkData: number[]; sparkColor: string; memory: string; }
+interface Optimization { recommendation: string; appliedDate: string | null; savings: string; status: "applied" | "pending" | "available"; memory: string; }
+interface Anomaly {
+  title: string; severity: "active" | "resolved" | "false-positive"; timeAgo: string; service: string;
+  extra: string; memory: string; confidence: string | null; suggestedFix: string | null; timeline: string[];
+}
+interface Forecast { month: string; cost: number; note: string; }
 
-  "/finops/optimizations": [
-    {
-      recommendation: "Committed use discount on Compute Engine",
-      appliedDate: "May 12",
-      savings: "$67/mo",
-      status: "applied" as const,
-      memory: "ROI breakeven reached in 3 weeks. 1-year CUD on n2-standard-8 for project-a production workloads.",
-    },
-    {
-      recommendation: "Switch Cloud Functions to 2nd gen",
-      appliedDate: "Jun 3",
-      savings: "$12/mo",
-      status: "applied" as const,
-      memory:
-        "Cold start p99 also improved 2.1s to 340ms. Migrated 14 functions across 3 services with zero downtime.",
-    },
-    {
-      recommendation: "Delete 3 unattached persistent disks",
-      appliedDate: "Jun 15",
-      savings: "$18/mo",
-      status: "applied" as const,
-      memory:
-        "Disks were orphaned after VM migration in May. 2x 200GB SSD + 1x 500GB standard. No snapshots referenced them.",
-    },
-    {
-      recommendation: "Right-size clens-dev to e2-standard-4",
-      appliedDate: "Jul 27",
-      savings: "$8/mo",
-      status: "applied" as const,
-      memory:
-        "Applied after CPU spike incident on Jul 25. Peak usage was only 22% on previous e2-standard-8. Downsized with zero performance impact.",
-    },
-    {
-      recommendation: "Apply partition filter to BigQuery ETL",
-      appliedDate: null,
-      savings: "est. $42/mo",
-      status: "pending" as const,
-      memory:
-        "Same fix resolved Jul 15 spike. Current ETL pipeline scans full 2TB table on each run. Adding partition filter would reduce scan to ~45GB.",
-    },
-    {
-      recommendation: "Cloud SQL committed use discount",
-      appliedDate: null,
-      savings: "est. $22/mo",
-      status: "available" as const,
-      memory:
-        "Requires 1-yr commitment, payback in 4 months. db-custom-4-16384 instance running 24/7 for 11 months. Usage pattern is stable.",
-    },
-    {
-      recommendation: "Lifecycle policies on 14 Storage buckets",
-      appliedDate: null,
-      savings: "est. $12/mo",
-      status: "available" as const,
-      memory:
-        "Standard class with <1 access/month identified for Nearline. 8 of 14 buckets are compliance-required hot storage (excluded). 6 eligible buckets total 1.8TB.",
-    },
-  ],
+interface FinOpsProfile {
+  monthlyTrend: MonthlyTrend[];
+  costs: PillarCost[];
+  optimizations: Optimization[];
+  anomalies: Anomaly[];
+  forecast: Forecast[];
+  riskFactors: string[];
+}
 
-  "/finops/anomalies": [
-    {
-      title: "BigQuery cost spike: +340% in last 4 hours",
-      severity: "active" as const,
-      timeAgo: "4 hours ago",
-      service: "BigQuery",
-      extra: "$42 estimated overspend",
-      memory:
-        "This matches the ETL spike pattern from Jul 15 (30d ago). That incident cost $42 extra and was caused by an unoptimized JOIN on the 2TB analytics.events table. The query scanned the full table instead of using the _PARTITIONDATE filter. Resolution on Jul 15: Added partition filter and optimized JOIN, reducing scan from 2TB to 45GB. Processing time dropped from 8min to 22sec.",
-      confidence: "88% same root cause",
-      suggestedFix: "Apply same partition filter to current query pipeline. The offending query is in the nightly ETL DAG (airflow-prod/dags/etl_analytics.py, line 142).",
-      timeline: [
-        "Jul 30 02:00 — ETL DAG triggered (normal schedule)",
-        "Jul 30 02:04 — BigQuery scan exceeded 1TB threshold",
-        "Jul 30 02:12 — Cost anomaly detected by Intellicore",
-        "Jul 30 02:15 — Pattern matched to Jul 15 incident (88% confidence)",
-      ],
-    },
-    {
-      title: "Compute Engine egress +85% WoW",
-      severity: "resolved" as const,
-      timeAgo: "5 days ago",
-      service: "Compute Engine",
-      extra: "Resolved in 2h",
-      memory:
-        "Cross-region replication job was running without compression between us-central1 and europe-west1. The backup sync for project-b was transferring ~180GB/day uncompressed. Resolution: Added gzip compression to the replication pipeline, reducing transfer to ~35GB/day. Egress normalized within 2 hours of applying the fix. Ongoing monitoring confirms stable egress since.",
-      confidence: null,
-      suggestedFix: null,
-      timeline: [
-        "Jul 25 08:00 — Egress anomaly detected (+85% vs 7-day avg)",
-        "Jul 25 08:30 — Root cause identified: uncompressed cross-region replication",
-        "Jul 25 09:15 — Compression applied to replication pipeline",
-        "Jul 25 10:00 — Egress normalized, anomaly resolved",
-      ],
-    },
-    {
-      title: "Cloud Storage class mismatch",
-      severity: "false-positive" as const,
-      timeAgo: "14 days ago",
-      service: "Cloud Storage",
-      extra: "Partial action taken",
-      memory:
-        "Flagged 14 Standard class buckets with <1 access/month as candidates for Nearline. Analysis showed 8 of 14 are compliance-required hot storage (SOC2 audit logs, PCI transaction records) that must remain in Standard class per policy. Adjusted recommendation: 6 buckets moved to Nearline ($12/mo saved), 8 kept as Standard with documented justification. Updated detection rules to exclude compliance-tagged buckets.",
-      confidence: null,
-      suggestedFix: null,
-      timeline: [
-        "Jul 16 — 14 buckets flagged for storage class mismatch",
-        "Jul 17 — Analysis revealed 8 compliance-required buckets",
-        "Jul 18 — 6 eligible buckets moved to Nearline",
-        "Jul 18 — Detection rules updated to exclude compliance tags",
-      ],
-    },
-  ],
+const PROFILES: Record<string, FinOpsProfile> = {
+  netcore: {
+    monthlyTrend: [
+      { month: "Feb", cost: 920000 }, { month: "Mar", cost: 968000 }, { month: "Apr", cost: 1010000 },
+      { month: "May", cost: 1055000 }, { month: "Jun", cost: 1092000 }, { month: "Jul", cost: 1140000 },
+    ],
+    costs: [
+      { name: "CloudOps", cost: 640000, breakdown: "GKE $410K, Cloud SQL $130K, Networking $100K", sparkData: [520, 560, 590, 610, 630, 640], sparkColor: "#3b82f6", memory: "Right-sized GKE node pools saved $18K/mo since Jun." },
+      { name: "AI / Vertex", cost: 310000, breakdown: "Vertex inference $260K, BigQuery ML $50K", sparkData: [180, 210, 240, 270, 290, 310], sparkColor: "#f59e0b", memory: "GPU spend growing with inference traffic. Reserved slot review scheduled." },
+      { name: "SecOps", cost: 42000, breakdown: "SCC Premium, Wiz", sparkData: [40, 41, 42, 42, 42, 42], sparkColor: "#10b981", memory: "Stable, no anomalies." },
+      { name: "DevOps", cost: 86000, breakdown: "Cloud Build, Artifact Registry", sparkData: [95, 98, 96, 94, 98, 86], sparkColor: "#8b5cf6", memory: "2nd-gen Functions migration cut cold-start cost." },
+    ],
+    optimizations: [
+      { recommendation: "Apply partition filter to BigQuery ETL", appliedDate: null, savings: "est. $42/run", status: "pending", memory: "Same fix resolved the Jul 15 spike. Current pipeline scans full 2TB on each run." },
+      { recommendation: "Committed use discount on GKE node pools", appliedDate: "Jun 3", savings: "$1,240/mo", status: "applied", memory: "1-yr CUD on n2-standard-8, breakeven in 5 weeks." },
+      { recommendation: "Reserved Vertex AI inference slots", appliedDate: null, savings: "est. $2,100/mo", status: "available", memory: "On-demand GPU spend growing 15% MoM. Review by Q4." },
+    ],
+    anomalies: [
+      {
+        title: "BigQuery cost spike: +340% in last 4 hours", severity: "active", timeAgo: "4 hours ago", service: "BigQuery",
+        extra: "$42 estimated overspend",
+        memory: "Matches the Jul 15 ETL spike pattern (unoptimized JOIN on a 2TB table). Root cause + fix already known.",
+        confidence: "88% same root cause",
+        suggestedFix: "Apply the same partition filter used on Jul 15 to the nightly ETL DAG.",
+        timeline: ["02:00 — ETL DAG triggered", "02:04 — BigQuery scan exceeded 1TB threshold", "02:12 — Cost anomaly detected", "02:15 — Pattern matched to Jul 15 incident (88%)"],
+      },
+    ],
+    forecast: [
+      { month: "Aug", cost: 1180000, note: "Assumes BigQuery anomaly resolved and partition filter applied." },
+      { month: "Sep", cost: 1120000, note: "Reserved Vertex slots applied, GKE CUD fully amortized." },
+    ],
+    riskFactors: [
+      "BigQuery usage trending +15% MoM from increased ML training data.",
+      "Vertex AI spend growing with new model experiments — review reserved slots by Q4.",
+    ],
+  },
 
-  "/finops/forecast": [
-    {
-      month: "Aug",
-      cost: 680,
-      note: "Assumes BigQuery anomaly resolved and partition filter applied. Compute stable with existing CUDs.",
-    },
-    {
-      month: "Sep",
-      cost: 650,
-      note: "CUD savings fully amortized + Cloud SQL CUD applied. Functions optimization running full month.",
-    },
-    {
-      month: "Oct",
-      cost: 620,
-      note: "All available recommendations applied. Storage lifecycle policies in effect for full billing cycle.",
-    },
-  ],
+  aarti: {
+    monthlyTrend: [
+      { month: "Feb", cost: 172000 }, { month: "Mar", cost: 176000 }, { month: "Apr", cost: 179000 },
+      { month: "May", cost: 181000 }, { month: "Jun", cost: 183000 }, { month: "Jul", cost: 186000 },
+    ],
+    costs: [
+      { name: "CloudOps", cost: 120000, breakdown: "Compute $80K, Cloud SQL $30K, Networking $10K", sparkData: [100, 105, 110, 113, 117, 120], sparkColor: "#3b82f6", memory: "Stable compliance-region workloads." },
+      { name: "SecOps", cost: 38000, breakdown: "SCC Premium, audit tooling", sparkData: [30, 32, 34, 35, 36, 38], sparkColor: "#10b981", memory: "Rising slightly with Q3 audit prep tooling." },
+    ],
+    optimizations: [
+      { recommendation: "Cloud SQL committed use discount", appliedDate: null, savings: "est. $22/mo", status: "available", memory: "db-custom-4-16384 running 24/7 for 8 months — stable pattern." },
+    ],
+    anomalies: [],
+    forecast: [
+      { month: "Aug", cost: 189000, note: "Flat spend, audit tooling stable." },
+    ],
+    riskFactors: [
+      "Cloud SQL instance approaching 75% storage capacity — may need resize by Sep.",
+    ],
+  },
 
-  "/finops/risk-factors": [
-    "BigQuery usage trending +15% MoM from increased ML training data. May need reserved slots by Q4 if trend continues.",
-    "Vertex AI spend growing with new model experiments. Current on-demand pricing acceptable below $50/mo, review if exceeded.",
-    "Cloud SQL instance approaching 80% storage capacity. May need disk resize by Sep (one-time cost, no ongoing increase).",
-  ],
+  shopstop: {
+    monthlyTrend: [
+      { month: "Feb", cost: 340000 }, { month: "Mar", cost: 355000 }, { month: "Apr", cost: 362000 },
+      { month: "May", cost: 378000 }, { month: "Jun", cost: 390000 }, { month: "Jul", cost: 412000 },
+    ],
+    costs: [
+      { name: "CloudOps", cost: 260000, breakdown: "Compute $180K, AWS EKS $50K, Networking $30K", sparkData: [210, 220, 230, 240, 250, 260], sparkColor: "#3b82f6", memory: "Pre-scaled 3x for sale window — cost bump is expected, not anomalous." },
+      { name: "AIOps", cost: 44000, breakdown: "Predictive scaling agent, Vertex AI", sparkData: [28, 32, 36, 38, 41, 44], sparkColor: "#f59e0b", memory: "Predictive scaling agent running on 5 services ahead of sale." },
+    ],
+    optimizations: [
+      { recommendation: "Right-size catalog-search after sale window", appliedDate: null, savings: "est. $18/mo", status: "available", memory: "Sale-window over-provisioning should scale back within 72h of event end." },
+    ],
+    anomalies: [
+      {
+        title: "Compute Engine egress +85% WoW", severity: "resolved", timeAgo: "5 days ago", service: "Compute Engine",
+        extra: "Resolved in 2h",
+        memory: "Cross-region replication running without compression. Added gzip, egress normalized within 2h.",
+        confidence: null, suggestedFix: null,
+        timeline: ["08:00 — Egress anomaly detected (+85%)", "08:30 — Root cause: uncompressed replication", "09:15 — Compression applied", "10:00 — Egress normalized"],
+      },
+    ],
+    forecast: [
+      { month: "Aug", cost: 450000, note: "Sale-window spend elevated, expected to normalize by Aug 10." },
+    ],
+    riskFactors: [
+      "Pre-sale traffic ramp typically adds 10-15% to compute spend for ~5 days.",
+    ],
+  },
+
+  designx: {
+    monthlyTrend: [
+      { month: "Feb", cost: 29000 }, { month: "Mar", cost: 30500 }, { month: "Apr", cost: 31200 },
+      { month: "May", cost: 32000 }, { month: "Jun", cost: 33400 }, { month: "Jul", cost: 34000 },
+    ],
+    costs: [
+      { name: "CloudOps", cost: 22000, breakdown: "Render farm $18K, Storage $4K", sparkData: [18, 19, 20, 20, 21, 22], sparkColor: "#3b82f6", memory: "Render farm usage flat, no anomalies." },
+      { name: "DevOps", cost: 6000, breakdown: "Cloud Build, Artifact Registry", sparkData: [5, 5, 6, 6, 6, 6], sparkColor: "#8b5cf6", memory: "Stable build minutes after caching improvements." },
+    ],
+    optimizations: [
+      { recommendation: "Switch thumbnail-generator to 2nd gen Functions", appliedDate: "Jun 3", savings: "$12/mo", status: "applied", memory: "Cold start p99 improved 2.1s to 340ms." },
+    ],
+    anomalies: [],
+    forecast: [
+      { month: "Aug", cost: 34500, note: "Flat spend expected." },
+    ],
+    riskFactors: [],
+  },
+
+  paynimbus: {
+    monthlyTrend: [
+      { month: "Feb", cost: 228000 }, { month: "Mar", cost: 233000 }, { month: "Apr", cost: 237000 },
+      { month: "May", cost: 240000 }, { month: "Jun", cost: 243000 }, { month: "Jul", cost: 248000 },
+    ],
+    costs: [
+      { name: "CloudOps", cost: 165000, breakdown: "Payments API $90K, Ledger $50K, Fraud detection $25K", sparkData: [140, 145, 150, 155, 160, 165], sparkColor: "#3b82f6", memory: "Stable, PCI-scoped tier isolated on dedicated capacity." },
+      { name: "SecOps", cost: 51000, breakdown: "Key management, PCI evidence tooling, IAM audit", sparkData: [42, 44, 46, 48, 50, 51], sparkColor: "#10b981", memory: "Rising slightly ahead of quarterly PCI evidence package." },
+    ],
+    optimizations: [
+      { recommendation: "Committed use discount on payments-api tier", appliedDate: "May 20", savings: "$310/mo", status: "applied", memory: "1-yr CUD, stable 24/7 usage pattern for 11 months." },
+    ],
+    anomalies: [],
+    forecast: [
+      { month: "Aug", cost: 251000, note: "Flat spend, PCI evidence tooling cost stable." },
+    ],
+    riskFactors: [
+      "Ledger service storage growing ~4%/mo — review retention policy by Q4.",
+    ],
+  },
 };
+
+function scaleForEnv(p: FinOpsProfile, envId: string, isProd: boolean): FinOpsProfile {
+  if (isProd) return p;
+  const f = envFactor(envId);
+  const scale = (n: number) => Math.max(0, Math.round(n * f));
+  return {
+    monthlyTrend: p.monthlyTrend.map((m) => ({ ...m, cost: scale(m.cost) })),
+    costs: p.costs.map((c) => ({ ...c, cost: scale(c.cost), sparkData: c.sparkData.map(scale) })),
+    optimizations: p.optimizations.filter((o) => o.status !== "pending"),
+    anomalies: [],
+    forecast: p.forecast.map((fc) => ({ ...fc, cost: scale(fc.cost), note: "Non-production environment — lower, steadier spend." })),
+    riskFactors: [],
+  };
+}
+
+const data = buildTenantEnvShell(TENANTS, (tenant, envId, isProd) => {
+  const scaled = scaleForEnv(PROFILES[tenant.id], envId, isProd);
+  return {
+    "/finops/monthly-trend": scaled.monthlyTrend,
+    "/finops/costs": scaled.costs,
+    "/finops/optimizations": scaled.optimizations,
+    "/finops/anomalies": scaled.anomalies,
+    "/finops/forecast": scaled.forecast,
+    "/finops/risk-factors": scaled.riskFactors,
+  };
+});
 
 export default data;

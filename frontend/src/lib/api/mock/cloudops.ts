@@ -1,77 +1,158 @@
 /* ------------------------------------------------------------------ */
-/*  Intellicore CMP — CloudOps seed data                              */
-/*  Served by apiFetch() when no backend is configured.               */
+/*  Intellicore CMP — CloudOps seed data                               */
+/*  Keyed [tenantId][environmentId][endpoint]. One rich production      */
+/*  profile per tenant, scaled down for non-prod environments.          */
 /* ------------------------------------------------------------------ */
 
-import type {
-  VmInstance,
-  Incident,
-  ServerlessFunction,
-  Pipeline,
-} from "../types";
+import { TENANTS } from "../../tenants";
+import { buildTenantEnvShell, envName, scaleCost } from "./_env";
 
-const computeInstances: VmInstance[] = [
-  { name: "clens-dev", type: "e2-standard-2", zone: "asia-south1-c", cpu: 87, memory: 72, status: "warning", cost: "$54", lastIncident: "CPU spike 95% (3d ago)" },
-  { name: "cloudlens-dev-new", type: "e2-standard-2", zone: "asia-south1-c", cpu: 45, memory: 61, status: "healthy", cost: "$54", lastIncident: "None" },
-  { name: "connectiq", type: "e2-medium", zone: "us-central1-a", cpu: 32, memory: 48, status: "healthy", cost: "$34", lastIncident: "None" },
-  { name: "cl-icore", type: "e2-standard-4", zone: "asia-south1-b", cpu: 56, memory: 70, status: "healthy", cost: "$107", lastIncident: "None" },
-  { name: "bastion-host", type: "e2-micro", zone: "us-central1-a", cpu: 12, memory: 34, status: "healthy", cost: "$8", lastIncident: "Egress anomaly (21d ago)" },
-  { name: "monitoring-agent", type: "e2-small", zone: "asia-south1-c", cpu: 28, memory: 55, status: "stopped", cost: "$0", lastIncident: "None" },
-];
+interface VmInstance {
+  name: string; type: string; zone: string; cpu: number; memory: number;
+  status: "healthy" | "warning" | "stopped"; cost: string; lastIncident: string;
+}
+interface Incident {
+  time: string; workload: string; resource: string; issue: string;
+  resolution: string; duration: string; status: string; statusColor: string;
+}
+interface ServerlessFn {
+  name: string; runtime: string; region: string; invocations: string;
+  avgLatency: string; errorRate: string; cost: string;
+}
+interface Pipeline {
+  name: string; type: string; lastRun: string; duration: string;
+  status: "healthy" | "warning"; nextRun: string; cost: string;
+}
+interface CloudOpsProfile {
+  vms: VmInstance[]; incidents: Incident[]; serverless: ServerlessFn[]; pipelines: Pipeline[];
+}
 
-const incidents: Incident[] = [
-  {
-    time: "3d ago", workload: "Compute", resource: "clens-dev",
-    issue: "CPU utilization 95% sustained",
-    resolution: "Auto-scaled to e2-standard-4, load balanced",
-    duration: "8 min", status: "Resolved", statusColor: "bg-green-50 text-green-700",
+const PROFILES: Record<string, CloudOpsProfile> = {
+  netcore: {
+    vms: [
+      { name: "gke-prod-app", type: "e2-standard-4", zone: "asia-south1-b", cpu: 78, memory: 88, status: "warning", cost: "$310", lastIncident: "Memory pressure 88% (today)" },
+      { name: "gke-prod-ml", type: "n2-standard-8", zone: "asia-south1-b", cpu: 62, memory: 70, status: "healthy", cost: "$540", lastIncident: "None" },
+      { name: "vertex-inference-hero", type: "a2-highgpu-1g", zone: "asia-south1-c", cpu: 44, memory: 51, status: "healthy", cost: "$890", lastIncident: "Cost spike 30d ago" },
+      { name: "cloudsql-prod-primary", type: "db-custom-8-32768", zone: "asia-south1-a", cpu: 55, memory: 60, status: "healthy", cost: "$410", lastIncident: "None" },
+      { name: "bastion-prod", type: "e2-micro", zone: "asia-south1-a", cpu: 8, memory: 22, status: "healthy", cost: "$7", lastIncident: "None" },
+    ],
+    incidents: [
+      { time: "5h ago", workload: "Data & AI", resource: "BigQuery ETL", issue: "Slot exhaustion, unoptimized JOIN scanning 2TB", resolution: "Partition filter applied, query optimized", duration: "22 min", status: "Resolved", statusColor: "bg-green-50 text-green-700" },
+      { time: "3d ago", workload: "Compute", resource: "gke-prod-app", issue: "Node pool memory pressure at 88%", resolution: "Right-sized node pool, added HPA headroom", duration: "8 min", status: "Resolved", statusColor: "bg-green-50 text-green-700" },
+      { time: "30d ago", workload: "AI", resource: "vertex-inference-hero", issue: "GPU endpoint cost spike +84%", resolution: "Reserved slot review scheduled", duration: "n/a", status: "Mitigated", statusColor: "bg-blue-50 text-blue-700" },
+    ],
+    serverless: [
+      { name: "search-api", runtime: "Node.js 20", region: "asia-south1", invocations: "812,400", avgLatency: "94ms", errorRate: "0.01%", cost: "$310" },
+      { name: "ingestion-webhook", runtime: "Python 3.12", region: "asia-south1", invocations: "220,100", avgLatency: "48ms", errorRate: "0%", cost: "$120" },
+    ],
+    pipelines: [
+      { name: "etl-analytics-nightly", type: "Dataflow", lastRun: "Today 02:00", duration: "38 min", status: "warning", nextRun: "Tomorrow 02:00", cost: "$180" },
+      { name: "ml-training-weekly", type: "Vertex AI", lastRun: "Jul 28, 02:00", duration: "3h 40min", status: "healthy", nextRun: "Aug 4, 02:00", cost: "$640" },
+    ],
   },
-  {
-    time: "5d ago", workload: "Data & AI", resource: "BigQuery pipeline",
-    issue: "Slot exhaustion during ETL",
-    resolution: "Autoscaling slots enabled, query optimized",
-    duration: "22 min", status: "Resolved", statusColor: "bg-green-50 text-green-700",
+  aarti: {
+    vms: [
+      { name: "erp-prod-app", type: "e2-standard-4", zone: "asia-south1-a", cpu: 41, memory: 55, status: "healthy", cost: "$210", lastIncident: "None" },
+      { name: "cloudsql-erp-primary", type: "db-custom-4-16384", zone: "asia-south1-a", cpu: 38, memory: 50, status: "healthy", cost: "$260", lastIncident: "None" },
+      { name: "batch-processing-vm", type: "e2-standard-2", zone: "asia-south1-b", cpu: 30, memory: 40, status: "healthy", cost: "$54", lastIncident: "None" },
+      { name: "bastion-audit", type: "e2-micro", zone: "asia-south1-a", cpu: 6, memory: 18, status: "healthy", cost: "$7", lastIncident: "None" },
+    ],
+    incidents: [
+      { time: "18d ago", workload: "Compute", resource: "erp-prod-app", issue: "Scheduled batch job overlap caused brief CPU contention", resolution: "Job scheduling window adjusted", duration: "6 min", status: "Resolved", statusColor: "bg-green-50 text-green-700" },
+    ],
+    serverless: [
+      { name: "compliance-report-gen", runtime: "Python 3.12", region: "asia-south1", invocations: "4,120", avgLatency: "310ms", errorRate: "0%", cost: "$22" },
+    ],
+    pipelines: [
+      { name: "erp-nightly-sync", type: "Cloud Composer", lastRun: "Today 01:00", duration: "26 min", status: "healthy", nextRun: "Tomorrow 01:00", cost: "$95" },
+    ],
   },
-  {
-    time: "7d ago", workload: "Database", resource: "pgsql",
-    issue: "Connection pool max (100) hit",
-    resolution: "Pool size increased to 200, connection leak fixed",
-    duration: "18 min", status: "Resolved", statusColor: "bg-green-50 text-green-700",
+  shopstop: {
+    vms: [
+      { name: "checkout-service-prod", type: "n2-standard-4", zone: "asia-south1-a", cpu: 71, memory: 66, status: "warning", cost: "$280", lastIncident: "Egress anomaly (today)" },
+      { name: "cart-service-prod", type: "e2-standard-4", zone: "asia-south1-a", cpu: 58, memory: 60, status: "healthy", cost: "$210", lastIncident: "None" },
+      { name: "catalog-search-prod", type: "n2-standard-2", zone: "asia-south1-b", cpu: 33, memory: 45, status: "healthy", cost: "$140", lastIncident: "None" },
+      { name: "eks-analytics-prod", type: "m5.xlarge (AWS)", zone: "ap-south-1a", cpu: 47, memory: 52, status: "healthy", cost: "$320", lastIncident: "None" },
+    ],
+    incidents: [
+      { time: "58d ago", workload: "Networking", resource: "bastion-host", issue: "Egress anomaly 3.3σ from baseline", resolution: "Confirmed legitimate backup job, threshold adjusted", duration: "4 min", status: "False positive", statusColor: "bg-slate-100 text-slate-600" },
+      { time: "45d ago", workload: "Compute", resource: "checkout-service-prod", issue: "CPU predicted to breach at peak traffic", resolution: "Predictive auto-scale 6 min ahead of breach", duration: "n/a (automated)", status: "Prevented", statusColor: "bg-green-50 text-green-700" },
+    ],
+    serverless: [
+      { name: "order-confirmation", runtime: "Node.js 20", region: "asia-south1", invocations: "1,204,300", avgLatency: "112ms", errorRate: "0.02%", cost: "$410" },
+    ],
+    pipelines: [
+      { name: "inventory-sync-hourly", type: "Dataflow", lastRun: "Today 11:00", duration: "9 min", status: "healthy", nextRun: "Today 12:00", cost: "$60" },
+    ],
   },
-  {
-    time: "14d ago", workload: "Serverless", resource: "process-orders",
-    issue: "Cold start >2s (p99)",
-    resolution: "Min instances set to 3, memory increased to 512MB",
-    duration: "N/A (config)", status: "Mitigated", statusColor: "bg-blue-50 text-blue-700",
+  designx: {
+    vms: [
+      { name: "render-farm-prod", type: "n2-highcpu-8", zone: "asia-south1-a", cpu: 66, memory: 40, status: "healthy", cost: "$390", lastIncident: "None" },
+      { name: "asset-store-prod", type: "e2-standard-2", zone: "asia-south1-a", cpu: 22, memory: 35, status: "healthy", cost: "$54", lastIncident: "None" },
+    ],
+    incidents: [],
+    serverless: [
+      { name: "thumbnail-generator", runtime: "Go 1.22", region: "asia-south1", invocations: "88,400", avgLatency: "210ms", errorRate: "0.01%", cost: "$18" },
+      { name: "export-orchestrator", runtime: "Node.js 20", region: "asia-south1", invocations: "12,900", avgLatency: "340ms", errorRate: "0%", cost: "$9" },
+    ],
+    pipelines: [
+      { name: "asset-cdn-sync", type: "Cloud Run Jobs", lastRun: "Today 06:00", duration: "4 min", status: "healthy", nextRun: "Today 18:00", cost: "$8" },
+    ],
   },
-  {
-    time: "21d ago", workload: "Compute", resource: "bastion-host",
-    issue: "Network egress anomaly 170k+",
-    resolution: "Traffic analyzed — legitimate backup job, alert threshold adjusted",
-    duration: "4 min", status: "False positive", statusColor: "bg-slate-100 text-slate-600",
+  paynimbus: {
+    vms: [
+      { name: "payments-api-prod", type: "n2-standard-4", zone: "ap-south-1a (AWS)", cpu: 52, memory: 58, status: "healthy", cost: "$260", lastIncident: "None" },
+      { name: "ledger-service-prod", type: "e2-standard-4", zone: "asia-south1-a", cpu: 46, memory: 55, status: "healthy", cost: "$230", lastIncident: "None" },
+      { name: "fraud-detection-prod", type: "n2-standard-2", zone: "asia-south1-b", cpu: 61, memory: 48, status: "healthy", cost: "$150", lastIncident: "None" },
+    ],
+    incidents: [
+      { time: "94d ago", workload: "Security", resource: "admin-key-rotation", issue: "Admin access key unused for 94 days", resolution: "Rotated + scoped down, PCI evidence attached", duration: "24h SLA", status: "Resolved", statusColor: "bg-green-50 text-green-700" },
+    ],
+    serverless: [
+      { name: "transaction-webhook", runtime: "Java 21", region: "ap-south-1", invocations: "2,410,600", avgLatency: "68ms", errorRate: "0%", cost: "$520" },
+    ],
+    pipelines: [
+      { name: "settlement-batch", type: "AWS Batch", lastRun: "Today 00:30", duration: "52 min", status: "healthy", nextRun: "Tomorrow 00:30", cost: "$210" },
+    ],
   },
-];
-
-const serverless: ServerlessFunction[] = [
-  { name: "process-orders", runtime: "Node.js 20", region: "us-central1", invocations: "4,218", avgLatency: "132ms", errorRate: "0.02%", cost: "$24" },
-  { name: "send-notifications", runtime: "Python 3.12", region: "us-central1", invocations: "2,891", avgLatency: "89ms", errorRate: "0%", cost: "$18" },
-  { name: "resize-images", runtime: "Go 1.22", region: "asia-south1", invocations: "1,456", avgLatency: "245ms", errorRate: "0.01%", cost: "$15" },
-  { name: "sync-inventory", runtime: "Node.js 20", region: "us-central1", invocations: "812", avgLatency: "178ms", errorRate: "0%", cost: "$12" },
-  { name: "webhook-handler", runtime: "Python 3.12", region: "europe-west1", invocations: "3,344", avgLatency: "56ms", errorRate: "0%", cost: "$10" },
-  { name: "data-export", runtime: "Node.js 20", region: "us-central1", invocations: "96", avgLatency: "1,120ms", errorRate: "0%", cost: "$7" },
-];
-
-const pipelines: Pipeline[] = [
-  { name: "etl-daily", type: "Dataflow", lastRun: "Today 06:00", duration: "42 min", status: "healthy", nextRun: "Tomorrow 06:00", cost: "$12" },
-  { name: "ml-training-weekly", type: "Vertex AI", lastRun: "Jul 28, 02:00", duration: "3h 18 min", status: "warning", nextRun: "Aug 4, 02:00", cost: "$11" },
-  { name: "data-export-hourly", type: "BigQuery", lastRun: "Today 11:00", duration: "8 min", status: "healthy", nextRun: "Today 12:00", cost: "$5" },
-];
-
-const data: Record<string, unknown> = {
-  "/cloudops/compute-instances": computeInstances,
-  "/cloudops/incidents": incidents,
-  "/cloudops/serverless": serverless,
-  "/cloudops/pipelines": pipelines,
 };
+
+function scaleForEnv(profile: CloudOpsProfile, envId: string, isProd: boolean): CloudOpsProfile {
+  if (isProd) return profile;
+  return {
+    vms: profile.vms.map((vm) => ({
+      ...vm,
+      name: envName(vm.name.replace("-prod", ""), envId),
+      cpu: Math.max(5, Math.round(vm.cpu * 0.5)),
+      memory: Math.max(10, Math.round(vm.memory * 0.5)),
+      status: vm.status === "warning" ? "healthy" : vm.status,
+      cost: scaleCost(vm.cost, envId),
+      lastIncident: "None",
+    })),
+    incidents: [],
+    serverless: profile.serverless.map((fn) => ({
+      ...fn,
+      name: envName(fn.name, envId),
+      invocations: scaleCost(`$${fn.invocations.replace(/,/g, "")}`, envId).replace("$", ""),
+      cost: scaleCost(fn.cost, envId),
+    })),
+    pipelines: profile.pipelines.map((p) => ({
+      ...p,
+      name: envName(p.name, envId),
+      status: "healthy",
+      cost: scaleCost(p.cost, envId),
+    })),
+  };
+}
+
+const data = buildTenantEnvShell(TENANTS, (tenant, envId, isProd) => {
+  const scaled = scaleForEnv(PROFILES[tenant.id], envId, isProd);
+  return {
+    "/cloudops/compute-instances": scaled.vms,
+    "/cloudops/incidents": scaled.incidents,
+    "/cloudops/serverless": scaled.serverless,
+    "/cloudops/pipelines": scaled.pipelines,
+  };
+});
 
 export default data;

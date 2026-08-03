@@ -8,6 +8,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { apiFetch } from "./api";
+import type { ApiFetchContext } from "./api/client";
 
 interface ReportSection {
   label: string;
@@ -98,21 +99,27 @@ export function reportTitleFor(path: string): string {
   return REPORT_CONFIG[path]?.title ?? "Health Report";
 }
 
-/** Fetch the pillar's data, build a PDF, and trigger a download. */
-export async function downloadReport(path: string): Promise<void> {
+export interface ReportOrgContext extends ApiFetchContext {
+  tenantName?: string;
+  environmentLabel?: string;
+}
+
+/** Fetch the pillar's data for the current customer + environment, build a PDF, and trigger a download. */
+export async function downloadReport(path: string, org?: ReportOrgContext): Promise<void> {
   const cfg = REPORT_CONFIG[path];
   if (!cfg) return;
 
   const datasets = await Promise.all(
     cfg.sections.map(async (s) => ({
       label: s.label,
-      rows: (await apiFetch<Record<string, unknown>[]>(s.endpoint)) || [],
+      rows: (await apiFetch<Record<string, unknown>[]>(s.endpoint, org)) || [],
     })),
   );
 
-  const doc = buildPdf(cfg, datasets);
+  const doc = buildPdf(cfg, datasets, org);
   const stamp = new Date().toISOString().slice(0, 10);
-  doc.save(`intellicore-${cfg.slug}-${stamp}.pdf`);
+  const tenantSlug = (org?.tenantId ?? "demo").toLowerCase();
+  doc.save(`intellicore-${tenantSlug}-${cfg.slug}-${stamp}.pdf`);
 }
 
 /* ── PDF builder ──────────────────────────────────────────────────── */
@@ -147,6 +154,7 @@ function humanize(key: string): string {
 function buildPdf(
   cfg: ReportConfig,
   datasets: { label: string; rows: Record<string, unknown>[] }[],
+  org?: ReportOrgContext,
 ): jsPDF {
   const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
@@ -182,7 +190,10 @@ function buildPdf(
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...SLATE);
   doc.setFontSize(10);
-  doc.text(`Prepared for: ${cfg.audience}    ·    Generated: ${generated}`, margin, 98);
+  const customerLine = org?.tenantName
+    ? `${org.tenantName}${org.environmentLabel ? ` — ${org.environmentLabel}` : ""}    ·    `
+    : "";
+  doc.text(`${customerLine}Prepared for: ${cfg.audience}    ·    Generated: ${generated}`, margin, 98);
   doc.text("Managed by Searce CSRE Squad", margin, 112);
 
   // ── Executive summary ──

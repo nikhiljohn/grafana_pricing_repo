@@ -131,3 +131,32 @@ VALUES
     ('demo-tenant', 'gcp', 'netcore-staging', 'Netcore Staging (GCP)', 'connected'),
     ('demo-tenant', 'aws', '429617291000', 'Netcore Analytics (AWS)', 'connected')
 ON CONFLICT DO NOTHING;
+
+-- ─── Seed the managed customer book ───────────────────────────────
+-- Five customer tenants matching the customer demo script and the
+-- frontend org switcher (frontend/src/lib/tenants.ts). Each has its
+-- own Memory graph in Neo4j (see backend/scripts/seed_demo.py) and its
+-- own cloud accounts here, so a CSRE user browsing the org switcher
+-- sees genuinely distinct data per customer, not just relabeled copies.
+INSERT INTO tenants (id, name, tier, data_region)
+VALUES
+    ('netcore', 'Netcore Cloud', 'elite', 'asia-south1'),
+    ('aarti', 'Aarti Industries', 'advanced', 'asia-south1'),
+    ('shopstop', 'ShoppersStop', 'elite', 'asia-south1'),
+    ('designx', 'DesignX', 'foundation', 'asia-south1'),
+    ('paynimbus', 'PayNimbus', 'elite', 'asia-south1')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO cloud_accounts (tenant_id, provider, external_id, display_name, status)
+VALUES
+    ('netcore', 'gcp', 'netcore-prod-1', 'Netcore Production (GCP)', 'connected'),
+    ('netcore', 'gcp', 'netcore-staging-1', 'Netcore Staging (GCP)', 'connected'),
+    ('aarti', 'gcp', 'aarti-prod-1', 'Aarti Production (GCP)', 'connected'),
+    ('aarti', 'gcp', 'aarti-uat-1', 'Aarti UAT (GCP)', 'connected'),
+    ('shopstop', 'gcp', 'shopstop-prod-1', 'ShoppersStop Production (GCP)', 'connected'),
+    ('shopstop', 'aws', '010863548913', 'ShoppersStop Analytics (AWS)', 'connected'),
+    ('shopstop', 'gcp', 'shopstop-staging-1', 'ShoppersStop Staging (GCP)', 'connected'),
+    ('designx', 'gcp', 'designx-prod-1', 'DesignX Production (GCP)', 'connected'),
+    ('paynimbus', 'aws', '010863548914', 'PayNimbus Production (AWS)', 'connected'),
+    ('paynimbus', 'gcp', 'paynimbus-prod-1', 'PayNimbus Production (GCP)', 'connected')
+ON CONFLICT DO NOTHING;

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intellicore CMP — The Cloud Platform That Remembers | Searce</title>
+<meta name="description" content="Intellicore CMP fuses CloudOps, FinOps, Cloud Security, DevOps and AIOps into one operational Memory graph — so every incident, fix and cost pattern becomes institutional knowledge your cloud reuses automatically. A Searce product.">
+<meta property="og:title" content="Intellicore CMP — The Cloud Platform That Remembers">
+<meta property="og:description" content="Reactive support forgets every ticket. Intellicore remembers — and acts on what it knows.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F172A'/%3E%3Ccircle cx='16' cy='8' r='2.6' fill='%2334D399'/%3E%3Ccircle cx='7' cy='20' r='2.6' fill='%2338BDF8'/%3E%3Ccircle cx='25' cy='20' r='2.6' fill='%2338BDF8'/%3E%3Ccircle cx='16' cy='24' r='2.2' fill='%23818CF8'/%3E%3Cpath d='M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3' stroke='%23CBD5E1' stroke-width='1.3' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --navy: #0b0f1a;
+    --navy-2: #111827;
+    --panel: #151b2b;
+    --panel-2: #1b2338;
+    --border: #262f45;
+    --text: #e5e9f5;
+    --muted: #93a1c2;
+    --muted-2: #6b7690;
+    --emerald: #34d399;
+    --blue: #38bdf8;
+    --violet: #818cf8;
+    --amber: #fbbf24;
+    --rose: #fb7185;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+  section { padding: 88px 0; }
+  h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--emerald); background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.25);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 20px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+
+  /* ── Nav ── */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(12px);
+    background: rgba(11,15,26,0.85);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; max-width: 1180px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #0f172a, #1e293b); display: grid; place-items: center; border: 1px solid var(--border); }
+  .brand-mark svg { width: 18px; height: 18px; }
+  .nav-links { display: flex; gap: 32px; font-size: 14px; color: var(--muted); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { display: flex; gap: 12px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: 10px;
+    border: 1px solid transparent; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--emerald), #10b981); color: #062018; }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-ghost { border-color: var(--border); color: var(--text); }
+  .btn-ghost:hover { background: var(--panel-2); }
+
+  /* ── Hero ── */
+  .hero { padding: 90px 0 60px; position: relative; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; }
+  .hero h1 { font-size: 50px; line-height: 1.08; margin-bottom: 22px; }
+  .hero h1 .grad { background: linear-gradient(135deg, var(--emerald), var(--blue)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.sub { font-size: 18px; color: var(--muted); max-width: 520px; margin-bottom: 32px; }
+  .hero-ctas { display: flex; gap: 14px; margin-bottom: 40px; }
+  .hero-stats { display: flex; gap: 36px; }
+  .hstat b { display: block; font-size: 24px; font-weight: 800; color: var(--text); }
+  .hstat span { font-size: 12.5px; color: var(--muted-2); }
+
+  /* ── Graph visual ── */
+  .graph-card {
+    position: relative; border-radius: 20px; border: 1px solid var(--border);
+    background: radial-gradient(circle at 30% 20%, #16213a 0%, #0d1220 65%);
+    padding: 28px; min-height: 460px; overflow: hidden;
+  }
+  .graph-card::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 26px 26px; pointer-events: none;
+  }
+  .graph-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-2); margin-bottom: 4px; }
+  .graph-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 18px; }
+  svg.graph { width: 100%; height: 380px; overflow: visible; }
+  .g-edge { stroke: #35405e; stroke-width: 1.4; fill: none; }
+  .g-edge.hot { stroke: url(#hotgrad); stroke-width: 2.2; }
+  .g-node circle { filter: drop-shadow(0 0 8px currentColor); }
+  .g-node text { font-size: 10px; fill: #cbd5e1; font-family: inherit; }
+  .g-node .lbl-sub { font-size: 8.5px; fill: #7c88a8; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+  .pulsing { animation: pulse 2.4s ease-in-out infinite; }
+
+  /* ── Trust bar ── */
+  .trust { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--navy-2); }
+  .trust-inner { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; flex-wrap: wrap; gap: 18px; }
+  .trust-item { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .trust-item b { color: var(--text); }
+
+  /* ── Section headers ── */
+  .section-head { max-width: 620px; margin-bottom: 52px; }
+  .section-head h2 { font-size: 34px; margin-bottom: 14px; }
+  .section-head p { color: var(--muted); font-size: 16px; }
+  .center { text-align: center; margin-left: auto; margin-right: auto; }
+
+  /* ── Problem / contrast ── */
+  .contrast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .contrast-card { border-radius: 16px; border: 1px solid var(--border); padding: 28px; }
+  .contrast-card.bad { background: linear-gradient(180deg, rgba(251,113,133,0.06), transparent); }
+  .contrast-card.good { background: linear-gradient(180deg, rgba(52,211,153,0.07), transparent); border-color: rgba(52,211,153,0.3); }
+  .contrast-card h3 { font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .contrast-card ul { list-style: none; display: flex; flex-direction: column; gap: 13px; }
+  .contrast-card li { font-size: 14.5px; color: var(--muted); display: flex; gap: 10px; align-items: flex-start; }
+  .contrast-card.good li { color: #d7f5e8; }
+  .tick { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; margin-top: 1px; }
+  .bad .tick { background: rgba(251,113,133,0.15); color: var(--rose); }
+  .good .tick { background: rgba(52,211,153,0.18); color: var(--emerald); }
+
+  /* ── Product deep-dive ── */
+  .product-block { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 96px; }
+  .product-block.reverse { grid-template-columns: 1fr 1fr; }
+  .product-block.reverse .p-visual { order: 2; }
+  .product-block.reverse .p-text { order: 1; }
+  .p-text h3 { font-size: 26px; margin-bottom: 16px; }
+  .p-text p { color: var(--muted); font-size: 15.5px; margin-bottom: 16px; }
+  .p-text .kicker { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue); margin-bottom: 10px; }
+  .p-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+  .p-list li { display: flex; gap: 12px; font-size: 14.5px; color: #cdd6ee; }
+  .p-list .bullet { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--border); display: grid; place-items: center; font-size: 11px; color: var(--emerald); margin-top: 1px; }
+
+  .p-visual {
+    border-radius: 18px; border: 1px solid var(--border); background: var(--panel);
+    padding: 22px; min-height: 300px;
+  }
+  .checklist-card { background: var(--panel-2); border-radius: 12px; border: 1px solid var(--border); padding: 18px; margin-bottom: 12px; }
+  .checklist-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .checklist-row:last-child { border-bottom: none; }
+  .cb { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--muted-2); flex-shrink: 0; margin-top: 2px; }
+  .cb.done { background: var(--emerald); border-color: var(--emerald); position: relative; }
+  .cb.done::after { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; color: #062018; font-weight: 900; }
+  .cl-title { font-size: 13.5px; color: var(--text); font-weight: 600; }
+  .cl-note { font-size: 12px; color: var(--muted-2); margin-top: 2px; }
+  .cl-note .hl { color: var(--emerald); font-weight: 600; }
+
+  /* ── Pillars ── */
+  .pillars-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  .pillar-card { border-radius: 14px; border: 1px solid var(--border); background: var(--panel); padding: 22px 18px; text-align: center; transition: transform 0.15s, border-color 0.15s; }
+  .pillar-card:hover { transform: translateY(-4px); border-color: var(--emerald); }
+  .pillar-icon { width: 42px; height: 42px; border-radius: 10px; margin: 0 auto 14px; display: grid; place-items: center; font-size: 18px; }
+  .pillar-card h4 { font-size: 14.5px; margin-bottom: 6px; }
+  .pillar-card p { font-size: 12px; color: var(--muted-2); }
+
+  /* ── Stats band ── */
+  .stats-band { background: linear-gradient(180deg, var(--panel), var(--navy-2)); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; text-align: center; }
+  .stat b { display: block; font-size: 36px; font-weight: 800; background: linear-gradient(135deg, var(--emerald), var(--blue)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat span { font-size: 13px; color: var(--muted); }
+
+  /* ── Architecture strip ── */
+  .arch-strip { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 40px; }
+  .arch-pill { font-size: 12.5px; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); padding: 8px 14px; border-radius: 999px; }
+  .arch-pill b { color: var(--text); }
+
+  /* ── Testimonial-style quote ── */
+  .quote-block { text-align: center; max-width: 780px; margin: 0 auto; }
+  .quote-block p { font-size: 24px; font-weight: 500; line-height: 1.5; color: #eef1fb; margin-bottom: 20px; }
+  .quote-block .attrib { font-size: 13px; color: var(--muted-2); }
+
+  /* ── FAQ / objections ── */
+  .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .faq-item { border-radius: 14px; border: 1px solid var(--border); padding: 22px; background: var(--panel); }
+  .faq-item h4 { font-size: 15px; margin-bottom: 8px; color: var(--text); }
+  .faq-item p { font-size: 13.5px; color: var(--muted); }
+
+  /* ── CTA ── */
+  .cta-section { text-align: center; padding: 100px 0; }
+  .cta-box {
+    border-radius: 24px; border: 1px solid var(--border);
+    background: radial-gradient(circle at 50% 0%, rgba(52,211,153,0.1), transparent 60%), var(--panel);
+    padding: 64px 40px;
+  }
+  .cta-box h2 { font-size: 34px; margin-bottom: 16px; }
+  .cta-box p { color: var(--muted); font-size: 16px; max-width: 520px; margin: 0 auto 32px; }
+  .cta-btns { display: flex; gap: 14px; justify-content: center; }
+
+  /* ── Footer ── */
+  footer { border-top: 1px solid var(--border); padding: 48px 0 32px; }
+  .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+  .footer-brand { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+  .footer-links { display: flex; gap: 26px; font-size: 13.5px; color: var(--muted-2); }
+  .footer-links a:hover { color: var(--text); }
+
+  @media (max-width: 980px) {
+    .hero-grid, .product-block, .product-block.reverse { grid-template-columns: 1fr; }
+    .product-block.reverse .p-visual, .product-block.reverse .p-text { order: unset; }
+    .contrast-grid, .stats-grid, .faq-grid { grid-template-columns: 1fr; }
+    .pillars-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { display: none; }
+    .hero h1 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="8" r="2.6" fill="#34D399"/><circle cx="7" cy="20" r="2.6" fill="#38BDF8"/><circle cx="25" cy="20" r="2.6" fill="#38BDF8"/><circle cx="16" cy="24" r="2.2" fill="#818CF8"/><path d="M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3" stroke="#CBD5E1" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </div>
+      Intellicore <span style="color:var(--muted-2); font-weight:500;">CMP</span>
+    </div>
+    <div class="nav-links">
+      <a href="#product">Product</a>
+      <a href="#pillars">Pillars</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#faq" class="btn btn-ghost">Talk to Searce</a>
+      <a href="#cta" class="btn btn-primary">Book a demo</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> A Searce Product · Powered by CSRE</div>
+      <h1>Reactive support forgets<br>every ticket. <span class="grad">Intellicore remembers.</span></h1>
+      <p class="sub">
+        Intellicore CMP fuses CloudOps, FinOps, Cloud Security, DevOps and AIOps into one
+        operational Memory graph — so every incident, fix and cost pattern becomes institutional
+        knowledge your cloud reuses automatically. That's the difference between a ticket queue
+        and an intelligence layer.
+      </p>
+      <div class="hero-ctas">
+        <a href="#cta" class="btn btn-primary">Get your free 2-week assessment</a>
+        <a href="#product" class="btn btn-ghost">See the Memory graph ↓</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b>12 min</b><span>avg. time to flag a known pattern</span></div>
+        <div class="hstat"><b>96%</b><span>auto-fix confidence on recurring findings</span></div>
+        <div class="hstat"><b>0</b><span>LLM cost to Searce — you bring your own key</span></div>
+      </div>
+    </div>
+
+    <div class="graph-card">
+      <div class="graph-label">Live view</div>
+      <div class="graph-title">The Memory Graph — how one fix becomes every fix</div>
+      <svg class="graph" viewBox="0 0 480 380">
+        <defs>
+          <linearGradient id="hotgrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#34d399"/>
+            <stop offset="100%" stop-color="#38bdf8"/>
+          </linearGradient>
+        </defs>
+
+        <!-- edges -->
+        <path class="g-edge hot" d="M240,190 L120,90"/>
+        <path class="g-edge hot" d="M240,190 L360,90"/>
+        <path class="g-edge" d="M240,190 L120,290"/>
+        <path class="g-edge hot" d="M240,190 L360,290"/>
+        <path class="g-edge" d="M120,90 L60,40"/>
+        <path class="g-edge" d="M360,90 L420,40"/>
+        <path class="g-edge" d="M360,290 L420,330"/>
+        <path class="g-edge" d="M120,290 L60,330"/>
+        <path class="g-edge hot" d="M120,90 L360,290" stroke-dasharray="3 5"/>
+
+        <!-- center: Memory node -->
+        <g class="g-node">
+          <circle cx="240" cy="190" r="26" fill="#0d1220" stroke="#34d399" stroke-width="2" class="pulsing" style="color:#34d399"/>
+          <text x="240" y="187" text-anchor="middle" font-weight="700" fill="#34d399" font-size="10">MEMORY</text>
+          <text x="240" y="198" text-anchor="middle" class="lbl-sub">graph</text>
+        </g>
+
+        <!-- Aarti SSH incident -->
+        <g class="g-node">
+          <circle cx="120" cy="90" r="19" fill="#0d1220" stroke="#fb7185" stroke-width="2" style="color:#fb7185"/>
+          <text x="120" y="87" text-anchor="middle" fill="#fecdd3" font-size="9" font-weight="700">SSH open</text>
+          <text x="120" y="97" text-anchor="middle" class="lbl-sub">CIS 5.2 finding</text>
+        </g>
+        <g class="g-node">
+          <circle cx="60" cy="40" r="13" fill="#0d1220" stroke="#64748b" stroke-width="1.5"/>
+          <text x="60" y="43" text-anchor="middle" fill="#cbd5e1" font-size="8">Account A</text>
+        </g>
+
+        <!-- Netcore cost spike -->
+        <g class="g-node">
+          <circle cx="360" cy="90" r="19" fill="#0d1220" stroke="#fbbf24" stroke-width="2" style="color:#fbbf24"/>
+          <text x="360" y="87" text-anchor="middle" fill="#fde68a" font-size="9" font-weight="700">Cost spike</text>
+          <text x="360" y="97" text-anchor="middle" class="lbl-sub">BigQuery ETL</text>
+        </g>
+        <g class="g-node">
+          <circle cx="420" cy="40" r="13" fill="#0d1220" stroke="#64748b" stroke-width="1.5"/>
+          <text x="420" y="43" text-anchor="middle" fill="#cbd5e1" font-size="8">2TB table</text>
+        </g>
+
+        <!-- ShoppersStop egress -->
+        <g class="g-node">
+          <circle cx="360" cy="290" r="19" fill="#0d1220" stroke="#38bdf8" stroke-width="2" class="pulsing" style="color:#38bdf8"/>
+          <text x="360" y="287" text-anchor="middle" fill="#bae6fd" font-size="9" font-weight="700">Egress 3.3σ</text>
+          <text x="360" y="297" text-anchor="middle" class="lbl-sub">Real, not FP</text>
+        </g>
+        <g class="g-node">
+          <circle cx="420" cy="330" r="13" fill="#0d1220" stroke="#64748b" stroke-width="1.5"/>
+          <text x="420" y="333" text-anchor="middle" fill="#cbd5e1" font-size="8">Sale window</text>
+        </g>
+
+        <!-- DesignX IAM guardrail -->
+        <g class="g-node">
+          <circle cx="120" cy="290" r="19" fill="#0d1220" stroke="#818cf8" stroke-width="2" style="color:#818cf8"/>
+          <text x="120" y="287" text-anchor="middle" fill="#c7d2fe" font-size="9" font-weight="700">IAM grant</text>
+          <text x="120" y="297" text-anchor="middle" class="lbl-sub">blocked pre-deploy</text>
+        </g>
+        <g class="g-node">
+          <circle cx="60" cy="330" r="13" fill="#0d1220" stroke="#64748b" stroke-width="1.5"/>
+          <text x="60" y="333" text-anchor="middle" fill="#cbd5e1" font-size="8">deploy-bot</text>
+        </g>
+      </svg>
+      <div style="display:flex; gap:16px; margin-top:10px; flex-wrap:wrap;">
+        <span style="font-size:11px; color:var(--muted-2);">● <b style="color:var(--emerald)">Reused fix path</b> — pattern matched across accounts</span>
+        <span style="font-size:11px; color:var(--muted-2);">◌ Resource / account context</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="trust">
+  <div class="container trust-inner">
+    <div class="trust-item">Managed across <b>GCP &amp; AWS</b></div>
+    <div class="trust-item"><b>Chemicals</b> · Pharma</div>
+    <div class="trust-item"><b>Fintech</b> · Payments</div>
+    <div class="trust-item"><b>Retail</b> · E-commerce</div>
+    <div class="trust-item"><b>Martech</b> SaaS</div>
+    <div class="trust-item"><b>Design</b> SaaS</div>
+  </div>
+</div>
+
+<!-- ── PROBLEM ── -->
+<section>
+  <div class="container">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center"><span class="dot"></span> The problem with reactive support</div>
+      <h2>Every ticket starts from zero.<br>That's the actual cost.</h2>
+      <p>A ticket queue is a filing cabinet. It stores what happened — it doesn't remember what it means, who it affects, or what fixed it last time. Every new engineer, every new incident, starts the investigation over.</p>
+    </div>
+    <div class="contrast-grid">
+      <div class="contrast-card bad">
+        <h3>🗂️ Reactive support</h3>
+        <ul>
+          <li><span class="tick">✕</span> Opens a ticket and starts the investigation from scratch, every time.</li>
+          <li><span class="tick">✕</span> Institutional knowledge lives in one engineer's head — and leaves when they do.</li>
+          <li><span class="tick">✕</span> Checklists are static documents nobody updates after the first incident.</li>
+          <li><span class="tick">✕</span> The same statistical anomaly gets escalated or ignored inconsistently, because nobody remembers what it was last time.</li>
+          <li><span class="tick">✕</span> A fix that worked in one account doesn't automatically apply to the other nine.</li>
+        </ul>
+      </div>
+      <div class="contrast-card good">
+        <h3>🧠 Intellicore's Memory</h3>
+        <ul>
+          <li><span class="tick">✓</span> Recognizes a recurring pattern in minutes, not hours — because it's seen it before.</li>
+          <li><span class="tick">✓</span> Knowledge lives in the graph, not in a person. Nobody rolling off ever takes it with them.</li>
+          <li><span class="tick">✓</span> Checklists adapt automatically — every resolved incident becomes a new guardrail.</li>
+          <li><span class="tick">✓</span> Distinguishes a real signal from a known false positive by comparing its actual shape, not just its magnitude.</li>
+          <li><span class="tick">✓</span> One fix, reused with evidence, across every account and environment it applies to.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRODUCT DEEP DIVE ── -->
+<section id="product">
+  <div class="container">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center"><span class="dot"></span> Product</div>
+      <h2>How Intellicore turns events into memory</h2>
+      <p>Every signal from your cloud — an incident, a cost anomaly, a security finding, a config change — becomes a node in a per-tenant graph. Intellicore doesn't just log it. It connects it.</p>
+    </div>
+
+    <div class="product-block">
+      <div class="p-text">
+        <div class="kicker">01 — Memory Event Detection</div>
+        <h3>AI reads every signal for what it actually means, not just what it says</h3>
+        <p>
+          A raw event — "BigQuery scan exceeded 1TB" — means nothing on its own. Intellicore's AI layer
+          correlates it against every prior event on that resource, that account, and that pattern class:
+          what preceded it, what it caused, and whether this exact shape has occurred before.
+        </p>
+        <p>
+          That's what separates a Memory Event from a log line: it carries causal context (<em>what led here</em>),
+          resource context (<em>what else does this touch</em>), and historical context (<em>has this
+          happened, and how did it resolve</em>) — all attached automatically, at ingestion time.
+        </p>
+        <ul class="p-list">
+          <li><span class="bullet">✓</span> Causal inference links deploys to the incidents they trigger, IAM grants to the findings they create.</li>
+          <li><span class="bullet">✓</span> Pattern rules run continuously — 3+ occurrences at rising confidence surfaces a named, reusable pattern.</li>
+          <li><span class="bullet">✓</span> Every pattern carries its own confidence score, so low-signal noise never auto-executes.</li>
+        </ul>
+      </div>
+      <div class="p-visual">
+        <div class="graph-label">Memory graph — causal chain</div>
+        <svg viewBox="0 0 400 260" style="width:100%; height:260px; overflow:visible;">
+          <path class="g-edge hot" d="M60,60 L180,60"/>
+          <path class="g-edge hot" d="M180,60 L300,60"/>
+          <path class="g-edge" d="M180,60 L180,150"/>
+          <path class="g-edge hot" d="M180,150 L300,190"/>
+          <g><circle cx="60" cy="60" r="20" fill="#0d1220" stroke="#fbbf24" stroke-width="2"/><text x="60" y="57" text-anchor="middle" font-size="9" fill="#fde68a" font-weight="700">Deploy</text><text x="60" y="68" text-anchor="middle" font-size="8" fill="#7c88a8">Fri 4:32pm</text></g>
+          <g><circle cx="180" cy="60" r="20" fill="#0d1220" stroke="#fb7185" stroke-width="2" class="pulsing"/><text x="180" y="57" text-anchor="middle" font-size="9" fill="#fecdd3" font-weight="700">P2 Incident</text><text x="180" y="68" text-anchor="middle" font-size="8" fill="#7c88a8">5xx spike</text></g>
+          <g><circle cx="300" cy="60" r="20" fill="#0d1220" stroke="#34d399" stroke-width="2"/><text x="300" y="57" text-anchor="middle" font-size="9" fill="#d7f5e8" font-weight="700">Rollback</text><text x="300" y="68" text-anchor="middle" font-size="8" fill="#7c88a8">auto-executed</text></g>
+          <g><circle cx="180" cy="150" r="16" fill="#0d1220" stroke="#818cf8" stroke-width="2"/><text x="180" y="147" text-anchor="middle" font-size="8.5" fill="#c7d2fe" font-weight="700">Pattern</text><text x="180" y="157" text-anchor="middle" font-size="7.5" fill="#7c88a8">Friday deploy → P2</text></g>
+          <g><circle cx="300" cy="190" r="16" fill="#0d1220" stroke="#38bdf8" stroke-width="2"/><text x="300" y="187" text-anchor="middle" font-size="8.5" fill="#bae6fd" font-weight="700">Guardrail</text><text x="300" y="197" text-anchor="middle" font-size="7.5" fill="#7c88a8">deploy freeze 4pm+</text></g>
+        </svg>
+        <p style="font-size:12px; color:var(--muted-2); margin-top:8px;">4 occurrences of this exact chain → Intellicore proposed the guardrail on its own.</p>
+      </div>
+    </div>
+
+    <div class="product-block reverse">
+      <div class="p-text">
+        <div class="kicker">02 — Beyond human checklists</div>
+        <h3>The checklist a human writes goes stale. The one Intellicore runs doesn't.</h3>
+        <p>
+          A human-authored runbook captures what someone knew on the day they wrote it. It doesn't know
+          that this specific VPC belongs to a compliance-scoped project, that this service account was
+          already flagged twice this quarter, or that the "backup job" false positive from six weeks ago
+          has a different signature than what's happening right now.
+        </p>
+        <p>
+          Intellicore's checklist isn't a document — it's a live query against the graph. Every item carries
+          the full context a human would need forty minutes and three Slack threads to reconstruct: prior
+          occurrences, blast radius, who owns the resource, and whether this exact fix has ever caused a
+          regression.
+        </p>
+        <ul class="p-list">
+          <li><span class="bullet">✓</span> No stale runbooks — every checklist item is generated from what's true in the graph right now.</li>
+          <li><span class="bullet">✓</span> Full context per item: prior occurrences, confidence, blast radius, evidence.</li>
+          <li><span class="bullet">✓</span> What a rotating on-call engineer can't hold in their head, the graph holds indefinitely.</li>
+        </ul>
+      </div>
+      <div class="p-visual">
+        <div class="checklist-card">
+          <div class="checklist-row">
+            <div class="cb done"></div>
+            <div><div class="cl-title">Restrict SSH security group to VPN CIDR</div>
+            <div class="cl-note">Auto-remediated · seen <span class="hl">12 times</span> · confidence <span class="hl">96%</span> · evidence attached</div></div>
+          </div>
+          <div class="checklist-row">
+            <div class="cb done"></div>
+            <div><div class="cl-title">Rotate admin key unused 90+ days</div>
+            <div class="cl-note">Matches <span class="hl">2 prior fintech remediations</span> · PCI-DSS evidence auto-attached</div></div>
+          </div>
+          <div class="checklist-row">
+            <div class="cb"></div>
+            <div><div class="cl-title">Classify checkout-service egress anomaly</div>
+            <div class="cl-note">Signature <span class="hl">differs from Jun 2 false positive</span> — flagged as likely real, human review requested</div></div>
+          </div>
+          <div class="checklist-row">
+            <div class="cb"></div>
+            <div><div class="cl-title">Review deploy-bot Editor grant</div>
+            <div class="cl-note">Blocked pre-deploy · matches the <span class="hl">May 9 privilege-escalation</span> pattern</div></div>
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--muted-2); margin-top:4px;">Every line above is generated, not written — and disappears the moment it's no longer true.</p>
+      </div>
+    </div>
+
+    <div class="product-block">
+      <div class="p-text">
+        <div class="kicker">03 — Institutional memory, not individual memory</div>
+        <h3>When an engineer rolls off, none of this leaves with them</h3>
+        <p>
+          The single biggest cost of reactive support isn't the incident — it's re-learning the same
+          incident every time someone new is on call. Intellicore's graph is the institution's memory,
+          not any one person's. A new CSRE engineer inherits every pattern, every fix, every false-positive
+          lesson on day one.
+        </p>
+        <p>
+          This is also why Intellicore doesn't need a bigger model to get smarter — it needs more graph.
+          Every incident your team resolves makes the next one faster to recognize, for every account,
+          every environment, indefinitely.
+        </p>
+        <ul class="p-list">
+          <li><span class="bullet">✓</span> Zero knowledge loss on team rotation — the graph, not the person, is the source of truth.</li>
+          <li><span class="bullet">✓</span> Cross-environment reuse: a fix proven in staging carries its evidence into production.</li>
+          <li><span class="bullet">✓</span> BYOK — every AI feature runs on your own Anthropic, OpenAI or Gemini key. Your data, your key, nothing billed to Searce.</li>
+        </ul>
+      </div>
+      <div class="p-visual">
+        <div class="graph-label">Cross-environment reuse</div>
+        <svg viewBox="0 0 400 220" style="width:100%; height:220px; overflow:visible;">
+          <path class="g-edge hot" d="M80,110 L200,60"/>
+          <path class="g-edge hot" d="M80,110 L200,160"/>
+          <path class="g-edge hot" d="M200,60 L320,60"/>
+          <path class="g-edge hot" d="M200,160 L320,160"/>
+          <g><circle cx="80" cy="110" r="22" fill="#0d1220" stroke="#34d399" stroke-width="2" class="pulsing"/><text x="80" y="107" text-anchor="middle" font-size="9" fill="#d7f5e8" font-weight="700">Fix proven</text><text x="80" y="118" text-anchor="middle" font-size="8" fill="#7c88a8">in staging</text></g>
+          <g><circle cx="200" cy="60" r="16" fill="#0d1220" stroke="#38bdf8" stroke-width="2"/><text x="200" y="63" text-anchor="middle" font-size="8.5" fill="#bae6fd" font-weight="700">UAT</text></g>
+          <g><circle cx="200" cy="160" r="16" fill="#0d1220" stroke="#818cf8" stroke-width="2"/><text x="200" y="163" text-anchor="middle" font-size="8.5" fill="#c7d2fe" font-weight="700">Dev</text></g>
+          <g><circle cx="320" cy="60" r="20" fill="#0d1220" stroke="#fbbf24" stroke-width="2"/><text x="320" y="57" text-anchor="middle" font-size="9" fill="#fde68a" font-weight="700">Production</text><text x="320" y="68" text-anchor="middle" font-size="8" fill="#7c88a8">applied w/ evidence</text></g>
+          <g><circle cx="320" cy="160" r="20" fill="#0d1220" stroke="#fbbf24" stroke-width="2"/><text x="320" y="157" text-anchor="middle" font-size="9" fill="#fde68a" font-weight="700">Production</text><text x="320" y="168" text-anchor="middle" font-size="8" fill="#7c88a8">applied w/ evidence</text></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PILLARS ── -->
+<section id="pillars" style="background: var(--navy-2); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center"><span class="dot"></span> One graph, five pillars</div>
+      <h2>Every operational discipline, fused by Memory</h2>
+      <p>Intellicore doesn't run five separate tools bolted together. One graph. Five lenses onto it.</p>
+    </div>
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <div class="pillar-icon" style="background:rgba(56,189,248,0.12); color:#38bdf8;">☁</div>
+        <h4>CloudOps</h4>
+        <p>Reliability, capacity, incident causal chains</p>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon" style="background:rgba(251,191,36,0.12); color:#fbbf24;">$</div>
+        <h4>FinOps</h4>
+        <p>Cost anomalies matched to known patterns in minutes</p>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon" style="background:rgba(251,113,133,0.12); color:#fb7185;">🛡</div>
+        <h4>Cloud Security</h4>
+        <p>Findings, IAM risk, compliance evidence — automatic</p>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon" style="background:rgba(129,140,248,0.12); color:#818cf8;">⌥</div>
+        <h4>DevOps</h4>
+        <p>Change guardrails learned from your own incidents</p>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon" style="background:rgba(52,211,153,0.12); color:#34d399;">✦</div>
+        <h4>AIOps</h4>
+        <p>Agents that act on Memory, not just alert on thresholds</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<section class="stats-band">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat"><b>15–20%</b><span>typical cloud spend savings, no war room required</span></div>
+      <div class="stat"><b>22%</b><span>MTTR improvement on second occurrence of any pattern</span></div>
+      <div class="stat"><b>100%</b><span>of &gt;90%-confidence auto-fixes ship with zero regressions</span></div>
+      <div class="stat"><b>2 weeks</b><span>from first login to a full FinOps + security posture readout</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS / ARCHITECTURE ── -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center"><span class="dot"></span> How it's built</div>
+      <h2>Isolated per customer. Managed by Searce CSRE.</h2>
+      <p>Every customer runs in its own environment, with its own Memory graph and its own encrypted AI key. Nothing shared, nothing shared-fate.</p>
+    </div>
+    <div class="arch-strip">
+      <span class="arch-pill"><b>Separate VM</b> per customer</span>
+      <span class="arch-pill"><b>Neo4j</b> Memory graph</span>
+      <span class="arch-pill"><b>BYOK</b> — Anthropic / OpenAI / Gemini</span>
+      <span class="arch-pill"><b>TOTP 2FA</b> + Google SSO</span>
+      <span class="arch-pill"><b>Encrypted at rest</b> — pgcrypto</span>
+      <span class="arch-pill">Managed by <b>Searce CSRE Squad</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- ── QUOTE ── -->
+<section style="padding-top:0;">
+  <div class="container">
+    <div class="quote-block">
+      <p>"A pharma customer, mid-audit. Reactive support opens a ticket and starts from zero. Intellicore already fixed this exact pattern on three of their accounts three weeks ago — so it offers the same one-click remediation at 96% confidence, with the audit evidence attached. Minutes, not days."</p>
+      <div class="attrib">— from an Intellicore CMP customer walkthrough</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center"><span class="dot"></span> Common questions</div>
+      <h2>What people ask before they say yes</h2>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <h4>Is this real data or a demo?</h4>
+        <p>The Memory engine and every pillar are real. What you see in a first walkthrough is a representative demo book — on your account, it's your data from day one.</p>
+      </div>
+      <div class="faq-item">
+        <h4>We already use Datadog / Wiz — is this redundant?</h4>
+        <p>No — Intellicore operationalizes those signals and adds the managed remediation memory on top. Not either/or.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Does the AI cost extra?</h4>
+        <p>No. You bring your own key (Anthropic, OpenAI, or Gemini), so inference is billed to your own account. Searce never marks it up.</p>
+      </div>
+      <div class="faq-item">
+        <h4>How isolated is our data?</h4>
+        <p>Each customer runs in its own isolated environment — separate VM, separate databases, its own TLS certificate.</p>
+      </div>
+      <div class="faq-item">
+        <h4>What happens if our engineer leaves?</h4>
+        <p>The memory stays. That's the whole point — the institution remembers, not the individual.</p>
+      </div>
+      <div class="faq-item">
+        <h4>How fast can we see value?</h4>
+        <p>Give us your most reactive, most at-risk account. In two weeks we'll hand you its FinOps savings, security posture, and a memory-backed remediation plan — free.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section" id="cta">
+  <div class="container">
+    <div class="cta-box">
+      <div class="eyebrow" style="justify-content:center"><span class="dot"></span> The ask</div>
+      <h2>Give us one account. Your most reactive one.</h2>
+      <p>In two weeks we'll hand you its FinOps savings, security posture, and a memory-backed remediation plan — free. No procurement cycle required to see it work.</p>
+      <div class="cta-btns">
+        <a href="mailto:hello@searce.com?subject=Intellicore%20CMP%20—%20Free%20Assessment" class="btn btn-primary">Book your free assessment</a>
+        <a href="mailto:hello@searce.com?subject=Intellicore%20CMP%20—%20Demo%20Request" class="btn btn-ghost">Talk to the team</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="brand-mark" style="width:26px;height:26px;">
+        <svg viewBox="0 0 32 32" fill="none" style="width:15px;height:15px;"><circle cx="16" cy="8" r="2.6" fill="#34D399"/><circle cx="7" cy="20" r="2.6" fill="#38BDF8"/><circle cx="25" cy="20" r="2.6" fill="#38BDF8"/><circle cx="16" cy="24" r="2.2" fill="#818CF8"/><path d="M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3" stroke="#CBD5E1" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </div>
+      Intellicore CMP · A Searce Product · Powered by CSRE
+    </div>
+    <div class="footer-links">
+      <a href="#product">Product</a>
+      <a href="#pillars">Pillars</a>
+      <a href="#faq">FAQ</a>
+      <a href="mailto:hello@searce.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

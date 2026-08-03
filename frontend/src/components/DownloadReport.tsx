@@ -4,6 +4,8 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Download, Loader2 } from "lucide-react";
 import { hasReport, downloadReport, reportTitleFor } from "@/lib/report";
+import { useOrg } from "@/lib/org-context";
+import { envLabel } from "@/lib/tenants";
 
 /**
  * Route-aware "Download report" button. Appears in the top bar on any
@@ -13,6 +15,7 @@ import { hasReport, downloadReport, reportTitleFor } from "@/lib/report";
  */
 export function DownloadReport() {
   const pathname = usePathname();
+  const { tenantId, tenant, environment } = useOrg();
   const [busy, setBusy] = useState(false);
 
   if (!hasReport(pathname)) return null;
@@ -20,7 +23,12 @@ export function DownloadReport() {
   async function onClick() {
     setBusy(true);
     try {
-      await downloadReport(pathname);
+      await downloadReport(pathname, {
+        tenantId,
+        environment,
+        tenantName: tenant.name,
+        environmentLabel: envLabel(tenantId, environment),
+      });
     } catch (err) {
       console.error("Report generation failed:", err);
       alert("Could not generate the report. Please try again.");

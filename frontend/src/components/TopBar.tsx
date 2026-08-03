@@ -2,6 +2,7 @@ import { Search, Bell } from "lucide-react";
 import { fetchMe } from "@/lib/api";
 import { LogoutButton } from "@/components/LogoutButton";
 import { DownloadReport } from "@/components/DownloadReport";
+import { OrgSwitcher } from "@/components/OrgSwitcher";
 
 export async function TopBar() {
   const user = await fetchMe();
@@ -22,6 +23,8 @@ export async function TopBar() {
       </div>
 
       <DownloadReport />
+
+      <OrgSwitcher />
 
       <button className="p-2 hover:bg-slate-100 rounded-lg">
         <Bell className="w-4 h-4 text-slate-600" />

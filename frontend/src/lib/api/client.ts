@@ -1,18 +1,28 @@
 /* ------------------------------------------------------------------ */
 /*  Intellicore CMP — API client                                      */
 /*  Serves seed data from per-domain mock modules by default so every  */
-/*  page has data with no backend. The real pillar endpoints           */
-/*  (/command-center, /cloudops, /finops, …) are opt-in: set           */
+/*  page has data with no backend. Each mock module is keyed           */
+/*  [tenantId][environmentId][endpoint] so the org switcher on         */
+/*  Command Center changes every page's data. The real pillar          */
+/*  endpoints (/command-center, /cloudops, /finops, …) are opt-in: set  */
 /*  NEXT_PUBLIC_DATA_SOURCE=api once the backend implements them.       */
 /*  NOTE: this is intentionally decoupled from NEXT_PUBLIC_API_URL,     */
 /*  which the production image sets to "/api" for the auth proxy — the  */
 /*  data layer must NOT hit that until those endpoints exist.           */
 /* ------------------------------------------------------------------ */
 
+import { DEFAULT_ENV_ID, DEFAULT_TENANT_ID } from "@/lib/tenants";
+
 const USE_REAL_API = process.env.NEXT_PUBLIC_DATA_SOURCE === "api";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
-type MockModule = { default: Record<string, unknown> };
+type TenantBucket = Record<string, Record<string, unknown>>;
+type MockModule = { default: Record<string, TenantBucket> };
+
+export interface ApiFetchContext {
+  tenantId?: string;
+  environment?: string;
+}
 
 /**
  * Static import() map keyed by the first path segment of an endpoint.
@@ -32,20 +42,28 @@ const DOMAIN_LOADERS: Record<string, () => Promise<MockModule>> = {
 };
 
 /**
- * Fetches data for an Intellicore CMP endpoint.
+ * Fetches data for an Intellicore CMP endpoint, scoped to a tenant + environment.
  *
  * @param endpoint  API path, e.g. '/command-center/scores'
+ * @param ctx       Which customer + environment to fetch for. Defaults to
+ *                  the demo default tenant/environment when omitted.
  *
  * Real backend (when NEXT_PUBLIC_API_URL is set):
- *   GET `${API_BASE}${endpoint}` with the session cookie.
+ *   GET `${API_BASE}${endpoint}?tenant_id=...&environment=...` with the
+ *   session cookie.
  *
  * Development / demo (no backend):
- *   Resolves seed data from the matching ./mock/<domain> module.
+ *   Resolves seed data from the matching ./mock/<domain> module, indexed
+ *   [tenantId][environment][endpoint].
  */
-export async function apiFetch<T>(endpoint: string): Promise<T> {
+export async function apiFetch<T>(endpoint: string, ctx?: ApiFetchContext): Promise<T> {
+  const tenantId = ctx?.tenantId ?? DEFAULT_TENANT_ID;
+  const environment = ctx?.environment ?? DEFAULT_ENV_ID;
+
   if (USE_REAL_API) {
     try {
-      const res = await fetch(`${API_BASE}${endpoint}`, {
+      const qs = new URLSearchParams({ tenant_id: tenantId, environment });
+      const res = await fetch(`${API_BASE}${endpoint}?${qs.toString()}`, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         cache: "no-store",
@@ -63,5 +81,8 @@ export async function apiFetch<T>(endpoint: string): Promise<T> {
     return [] as unknown as T;
   }
   const mod = await loader();
-  return (mod.default[endpoint] ?? []) as T;
+  const byTenant = mod.default[tenantId] ?? mod.default[DEFAULT_TENANT_ID];
+  const byEnv =
+    byTenant?.[environment] ?? byTenant?.[Object.keys(byTenant ?? {})[0] ?? ""];
+  return (byEnv?.[endpoint] ?? []) as T;
 }
