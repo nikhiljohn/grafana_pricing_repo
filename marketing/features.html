@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Features — Intellicore CMP | Searce</title>
+<meta name="description" content="Every Intellicore CMP feature in detail — Command Center, CloudOps, FinOps, Cloud Security, DevOps, AIOps, the Memory graph, and how the platform is deployed and secured.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F172A'/%3E%3Ccircle cx='16' cy='8' r='2.6' fill='%2334D399'/%3E%3Ccircle cx='7' cy='20' r='2.6' fill='%2338BDF8'/%3E%3Ccircle cx='25' cy='20' r='2.6' fill='%2338BDF8'/%3E%3Ccircle cx='16' cy='24' r='2.2' fill='%23818CF8'/%3E%3Cpath d='M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3' stroke='%23CBD5E1' stroke-width='1.3' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --navy: #ffffff; --navy-2: #f4f6fb; --panel: #ffffff; --panel-2: #f1f4fa;
+    --border: #e2e7f2; --text: #10182b; --muted: #4b5670; --muted-2: #8992ac;
+    --emerald: #34d399; --blue: #38bdf8; --violet: #818cf8; --amber: #fbbf24; --rose: #fb7185;
+    --emerald-ink: #059669; --blue-ink: #0284c7; --violet-ink: #6366f1; --amber-ink: #b45309; --rose-ink: #e11d48;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif; background: var(--navy); color: var(--text); line-height: 1.5; }
+  a { color: inherit; text-decoration: none; }
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+  h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--emerald-ink);
+    background: rgba(5,150,105,0.08); border: 1px solid rgba(5,150,105,0.22);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 20px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-ink); box-shadow: 0 0 8px rgba(5,150,105,0.5); }
+
+  nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); border-bottom: 1px solid var(--border); }
+  .nav-inner { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; padding: 16px 28px; max-width: 1180px; margin: 0 auto; }
+  .brand { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 6px; font-weight: 700; font-size: 17px; white-space: nowrap; flex-shrink: 0; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #0f172a, #1e293b); display: grid; place-items: center; border: 1px solid var(--border); flex-shrink: 0; align-self: center; }
+  .brand-mark svg { width: 18px; height: 18px; }
+  .brand-text { flex-shrink: 0; white-space: nowrap; }
+  .cmp-expand { display: inline; white-space: nowrap; flex-shrink: 0; cursor: help; color: var(--muted-2); font-weight: 500; border-bottom: 1px dotted var(--muted-2); }
+  .cmp-letter { position: relative; font-weight: 700; color: var(--muted-2); transition: color 0.2s; }
+  .cmp-expand:hover .cmp-letter { color: var(--emerald-ink); }
+  .cmp-word { display: inline-block; max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; font-weight: 500; color: var(--text); transition: max-width 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease; }
+  .cmp-expand:hover .cmp-word { opacity: 1; }
+  .cmp-expand:hover .cmp-letter:nth-child(1) .cmp-word { max-width: 60px; }
+  .cmp-expand:hover .cmp-letter:nth-child(2) .cmp-word { max-width: 130px; transition-delay: 0.08s; }
+  .cmp-expand:hover .cmp-letter:nth-child(3) .cmp-word { max-width: 110px; transition-delay: 0.16s; }
+  .nav-links { display: flex; gap: 32px; font-size: 14px; color: var(--muted); }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-cta { display: flex; gap: 12px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s; }
+  .btn-primary { background: linear-gradient(135deg, var(--emerald), #10b981); color: #062018; }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-ghost { border-color: var(--border); color: var(--text); }
+  .btn-ghost:hover { background: var(--panel-2); }
+
+  .page-hero { padding: 64px 0 48px; text-align: center; }
+  .page-hero h1 { font-size: 42px; margin-bottom: 14px; }
+  .page-hero p { color: var(--muted); font-size: 17px; max-width: 620px; margin: 0 auto; }
+
+  .toc { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding-bottom: 56px; }
+  .toc a { font-size: 13px; font-weight: 600; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); padding: 8px 16px; border-radius: 999px; }
+  .toc a:hover { color: var(--emerald-ink); border-color: rgba(5,150,105,0.3); }
+
+  .feature-section { padding: 56px 0; border-top: 1px solid var(--border); }
+  .feature-head { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  .feature-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+  .feature-head h2 { font-size: 26px; }
+  .feature-head .sub { font-size: 14px; color: var(--muted-2); margin-top: 2px; }
+
+  .cap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .cap-card { border: 1px solid var(--border); border-radius: 14px; padding: 20px; background: var(--panel); }
+  .cap-card h3 { font-size: 15px; margin-bottom: 8px; }
+  .cap-card p { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+  .cap-card .tag { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 999px; margin-bottom: 10px; }
+
+  .cta-section { text-align: center; padding: 90px 0; }
+  .cta-box { border-radius: 24px; border: 1px solid var(--border); background: radial-gradient(circle at 50% 0%, rgba(52,211,153,0.1), transparent 60%), var(--panel); padding: 56px 40px; }
+  .cta-box h2 { font-size: 30px; margin-bottom: 14px; }
+  .cta-box p { color: var(--muted); font-size: 15px; max-width: 480px; margin: 0 auto 28px; }
+  .cta-btns { display: flex; gap: 14px; justify-content: center; }
+
+  footer { border-top: 1px solid var(--border); padding: 48px 0 32px; }
+  .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+  .footer-brand { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 6px; font-size: 14px; color: var(--muted); flex-shrink: 0; }
+  .footer-brand .brand-mark { align-self: center; }
+  .footer-tail { white-space: nowrap; flex-shrink: 0; }
+  .footer-links { display: flex; gap: 26px; font-size: 13.5px; color: var(--muted-2); }
+  .footer-links a:hover { color: var(--text); }
+
+  @media (max-width: 900px) {
+    .cap-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .page-hero h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="8" r="2.6" fill="#34D399"/><circle cx="7" cy="20" r="2.6" fill="#38BDF8"/><circle cx="25" cy="20" r="2.6" fill="#38BDF8"/><circle cx="16" cy="24" r="2.2" fill="#818CF8"/><path d="M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3" stroke="#CBD5E1" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </div>
+      <span class="brand-text">Intellicore</span><span class="cmp-expand">
+        <span class="cmp-letter">C<span class="cmp-word">loud&nbsp;</span></span>
+        <span class="cmp-letter">M<span class="cmp-word">anagement&nbsp;</span></span>
+        <span class="cmp-letter">P<span class="cmp-word">latform</span></span>
+      </span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#product">Product</a>
+      <a href="features.html" class="active">Features</a>
+      <a href="team.html">Team</a>
+      <a href="index.html#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <a href="index.html#faq" class="btn btn-ghost">Talk to Searce</a>
+      <a href="mailto:nikhil.john@searce.com?subject=Intellicore%20CMP%20—%20Demo%20Request" class="btn btn-primary">Book a demo</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero container">
+  <div class="eyebrow" style="justify-content:center"><span class="dot"></span> Every feature, in detail</div>
+  <h1>What's actually in the platform</h1>
+  <p>Ten modules, one Memory graph underneath all of them. This page is the detailed reference — the homepage is the pitch.</p>
+</div>
+
+<div class="toc container">
+  <a href="#command-center">Command Center</a>
+  <a href="#cloudops">CloudOps</a>
+  <a href="#finops">FinOps</a>
+  <a href="#secops">Cloud Security</a>
+  <a href="#devops">DevOps</a>
+  <a href="#aiops">AIOps</a>
+  <a href="#memory">Memory</a>
+  <a href="#assets">Assets &amp; Alerts</a>
+  <a href="#platform">Platform &amp; Security</a>
+</div>
+
+<section class="feature-section" id="command-center" style="border-top:none;">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(5,150,105,0.12); color:#059669;">⌘</div>
+      <div><h2>Command Center</h2><div class="sub">The daily briefing — one screen, every pillar, every managed customer</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <span class="tag" style="background:rgba(5,150,105,0.1); color:#059669;">Scores</span>
+        <h3>Five pillar health scores</h3>
+        <p>CloudOps, FinOps, Cloud Security, DevOps and AIOps each roll up to a single score with a one-line status note — healthy, warning, or actively being worked by an agent.</p>
+      </div>
+      <div class="cap-card">
+        <span class="tag" style="background:rgba(225,29,72,0.1); color:#e11d48;">Attention queue</span>
+        <h3>Needs Your Attention</h3>
+        <p>Live cards ranked by severity, each with a Memory line explaining why it matters — a prior occurrence, a confidence score, an evidence trail — so triage doesn't start from zero.</p>
+      </div>
+      <div class="cap-card">
+        <span class="tag" style="background:rgba(2,132,199,0.1); color:#0284c7;">Org switcher</span>
+        <h3>Multi-customer book</h3>
+        <p>Switch between managed customers and their environments (production, staging, UAT, dev) from one dropdown. Every pillar page re-renders for whichever account is selected.</p>
+      </div>
+      <div class="cap-card">
+        <span class="tag" style="background:rgba(180,83,9,0.1); color:#b45309;">Reporting</span>
+        <h3>One-click PDF reports</h3>
+        <p>A branded, board-ready health report generates client-side for whichever pillar and customer is currently in view — scores, findings, and patterns as a downloadable PDF.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="cloudops">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(2,132,199,0.12); color:#0284c7;">☁</div>
+      <div><h2>CloudOps</h2><div class="sub">Reliability, capacity, and the causal chain behind every incident</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card"><h3>Compute &amp; GKE monitoring</h3><p>Per-instance CPU, memory, and cost, with the last incident on each resource surfaced inline — not buried in a separate dashboard.</p></div>
+      <div class="cap-card"><h3>Incident causal chains</h3><p>Every incident links to what preceded it and what it caused — a Friday deploy that led to a P2, traced automatically from the Memory graph.</p></div>
+      <div class="cap-card"><h3>Serverless &amp; pipeline health</h3><p>Function invocation rates, latency, and error rates; data pipeline run history with duration and next-run scheduling.</p></div>
+      <div class="cap-card"><h3>Recurring-pattern detection</h3><p>Capacity patterns — like GKE hitting memory pressure at a consistent 65% of projected load — get named and tracked across every occurrence.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="finops">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(180,83,9,0.12); color:#b45309;">$</div>
+      <div><h2>FinOps</h2><div class="sub">Cost anomalies matched to known patterns, in minutes not days</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card"><h3>Anomaly detection with root cause</h3><p>A cost spike is matched against prior spikes on the same resource class — same query shape, same root cause — with a confidence score and a suggested fix.</p></div>
+      <div class="cap-card"><h3>Optimization tracking</h3><p>Applied and pending recommendations (committed-use discounts, right-sizing, lifecycle policies) with actual savings realized, not just projected.</p></div>
+      <div class="cap-card"><h3>Cost-by-pillar breakdown</h3><p>Spend attributed to CloudOps, SecOps, DevOps and AIOps individually, each with its own trend line and Memory note on what changed.</p></div>
+      <div class="cap-card"><h3>Forecasting</h3><p>Month-ahead cost projections that account for pending optimizations and known seasonal patterns (like pre-sale traffic ramps).</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="secops">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(225,29,72,0.12); color:#e11d48;">🛡</div>
+      <div><h2>Cloud Security</h2><div class="sub">Findings, IAM risk, and compliance evidence — attached automatically</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card"><h3>Findings with Memory context</h3><p>Every finding shows how many times it's been seen, the last resolution, and a confidence score for auto-fix — sourced from your own remediation history, not a generic playbook.</p></div>
+      <div class="cap-card"><h3>IAM risk scoring</h3><p>Service accounts and users ranked by risk with plain-language reasoning — "Editor since creation, memory shows 8 similar cases resolved with custom roles."</p></div>
+      <div class="cap-card"><h3>Compliance frameworks</h3><p>CIS Benchmark, NIST 800-53, ISO 27001, and PCI-DSS tracked as live pass/fail scores, not a point-in-time audit snapshot.</p></div>
+      <div class="cap-card"><h3>Auto-remediation with evidence</h3><p>High-confidence fixes (like restricting SSH to a VPN CIDR) apply automatically and attach compliance evidence to the remediation record — no separate evidence-collection step.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="devops">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(99,102,241,0.12); color:#6366f1;">⌥</div>
+      <div><h2>DevOps</h2><div class="sub">Change guardrails learned from your own incidents</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card"><h3>Risk-scored change log</h3><p>Every change — a role binding, a machine-type change, a query pattern shift — is scored Low/Medium/High with the Memory reasoning behind the score.</p></div>
+      <div class="cap-card"><h3>Orchestration requests</h3><p>Provisioning requests (a new VM, a GCS bucket, an IAM role) queued for approval with estimated cost and risk, informed by how similar requests played out before.</p></div>
+      <div class="cap-card"><h3>Patch compliance</h3><p>Days-behind tracking per resource with severity, plus Memory notes on why a patch was deferred (a change freeze, a compatibility test in progress).</p></div>
+      <div class="cap-card"><h3>Pre-deploy guardrails</h3><p>A prior incident — like a CI bot granted Editor — becomes a standing rule that blocks the same pattern before it ships again.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="aiops">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(5,150,105,0.12); color:#059669;">✦</div>
+      <div><h2>AIOps</h2><div class="sub">Agents that act on Memory, not just alert on a threshold</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card"><h3>Autonomous agents</h3><p>Purpose-built agents (security auto-remediation, cost anomaly, predictive operations) each carry their own confidence threshold and current status — active, investigating, or idle.</p></div>
+      <div class="cap-card"><h3>Full audit trail</h3><p>Every AI decision is logged with its reasoning, the Memory match that informed it, and its outcome — executed, awaiting approval, or flagged for human review.</p></div>
+      <div class="cap-card"><h3>Memory Chat</h3><p>Ask plain-language questions — "what changed in the last 24h?", "what's our biggest cost risk?" — answered from the graph, with cited events and patterns.</p></div>
+      <div class="cap-card"><h3>Transparent cost</h3><p>Token usage and spend broken down by feature (auto-remediation, anomaly analysis, reports) — all billed to the customer's own BYOK key, never marked up.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="memory">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(5,150,105,0.16); color:#059669;">🧠</div>
+      <div><h2>Memory</h2><div class="sub">The graph underneath every pillar — the actual product</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card"><h3>Timeline of entries</h3><p>Every ticket becomes an entry tagged by pillar and customer, with a confidence score and a running count of how many times it's been reused.</p></div>
+      <div class="cap-card"><h3>Incident patterns</h3><p>Recurring behaviors — surfaced once occurrence count and confidence both clear threshold — with occurrence counts and auto-resolution rates.</p></div>
+      <div class="cap-card"><h3>Remediation library</h3><p>Proven fixes with success rates, so a new fix is only auto-executed once it has a track record, not on its first attempt.</p></div>
+      <div class="cap-card"><h3>Cross-pillar learnings</h3><p>Insights that span disciplines — "IAM changes correlate with 40% of security findings within 48h" — that a single-pillar tool would never surface.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="assets">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(56,189,248,0.12); color:#0284c7;">▤</div>
+      <div><h2>Assets &amp; Alerts</h2><div class="sub">The inventory and the interrupt queue</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card"><h3>Asset / CMDB inventory</h3><p>Every resource across GCP and AWS — VMs, Cloud SQL, Cloud Run, EC2 — with cost, region, state, and last-seen timestamp in one searchable table.</p></div>
+      <div class="cap-card"><h3>Alert feed with filters</h3><p>Active, acknowledged, and resolved alerts across all pillars, each with baseline vs. current values so a spike's magnitude is immediately clear.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="platform">
+  <div class="container">
+    <div class="feature-head">
+      <div class="feature-icon" style="background:rgba(129,140,248,0.12); color:#6366f1;">⚙</div>
+      <div><h2>Platform &amp; Security</h2><div class="sub">How it's deployed, authenticated, and kept isolated</div></div>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card"><h3>Per-customer isolation</h3><p>Every customer runs on its own VM with its own Postgres, Neo4j, and Redis — no shared database, no cross-tenant query risk.</p></div>
+      <div class="cap-card"><h3>Auth: TOTP 2FA + Google SSO</h3><p>Email/password with Google Authenticator-compatible 2FA, or Sign in with Google — session revocation backed by Redis, not just a stateless token.</p></div>
+      <div class="cap-card"><h3>BYOK, encrypted at rest</h3><p>Anthropic, OpenAI, or Gemini keys, encrypted with pgcrypto — only the last 4 characters are ever shown in the UI, the plaintext key never leaves the LLM call path.</p></div>
+      <div class="cap-card"><h3>Auto-TLS, locked-down network</h3><p>Caddy handles certificate provisioning automatically; only ports 80/443 are exposed. Postgres, Neo4j, and Redis are reachable only on the private network.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <div class="eyebrow" style="justify-content:center"><span class="dot"></span> See it on your own account</div>
+      <h2>Give us one account. Your most reactive one.</h2>
+      <p>Two weeks, one free assessment — FinOps savings, security posture, and a memory-backed remediation plan.</p>
+      <div class="cta-btns">
+        <a href="mailto:nikhil.john@searce.com?subject=Intellicore%20CMP%20—%20Free%20Assessment" class="btn btn-primary">Book your free assessment</a>
+        <a href="index.html" class="btn btn-ghost">Back to overview</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <div class="brand-mark" style="width:26px;height:26px;">
+        <svg viewBox="0 0 32 32" fill="none" style="width:15px;height:15px;"><circle cx="16" cy="8" r="2.6" fill="#34D399"/><circle cx="7" cy="20" r="2.6" fill="#38BDF8"/><circle cx="25" cy="20" r="2.6" fill="#38BDF8"/><circle cx="16" cy="24" r="2.2" fill="#818CF8"/><path d="M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3" stroke="#CBD5E1" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </div>
+      <span class="brand-text">Intellicore</span><span class="cmp-expand">
+        <span class="cmp-letter">C<span class="cmp-word">loud&nbsp;</span></span>
+        <span class="cmp-letter">M<span class="cmp-word">anagement&nbsp;</span></span>
+        <span class="cmp-letter">P<span class="cmp-word">latform</span></span>
+      </span><span class="footer-tail">&nbsp;· A Searce Product · Powered by CSRE</span>
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Overview</a>
+      <a href="team.html">Team</a>
+      <a href="mailto:nikhil.john@searce.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
