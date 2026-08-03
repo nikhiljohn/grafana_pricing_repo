@@ -57,6 +57,24 @@
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
   .brand-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #0f172a, #1e293b); display: grid; place-items: center; border: 1px solid var(--border); }
   .brand-mark svg { width: 18px; height: 18px; }
+
+  /* ── "CMP" hover-bloom: each letter reveals what it stands for ── */
+  .cmp-expand {
+    display: inline-flex; align-items: baseline; cursor: help;
+    color: var(--muted-2); font-weight: 500;
+    border-bottom: 1px dotted var(--muted-2);
+  }
+  .cmp-letter { position: relative; font-weight: 700; color: var(--muted-2); transition: color 0.2s; }
+  .cmp-expand:hover .cmp-letter { color: var(--emerald); }
+  .cmp-word {
+    display: inline-block; max-width: 0; opacity: 0; overflow: hidden;
+    white-space: nowrap; font-weight: 500; color: var(--text);
+    transition: max-width 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  }
+  .cmp-expand:hover .cmp-word { opacity: 1; }
+  .cmp-expand:hover .cmp-letter:nth-child(1) .cmp-word { max-width: 60px; }
+  .cmp-expand:hover .cmp-letter:nth-child(2) .cmp-word { max-width: 130px; transition-delay: 0.08s; }
+  .cmp-expand:hover .cmp-letter:nth-child(3) .cmp-word { max-width: 110px; transition-delay: 0.16s; }
   .nav-links { display: flex; gap: 32px; font-size: 14px; color: var(--muted); }
   .nav-links a:hover { color: var(--text); }
   .nav-cta { display: flex; gap: 12px; align-items: center; }
@@ -241,7 +259,12 @@
       <div class="brand-mark">
         <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="8" r="2.6" fill="#34D399"/><circle cx="7" cy="20" r="2.6" fill="#38BDF8"/><circle cx="25" cy="20" r="2.6" fill="#38BDF8"/><circle cx="16" cy="24" r="2.2" fill="#818CF8"/><path d="M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3" stroke="#CBD5E1" stroke-width="1.3" stroke-linecap="round"/></svg>
       </div>
-      Intellicore <span style="color:var(--muted-2); font-weight:500;">CMP</span>
+      Intellicore
+      <span class="cmp-expand">
+        <span class="cmp-letter">C<span class="cmp-word">loud&nbsp;</span></span>
+        <span class="cmp-letter">M<span class="cmp-word">anagement&nbsp;</span></span>
+        <span class="cmp-letter">P<span class="cmp-word">latform</span></span>
+      </span>
     </div>
     <div class="nav-links">
       <a href="#product">Product</a>
@@ -821,7 +844,13 @@
       <div class="brand-mark" style="width:26px;height:26px;">
         <svg viewBox="0 0 32 32" fill="none" style="width:15px;height:15px;"><circle cx="16" cy="8" r="2.6" fill="#34D399"/><circle cx="7" cy="20" r="2.6" fill="#38BDF8"/><circle cx="25" cy="20" r="2.6" fill="#38BDF8"/><circle cx="16" cy="24" r="2.2" fill="#818CF8"/><path d="M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3" stroke="#CBD5E1" stroke-width="1.3" stroke-linecap="round"/></svg>
       </div>
-      Intellicore CMP · A Searce Product · Powered by CSRE
+      Intellicore
+      <span class="cmp-expand">
+        <span class="cmp-letter">C<span class="cmp-word">loud&nbsp;</span></span>
+        <span class="cmp-letter">M<span class="cmp-word">anagement&nbsp;</span></span>
+        <span class="cmp-letter">P<span class="cmp-word">latform</span></span>
+      </span>
+      · A Searce Product · Powered by CSRE
     </div>
     <div class="footer-links">
       <a href="#product">Product</a>
