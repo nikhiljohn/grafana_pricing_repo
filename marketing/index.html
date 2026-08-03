@@ -129,7 +129,10 @@
   /* Fixed (not theme-flipped) light colors — these labels always sit
      directly on the dark diagram canvases (.graph-card, .p-visual). */
   .graph-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7c88a8; margin-bottom: 4px; }
-  .graph-title { font-size: 14px; font-weight: 600; color: #e5e9f5; margin-bottom: 18px; }
+  .graph-title { font-size: 14px; font-weight: 600; color: #e5e9f5; margin-bottom: 6px; }
+  .graph-sub { font-size: 12px; color: #7c88a8; margin-bottom: 18px; line-height: 1.5; }
+  .pf-outcome { font-size: 12px; color: #a5b0d0; margin-top: 12px; padding-top: 12px; border-top: 1px solid #262f47; line-height: 1.5; }
+  .pf-outcome b { color: #e5e9f5; font-weight: 600; }
   svg.graph { width: 100%; height: 380px; overflow: visible; }
   .g-edge { stroke: #35405e; stroke-width: 1.4; fill: none; }
   .g-node circle { filter: drop-shadow(0 0 6px currentColor); }
@@ -347,8 +350,11 @@
       <div class="eyebrow"><span class="dot"></span> A Searce Product · Powered by CSRE</div>
       <h1>Reactive support forgets<br>every ticket. <span class="grad">Intellicore remembers.</span></h1>
       <p class="sub">
-        One Memory graph fuses CloudOps, FinOps, Cloud Security, DevOps and AIOps —
-        every incident and fix becomes reusable knowledge, automatically.
+        Every business now runs on cloud — and increasingly, on AI. Both throw off events
+        every single day: a rule that opens too much, a job that spends too much, a spike
+        nobody's seen before. First it was cloud. Now it's AI. That dependency is what
+        inspired Intellicore — one Memory graph that turns every event into part of your
+        story. The outcome doesn't arrive instantly. We're here to get you to it.
       </p>
       <div class="hero-ctas">
         <a href="mailto:nikhil.john@searce.com?subject=Intellicore%20CMP%20—%20Free%20Assessment" class="btn btn-primary">Get your free 2-week assessment</a>
@@ -362,8 +368,9 @@
     </div>
 
     <div class="graph-card">
-      <div class="graph-label">Live view</div>
-      <div class="graph-title">Four customers. One Memory graph.</div>
+      <div class="graph-label">Every customer's story</div>
+      <div class="graph-title">A cloud story is a graph of events.</div>
+      <div class="graph-sub">First it was cloud. Now it's AI. That dependency is what inspired Intellicore.</div>
       <svg class="graph" viewBox="0 0 480 340">
         <path class="g-edge lit" style="animation-delay:0s" d="M240,170 L110,80"/>
         <path class="g-edge lit" style="animation-delay:1s" d="M240,170 L370,80"/>
@@ -374,38 +381,39 @@
           <circle cx="240" cy="170" r="27" fill="#0d1220" stroke="#34d399" stroke-width="2"/>
           <use href="#ic-graph" x="228" y="158" width="24" height="24"/>
         </g>
-        <text x="240" y="210" text-anchor="middle" class="lbl-sub">Memory graph</text>
+        <text x="240" y="210" text-anchor="middle" class="lbl-sub">Every event. One story.</text>
 
         <g class="lit-icon lit" style="animation-delay:0s; color:#fb7185">
           <circle cx="110" cy="80" r="21" fill="#0d1220" stroke="#fb7185" stroke-width="2"/>
           <use href="#ic-shield" x="98" y="68" width="24" height="24"/>
         </g>
-        <text x="110" y="112" text-anchor="middle" class="lbl-sub">Aarti · SSH open to internet</text>
+        <text x="110" y="112" text-anchor="middle" class="lbl-sub">A rule opens more than it should</text>
 
         <g class="lit-icon lit" style="animation-delay:1s; color:#fbbf24">
           <circle cx="370" cy="80" r="21" fill="#0d1220" stroke="#fbbf24" stroke-width="2"/>
           <use href="#ic-db" x="358" y="68" width="24" height="24"/>
         </g>
-        <text x="370" y="112" text-anchor="middle" class="lbl-sub">Netcore · BigQuery cost spike</text>
+        <text x="370" y="112" text-anchor="middle" class="lbl-sub">An AI job spikes the bill overnight</text>
 
         <g class="lit-icon lit" style="animation-delay:2s; color:#38bdf8">
           <circle cx="370" cy="260" r="21" fill="#0d1220" stroke="#38bdf8" stroke-width="2"/>
           <use href="#ic-pulse" x="358" y="248" width="24" height="24"/>
         </g>
-        <text x="370" y="292" text-anchor="middle" class="lbl-sub">ShoppersStop · egress anomaly</text>
+        <text x="370" y="292" text-anchor="middle" class="lbl-sub">Traffic nobody's seen before</text>
 
         <g class="lit-icon lit" style="animation-delay:3s; color:#818cf8">
           <circle cx="110" cy="260" r="21" fill="#0d1220" stroke="#818cf8" stroke-width="2"/>
           <use href="#ic-key" x="98" y="248" width="24" height="24"/>
         </g>
-        <text x="110" y="292" text-anchor="middle" class="lbl-sub">DesignX · risky IAM grant</text>
+        <text x="110" y="292" text-anchor="middle" class="lbl-sub">A permission nobody reviewed</text>
       </svg>
       <div class="pf-story on-dark">
-        <div class="pf-step lit" style="animation-delay:0s"><b>1</b> Aarti's SSH rule was already fixed on 3 other accounts — Memory applies the same fix instantly.</div>
-        <div class="pf-step lit" style="animation-delay:1s"><b>2</b> Netcore's cost spike matches a bug from weeks ago — Memory already knows the fix.</div>
-        <div class="pf-step lit" style="animation-delay:2s"><b>3</b> This traffic looked like a false alarm before — Memory says it's real this time.</div>
-        <div class="pf-step lit" style="animation-delay:3s"><b>4</b> This exact permission caused a breach in May — Memory blocks it before it ships.</div>
+        <div class="pf-step lit" style="animation-delay:0s"><b>1</b> A security rule quietly opens more than it should. Intellicore traces every place the same gap could exist — then walks the fix through with you.</div>
+        <div class="pf-step lit" style="animation-delay:1s"><b>2</b> An AI workload spins up overnight and the bill climbs before anyone's awake. Intellicore ties the spike to the job that caused it, and works with you to right-size it.</div>
+        <div class="pf-step lit" style="animation-delay:2s"><b>3</b> A spike in traffic could be nothing — or everything. Intellicore checks it against every similar moment your systems have lived through, and helps your team decide.</div>
+        <div class="pf-step lit" style="animation-delay:3s"><b>4</b> A new permission looks routine, until it isn't. Intellicore remembers what happened last time something like it shipped, and gets ahead of it.</div>
       </div>
+      <div class="pf-outcome"><b>The outcome doesn't arrive in one step.</b> Intellicore is the graph that gets you there.</div>
     </div>
   </div>
 </header>
