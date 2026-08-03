@@ -1,0 +1,148 @@
+name: Deploy Customer Environment
+on:
+  workflow_dispatch:
+    inputs:
+      customer_name:
+        description: 'Customer name (lowercase, no spaces)'
+        required: true
+        type: string
+      gcp_project_id:
+        description: 'GCP Project ID for this customer'
+        required: true
+        type: string
+      region:
+        description: 'GCP Region'
+        required: true
+        default: 'asia-south1'
+        type: choice
+        options:
+          - asia-south1
+          - us-central1
+          - europe-west1
+          - asia-southeast1
+      machine_type:
+        description: 'VM Machine Type'
+        required: true
+        default: 'e2-standard-2'
+        type: choice
+        options:
+          - e2-standard-2
+          - e2-standard-4
+          - e2-standard-8
+      admin_email:
+        description: 'Admin email for this customer'
+        required: true
+        type: string
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    environment: customer-provisioning
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Provision customer environment
+        env:
+          CUSTOMER: ${{ inputs.customer_name }}
+          PROJECT_ID: ${{ inputs.gcp_project_id }}
+          REGION: ${{ inputs.region }}
+          ZONE: ${{ inputs.region }}-a
+          MACHINE_TYPE: ${{ inputs.machine_type }}
+          ADMIN_EMAIL: ${{ inputs.admin_email }}
+        run: |
+          VM_NAME="intellicore-${CUSTOMER}"
+          IP_NAME="intellicore-${CUSTOMER}-ip"
+
+          echo "=== Provisioning Intellicore CMP for: ${CUSTOMER} ==="
+
+          # Enable APIs
+          gcloud config set project ${PROJECT_ID}
+          gcloud services enable compute.googleapis.com --quiet
+
+          # Reserve static IP
+          gcloud compute addresses create ${IP_NAME} \
+            --region ${REGION} --quiet 2>/dev/null || true
+          IP=$(gcloud compute addresses describe ${IP_NAME} \
+            --region ${REGION} --format='get(address)')
+          DOMAIN="${IP//./-}.sslip.io"
+          echo "Customer URL: https://${DOMAIN}"
+
+          # Firewall
+          gcloud compute firewall-rules create intellicore-${CUSTOMER}-web \
+            --allow=tcp:80,tcp:443 --target-tags=intellicore-${CUSTOMER} \
+            --source-ranges=0.0.0.0/0 --quiet 2>/dev/null || true
+
+          # Create VM
+          gcloud compute instances create ${VM_NAME} \
+            --zone ${ZONE} \
+            --machine-type ${MACHINE_TYPE} \
+            --image-family ubuntu-2204-lts --image-project ubuntu-os-cloud \
+            --boot-disk-size 50GB --boot-disk-type pd-balanced \
+            --tags intellicore-${CUSTOMER} \
+            --address ${IP_NAME} \
+            --metadata=startup-script='#!/bin/bash
+          set -e
+          if ! command -v docker >/dev/null; then
+            curl -fsSL https://get.docker.com | sh
+          fi
+          systemctl enable --now docker' \
+            --quiet 2>/dev/null || echo "VM exists, reusing"
+
+          # Wait for Docker
+          for i in $(seq 1 30); do
+            gcloud compute ssh ${VM_NAME} --zone ${ZONE} \
+              --command "sudo docker version >/dev/null 2>&1" 2>/dev/null && break
+            sleep 10
+          done
+
+          # Generate secrets
+          ADMIN_PASSWORD=$(openssl rand -base64 16)
+
+          # Package and ship
+          tar --exclude=node_modules --exclude=.next --exclude=__pycache__ \
+              --exclude=.venv --exclude=.git --exclude=.github \
+              -czf /tmp/intellicore-cmp.tar.gz .
+
+          gcloud compute scp /tmp/intellicore-cmp.tar.gz \
+            ${VM_NAME}:/tmp/ --zone ${ZONE}
+
+          gcloud compute ssh ${VM_NAME} --zone ${ZONE} --command "
+            set -e
+            rm -rf ~/intellicore-cmp && mkdir -p ~/intellicore-cmp
+            tar -xzf /tmp/intellicore-cmp.tar.gz -C ~/intellicore-cmp
+            cd ~/intellicore-cmp
+
+            cat > .env.prod <<ENVEOF
+          DOMAIN=${DOMAIN}
+          LETSENCRYPT_EMAIL=${ADMIN_EMAIL}
+          POSTGRES_USER=intellicore
+          POSTGRES_PASSWORD=$(openssl rand -hex 16)
+          POSTGRES_DB=intellicore
+          NEO4J_PASSWORD=$(openssl rand -hex 16)
+          JWT_SECRET=$(openssl rand -hex 32)
+          ANTHROPIC_API_KEY=
+          CLAUDE_MODEL=claude-sonnet-4-5
+          TENANT_MODE=single
+          LOG_LEVEL=INFO
+          ADMIN_EMAIL=${ADMIN_EMAIL}
+          ADMIN_PASSWORD=${ADMIN_PASSWORD}
+          ENVEOF
+            chmod 600 .env.prod
+
+            sudo docker compose --env-file .env.prod \
+              -f deploy/gcp/docker-compose.prod.yml up -d --build
+          "
+
+          echo "=== Customer environment provisioned ==="
+          echo "URL: https://${DOMAIN}"
+          echo "Admin: ${ADMIN_EMAIL}"
+          echo "Password: ${ADMIN_PASSWORD}"
+          echo "VM: ${VM_NAME} in ${ZONE}"

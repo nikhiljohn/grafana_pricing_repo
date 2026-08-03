@@ -1,0 +1,79 @@
+name: Deploy to Production
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd frontend && npm ci && npm run build
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Package and deploy
+        env:
+          VM_NAME: ${{ vars.VM_NAME || 'intellicore-cmp-prod' }}
+          VM_ZONE: ${{ vars.VM_ZONE || 'asia-south1-a' }}
+          PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: |
+          tar --exclude=node_modules --exclude=.next --exclude=__pycache__ \
+              --exclude=.venv --exclude=.git --exclude=.github \
+              -czf /tmp/intellicore-cmp.tar.gz .
+
+          gcloud compute scp /tmp/intellicore-cmp.tar.gz \
+            ${VM_NAME}:/tmp/ --zone ${VM_ZONE} --project ${PROJECT_ID}
+
+          gcloud compute ssh ${VM_NAME} --zone ${VM_ZONE} --project ${PROJECT_ID} --command "
+            set -e
+            mkdir -p ~/intellicore-cmp-new
+            tar -xzf /tmp/intellicore-cmp.tar.gz -C ~/intellicore-cmp-new
+
+            # Preserve production secrets
+            cp ~/intellicore-cmp/.env.prod ~/intellicore-cmp-new/.env.prod
+
+            # Blue-green: keep rollback
+            rm -rf ~/intellicore-cmp-rollback
+            mv ~/intellicore-cmp ~/intellicore-cmp-rollback
+            mv ~/intellicore-cmp-new ~/intellicore-cmp
+
+            cd ~/intellicore-cmp
+            sudo docker compose --env-file .env.prod \
+              -f deploy/gcp/docker-compose.prod.yml up -d --build
+
+            # Health check with rollback
+            sleep 30
+            if ! curl -sf http://localhost:3000 > /dev/null; then
+              echo 'HEALTH CHECK FAILED — rolling back'
+              mv ~/intellicore-cmp ~/intellicore-cmp-failed
+              mv ~/intellicore-cmp-rollback ~/intellicore-cmp
+              cd ~/intellicore-cmp
+              sudo docker compose --env-file .env.prod \
+                -f deploy/gcp/docker-compose.prod.yml up -d --build
+              exit 1
+            fi
+            echo 'Production deployment successful'
+          "
