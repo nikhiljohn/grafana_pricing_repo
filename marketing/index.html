@@ -11,19 +11,32 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F172A'/%3E%3Ccircle cx='16' cy='8' r='2.6' fill='%2334D399'/%3E%3Ccircle cx='7' cy='20' r='2.6' fill='%2338BDF8'/%3E%3Ccircle cx='25' cy='20' r='2.6' fill='%2338BDF8'/%3E%3Ccircle cx='16' cy='24' r='2.2' fill='%23818CF8'/%3E%3Cpath d='M16 10.4L8.6 18.2M16 10.4L23.4 18.2M9.3 21.4L14.4 23.3M22.7 21.4L17.6 23.3' stroke='%23CBD5E1' stroke-width='1.3' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root {
-    --navy: #0b0f1a;
-    --navy-2: #111827;
-    --panel: #151b2b;
-    --panel-2: #1b2338;
-    --border: #262f45;
-    --text: #e5e9f5;
-    --muted: #93a1c2;
-    --muted-2: #6b7690;
+    /* Page background + panels (light theme). Variable names kept from the
+       original dark palette to minimize diff noise — values are light now. */
+    --navy: #ffffff;
+    --navy-2: #f4f6fb;
+    --panel: #ffffff;
+    --panel-2: #f1f4fa;
+    --border: #e2e7f2;
+    --text: #10182b;
+    --muted: #4b5670;
+    --muted-2: #8992ac;
+    /* Vivid accents — used inside the dark diagram cards (graph-card,
+       p-visual, pillar-anim-wrap) and for gradients, where they're drawn
+       against a dark canvas and need to glow. */
     --emerald: #34d399;
     --blue: #38bdf8;
     --violet: #818cf8;
     --amber: #fbbf24;
     --rose: #fb7185;
+    /* "Ink" accents — deeper shades of the same hues, used for text,
+       badges and icons rendered directly on the light page background,
+       where the vivid pastel versions above don't have enough contrast. */
+    --emerald-ink: #059669;
+    --blue-ink: #0284c7;
+    --violet-ink: #6366f1;
+    --amber-ink: #b45309;
+    --rose-ink: #e11d48;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -41,22 +54,23 @@
   .eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
     font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--emerald); background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.25);
+    color: var(--emerald-ink); background: rgba(5,150,105,0.08); border: 1px solid rgba(5,150,105,0.22);
     padding: 6px 12px; border-radius: 999px; margin-bottom: 20px;
   }
-  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-ink); box-shadow: 0 0 8px rgba(5,150,105,0.5); }
 
   /* ── Nav ── */
   nav {
     position: sticky; top: 0; z-index: 50;
     backdrop-filter: blur(12px);
-    background: rgba(11,15,26,0.85);
+    background: rgba(255,255,255,0.85);
     border-bottom: 1px solid var(--border);
   }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; max-width: 1180px; margin: 0 auto; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
-  .brand-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #0f172a, #1e293b); display: grid; place-items: center; border: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; white-space: nowrap; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #0f172a, #1e293b); display: grid; place-items: center; border: 1px solid var(--border); flex-shrink: 0; }
   .brand-mark svg { width: 18px; height: 18px; }
+  .brand-text { flex-shrink: 0; }
 
   /* ── "CMP" hover-bloom: each letter reveals what it stands for ── */
   .cmp-expand {
@@ -65,7 +79,7 @@
     border-bottom: 1px dotted var(--muted-2);
   }
   .cmp-letter { position: relative; font-weight: 700; color: var(--muted-2); transition: color 0.2s; }
-  .cmp-expand:hover .cmp-letter { color: var(--emerald); }
+  .cmp-expand:hover .cmp-letter { color: var(--emerald-ink); }
   .cmp-word {
     display: inline-block; max-width: 0; opacity: 0; overflow: hidden;
     white-space: nowrap; font-weight: 500; color: var(--text);
@@ -104,14 +118,17 @@
     position: relative; border-radius: 20px; border: 1px solid var(--border);
     background: radial-gradient(circle at 30% 20%, #16213a 0%, #0d1220 65%);
     padding: 28px; min-height: 460px; overflow: hidden;
+    box-shadow: 0 24px 48px -24px rgba(15,23,42,0.35);
   }
   .graph-card::before {
     content: ''; position: absolute; inset: 0;
     background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
     background-size: 26px 26px; pointer-events: none;
   }
-  .graph-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-2); margin-bottom: 4px; }
-  .graph-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 18px; }
+  /* Fixed (not theme-flipped) light colors — these labels always sit
+     directly on the dark diagram canvases (.graph-card, .p-visual). */
+  .graph-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #7c88a8; margin-bottom: 4px; }
+  .graph-title { font-size: 14px; font-weight: 600; color: #e5e9f5; margin-bottom: 18px; }
   svg.graph { width: 100%; height: 380px; overflow: visible; }
   .g-edge { stroke: #35405e; stroke-width: 1.4; fill: none; }
   .g-edge.hot { stroke: url(#hotgrad); stroke-width: 2.2; }
@@ -141,10 +158,10 @@
   .contrast-card h3 { font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
   .contrast-card ul { list-style: none; display: flex; flex-direction: column; gap: 13px; }
   .contrast-card li { font-size: 14.5px; color: var(--muted); display: flex; gap: 10px; align-items: flex-start; }
-  .contrast-card.good li { color: #d7f5e8; }
+  .contrast-card.good li { color: #065f46; }
   .tick { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; margin-top: 1px; }
-  .bad .tick { background: rgba(251,113,133,0.15); color: var(--rose); }
-  .good .tick { background: rgba(52,211,153,0.18); color: var(--emerald); }
+  .bad .tick { background: rgba(225,29,72,0.12); color: var(--rose-ink); }
+  .good .tick { background: rgba(5,150,105,0.14); color: var(--emerald-ink); }
 
   /* ── Product deep-dive ── */
   .product-block { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 96px; }
@@ -153,14 +170,15 @@
   .product-block.reverse .p-text { order: 1; }
   .p-text h3 { font-size: 26px; margin-bottom: 16px; }
   .p-text p { color: var(--muted); font-size: 15.5px; margin-bottom: 16px; }
-  .p-text .kicker { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue); margin-bottom: 10px; }
+  .p-text .kicker { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue-ink); margin-bottom: 10px; }
   .p-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-  .p-list li { display: flex; gap: 12px; font-size: 14.5px; color: #cdd6ee; }
-  .p-list .bullet { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--border); display: grid; place-items: center; font-size: 11px; color: var(--emerald); margin-top: 1px; }
+  .p-list li { display: flex; gap: 12px; font-size: 14.5px; color: var(--text); }
+  .p-list .bullet { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--border); display: grid; place-items: center; font-size: 11px; color: var(--emerald-ink); margin-top: 1px; }
 
   .p-visual {
-    border-radius: 18px; border: 1px solid var(--border); background: var(--panel);
+    border-radius: 18px; border: 1px solid var(--border); background: #0d1220;
     padding: 22px; min-height: 300px;
+    box-shadow: 0 20px 40px -22px rgba(15,23,42,0.35);
   }
   .checklist-card { background: var(--panel-2); border-radius: 12px; border: 1px solid var(--border); padding: 18px; margin-bottom: 12px; }
   .checklist-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
@@ -170,7 +188,7 @@
   .cb.done::after { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; color: #062018; font-weight: 900; }
   .cl-title { font-size: 13.5px; color: var(--text); font-weight: 600; }
   .cl-note { font-size: 12px; color: var(--muted-2); margin-top: 2px; }
-  .cl-note .hl { color: var(--emerald); font-weight: 600; }
+  .cl-note .hl { color: var(--emerald-ink); font-weight: 600; }
 
   /* ── Pillars (animated flow cards) ── */
   .pillars-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
@@ -191,6 +209,7 @@
   .pillar-anim-wrap {
     border-radius: 12px; border: 1px solid var(--border); background: #0d1220;
     padding: 10px 6px 6px; margin: 8px 0 10px;
+    box-shadow: 0 14px 28px -18px rgba(15,23,42,0.4);
   }
   svg.pillar-anim { width: 100%; height: 96px; overflow: visible; display: block; }
   .pf-edge { stroke: #2a3350; stroke-width: 1.6; fill: none; }
@@ -198,8 +217,8 @@
   .pf-node text { font-family: inherit; }
   .pf-lbl { font-size: 7.5px; fill: #cbd5e1; text-anchor: middle; font-weight: 700; }
   .pf-lbl-sub { font-size: 6.5px; fill: #6b7690; text-anchor: middle; }
-  .pillar-caption { font-size: 12px; color: #b7c1de; line-height: 1.45; }
-  .pillar-caption .hl { color: var(--emerald); font-weight: 600; }
+  .pillar-caption { font-size: 12px; color: var(--muted); line-height: 1.45; }
+  .pillar-caption .hl { color: var(--emerald-ink); font-weight: 600; }
 
   /* ── Stats band ── */
   .stats-band { background: linear-gradient(180deg, var(--panel), var(--navy-2)); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -214,7 +233,7 @@
 
   /* ── Testimonial-style quote ── */
   .quote-block { text-align: center; max-width: 780px; margin: 0 auto; }
-  .quote-block p { font-size: 24px; font-weight: 500; line-height: 1.5; color: #eef1fb; margin-bottom: 20px; }
+  .quote-block p { font-size: 24px; font-weight: 500; line-height: 1.5; color: var(--text); margin-bottom: 20px; }
   .quote-block .attrib { font-size: 13px; color: var(--muted-2); }
 
   /* ── FAQ / objections ── */
@@ -376,8 +395,8 @@
         </g>
       </svg>
       <div style="display:flex; gap:16px; margin-top:10px; flex-wrap:wrap;">
-        <span style="font-size:11px; color:var(--muted-2);">● <b style="color:var(--emerald)">Reused fix path</b> — pattern matched across accounts</span>
-        <span style="font-size:11px; color:var(--muted-2);">◌ Resource / account context</span>
+        <span style="font-size:11px; color:#7c88a8;">● <b style="color:#34d399">Reused fix path</b> — pattern matched across accounts</span>
+        <span style="font-size:11px; color:#7c88a8;">◌ Resource / account context</span>
       </div>
     </div>
   </div>
@@ -469,7 +488,7 @@
           <g><circle cx="180" cy="150" r="16" fill="#0d1220" stroke="#818cf8" stroke-width="2"/><text x="180" y="147" text-anchor="middle" font-size="8.5" fill="#c7d2fe" font-weight="700">Pattern</text><text x="180" y="157" text-anchor="middle" font-size="7.5" fill="#7c88a8">Friday deploy → P2</text></g>
           <g><circle cx="300" cy="190" r="16" fill="#0d1220" stroke="#38bdf8" stroke-width="2"/><text x="300" y="187" text-anchor="middle" font-size="8.5" fill="#bae6fd" font-weight="700">Guardrail</text><text x="300" y="197" text-anchor="middle" font-size="7.5" fill="#7c88a8">deploy freeze 4pm+</text></g>
         </svg>
-        <p style="font-size:12px; color:var(--muted-2); margin-top:8px;">4 occurrences of this exact chain → Intellicore proposed the guardrail on its own.</p>
+        <p style="font-size:12px; color:#7c88a8; margin-top:8px;">4 occurrences of this exact chain → Intellicore proposed the guardrail on its own.</p>
       </div>
     </div>
 
@@ -518,7 +537,7 @@
             <div class="cl-note">Blocked pre-deploy · matches the <span class="hl">May 9 privilege-escalation</span> pattern</div></div>
           </div>
         </div>
-        <p style="font-size:12px; color:var(--muted-2); margin-top:4px;">Every line above is generated, not written — and disappears the moment it's no longer true.</p>
+        <p style="font-size:12px; color:#7c88a8; margin-top:4px;">Every line above is generated, not written — and disappears the moment it's no longer true.</p>
       </div>
     </div>
 
@@ -574,7 +593,7 @@
       <!-- CloudOps -->
       <div class="pillar-card">
         <div class="pillar-head">
-          <div class="pillar-icon" style="background:rgba(56,189,248,0.12); color:#38bdf8;">☁</div>
+          <div class="pillar-icon" style="background:rgba(2,132,199,0.12); color:#0284c7;">☁</div>
           <h4>CloudOps</h4>
         </div>
         <div class="pillar-desc">Reliability, capacity, incident causal chains</div>
@@ -601,7 +620,7 @@
       <!-- FinOps -->
       <div class="pillar-card">
         <div class="pillar-head">
-          <div class="pillar-icon" style="background:rgba(251,191,36,0.12); color:#fbbf24;">$</div>
+          <div class="pillar-icon" style="background:rgba(180,83,9,0.12); color:#b45309;">$</div>
           <h4>FinOps</h4>
         </div>
         <div class="pillar-desc">Cost anomalies matched to known patterns in minutes</div>
@@ -628,7 +647,7 @@
       <!-- Cloud Security -->
       <div class="pillar-card">
         <div class="pillar-head">
-          <div class="pillar-icon" style="background:rgba(251,113,133,0.12); color:#fb7185;">🛡</div>
+          <div class="pillar-icon" style="background:rgba(225,29,72,0.12); color:#e11d48;">🛡</div>
           <h4>Cloud Security</h4>
         </div>
         <div class="pillar-desc">Findings, IAM risk, compliance evidence — automatic</div>
@@ -655,7 +674,7 @@
       <!-- DevOps -->
       <div class="pillar-card">
         <div class="pillar-head">
-          <div class="pillar-icon" style="background:rgba(129,140,248,0.12); color:#818cf8;">⌥</div>
+          <div class="pillar-icon" style="background:rgba(99,102,241,0.12); color:#6366f1;">⌥</div>
           <h4>DevOps</h4>
         </div>
         <div class="pillar-desc">Change guardrails learned from your own incidents</div>
@@ -682,7 +701,7 @@
       <!-- AIOps -->
       <div class="pillar-card">
         <div class="pillar-head">
-          <div class="pillar-icon" style="background:rgba(52,211,153,0.12); color:#34d399;">✦</div>
+          <div class="pillar-icon" style="background:rgba(5,150,105,0.12); color:#059669;">✦</div>
           <h4>AIOps</h4>
         </div>
         <div class="pillar-desc">Agents that act on Memory, not just alert on thresholds</div>
@@ -709,7 +728,7 @@
       <!-- Memory — the graph that connects all five -->
       <div class="pillar-card memory-card">
         <div class="pillar-head">
-          <div class="pillar-icon" style="background:rgba(52,211,153,0.16); color:#34d399;">🧠</div>
+          <div class="pillar-icon" style="background:rgba(5,150,105,0.16); color:#059669;">🧠</div>
           <h4>Memory</h4>
         </div>
         <div class="pillar-desc">The graph underneath all five pillars, at once</div>
