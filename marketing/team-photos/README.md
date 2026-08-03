@@ -1,13 +1,13 @@
 # Team photos
 
-Drop the following files into this folder (any reasonable size/aspect works —
-the CSS crops them to a circle or rounded square automatically):
+Already uploaded to `gs://intellicore-cmp-site-77682/team-photos/` as `.png`:
 
-- `hardik.jpg` — Hardik Parekh (Founder & CEO)
-- `harish.jpg` — Harish Gurram (Director, CSRE Delivery)
-- `chandan.jpg` — Chandan Rudani (Senior Manager, CSRE — India Squad lead)
-- `mukur.jpg` — Mukur Panchani (Squad Lead)
-- `nikhil.jpg` — Nikhil John (Director, CSR — Practice lead, India Region)
+- `hardik.png` — Hardik Parekh (Founder & CEO)
+- `harish.png` — Harish Gurram (Director, CSRE Delivery)
+- `chandan.png` — Chandan Rudani (Senior Manager, CSRE — India Squad lead)
+- `mukur.png` — Mukur Panchani (Squad Lead)
+- `nikhil.png` — Nikhil John (Director, CSR — Practice lead, India Region)
+- `urmi.png` — Urmi Mirani (Cloud & AI Engineer)
+- `devam.png` — Devam Patel (Cloud & AI Engineer)
 
-`team.html` already references these exact paths. Once the files are in
-place, no HTML changes are needed — just redeploy.
+`team.html` references these exact paths under `team-photos/`.
