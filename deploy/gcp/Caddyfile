@@ -1,0 +1,45 @@
+# Intellicore CMP edge: auto-HTTPS + app-gate auth (password + TOTP) on
+# every route. Interim to full Google Workspace SSO — see deploy/gcp/README.md.
+
+{
+	email {$LETSENCRYPT_EMAIL}
+}
+
+{$DOMAIN} {
+	# Public: the login page shell, its static assets, and the auth API
+	# that implements the login itself. Nothing else is reachable without
+	# a valid session.
+	@public path /login /login/* /_next/* /favicon.ico /api/auth/login /api/auth/totp/verify /api/auth/oauth /api/auth/oauth/*
+
+	handle @public {
+		handle_path /api/* {
+			reverse_proxy backend:8000
+		}
+		handle {
+			reverse_proxy frontend:3000
+		}
+	}
+
+	handle {
+		forward_auth backend:8000 {
+			uri /auth/session/check
+			header_up X-Real-IP {remote_host}
+			copy_headers X-Auth-User
+
+			@unauthed status 401
+			handle_response @unauthed {
+				redir * /login?rd={scheme}://{host}{uri} 302
+			}
+		}
+
+		# /api/* → backend (prefix stripped: /api/memory → /memory)
+		handle_path /api/* {
+			reverse_proxy backend:8000
+		}
+
+		# Everything else → Next.js frontend
+		handle {
+			reverse_proxy frontend:3000
+		}
+	}
+}
