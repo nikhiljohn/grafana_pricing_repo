@@ -146,6 +146,24 @@
   .lit-icon circle { filter: drop-shadow(0 0 7px currentColor); }
   .lit-icon use { color: inherit; }
 
+  /* Step-by-step story captions — one per lit node, synced to the same  */
+  /* delay, so each icon lighting up is explained in plain words: what   */
+  /* happened, and why it matters. This is the "how Intellicore works"   */
+  /* narrative, not just decoration.                                    */
+  .pf-story { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+  .pf-step { font-size: 12px; color: var(--muted-2); opacity: 0.45; transition: opacity 0.3s; display: flex; gap: 7px; }
+  .pf-step b { flex-shrink: 0; width: 15px; height: 15px; border-radius: 50%; background: var(--panel-2); color: var(--muted-2); font-size: 9px; display: grid; place-items: center; font-weight: 700; }
+  @keyframes step-glow { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+  .pf-step.lit { animation: step-glow 3.2s ease-in-out infinite; }
+  .pf-step.lit b { background: var(--emerald); color: #062018; }
+  .pf-step.lit { color: var(--text); font-weight: 500; }
+  /* Dark-canvas variant — used inside .graph-card, where the page's light
+     theme text colors would be unreadable against the dark diagram bg. */
+  .pf-story.on-dark .pf-step { color: #7c88a8; }
+  .pf-story.on-dark .pf-step.lit { color: #e5e9f5; }
+  .pf-story.on-dark .pf-step b { background: #1b2338; color: #7c88a8; }
+  .pf-story.on-dark .pf-step.lit b { background: var(--emerald); color: #062018; }
+
   /* ── Trust bar ── */
   .trust { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--navy-2); }
   .trust-inner { display: flex; align-items: center; justify-content: space-between; padding: 26px 0; flex-wrap: wrap; gap: 18px; }
@@ -382,7 +400,12 @@
         </g>
         <text x="110" y="292" text-anchor="middle" class="lbl-sub">DesignX · risky IAM grant</text>
       </svg>
-      <div style="font-size:11px; color:#7c88a8; margin-top:6px;">Each customer's event lights up in turn — same graph, same Memory, different story.</div>
+      <div class="pf-story on-dark">
+        <div class="pf-step lit" style="animation-delay:0s"><b>1</b> Aarti's SSH rule was already fixed on 3 other accounts — Memory applies the same fix instantly.</div>
+        <div class="pf-step lit" style="animation-delay:1s"><b>2</b> Netcore's cost spike matches a bug from weeks ago — Memory already knows the fix.</div>
+        <div class="pf-step lit" style="animation-delay:2s"><b>3</b> This traffic looked like a false alarm before — Memory says it's real this time.</div>
+        <div class="pf-step lit" style="animation-delay:3s"><b>4</b> This exact permission caused a breach in May — Memory blocks it before it ships.</div>
+      </div>
     </div>
   </div>
 </header>
@@ -441,43 +464,48 @@
     <div class="product-block">
       <div class="p-text">
         <div class="kicker">01 — Memory Event Detection</div>
-        <h3>Reads what a signal means, not just what it says</h3>
-        <p>A raw event means nothing alone. Intellicore correlates it against every prior event on that resource — what led here, what it touches, whether this shape has happened before.</p>
+        <h3>It understands what happened — not just that something happened</h3>
+        <p>A single alert doesn't tell you much on its own. Intellicore looks at everything around it — what came right before, and whether this exact thing has ever happened before.</p>
         <ul class="p-list">
-          <li><span class="bullet">✓</span> Causal inference links deploys to the incidents they trigger.</li>
-          <li><span class="bullet">✓</span> 3+ occurrences at rising confidence surfaces a named pattern.</li>
-          <li><span class="bullet">✓</span> Confidence scores mean low-signal noise never auto-executes.</li>
+          <li><span class="bullet">✓</span> If one thing usually causes another — like a Friday deploy causing a Monday outage — Intellicore learns that link.</li>
+          <li><span class="bullet">✓</span> If the same problem happens 3 or more times, it gets a name and becomes a known pattern.</li>
+          <li><span class="bullet">✓</span> It only acts on its own when it's truly sure — a one-off blip never triggers an automatic fix.</li>
         </ul>
       </div>
       <div class="p-visual">
-        <div class="graph-label">Memory graph — causal chain</div>
-        <svg viewBox="0 0 400 130" style="width:100%; height:130px; overflow:visible;">
-          <path class="g-edge lit" style="animation-delay:0s" d="M50,65 L160,65"/>
-          <path class="g-edge lit" style="animation-delay:1.07s" d="M160,65 L270,65"/>
-          <path class="g-edge lit" style="animation-delay:2.14s" d="M270,65 L360,65"/>
-          <g class="lit-icon lit" style="animation-delay:0s; color:#fbbf24"><circle cx="50" cy="65" r="19" fill="#0d1220" stroke="#fbbf24" stroke-width="2"/><use href="#ic-server" x="39" y="54" width="22" height="22"/></g>
-          <text x="50" y="98" text-anchor="middle" class="lbl-sub">Deploy, Fri 4:32pm</text>
-          <g class="lit-icon lit" style="animation-delay:1.07s; color:#fb7185"><circle cx="160" cy="65" r="19" fill="#0d1220" stroke="#fb7185" stroke-width="2"/><use href="#ic-pulse" x="149" y="54" width="22" height="22"/></g>
-          <text x="160" y="98" text-anchor="middle" class="lbl-sub">P2 incident, 5xx spike</text>
-          <g class="lit-icon lit" style="animation-delay:2.14s; color:#818cf8"><circle cx="270" cy="65" r="19" fill="#0d1220" stroke="#818cf8" stroke-width="2"/><use href="#ic-graph" x="259" y="54" width="22" height="22"/></g>
-          <text x="270" y="98" text-anchor="middle" class="lbl-sub">Pattern: 4th time</text>
-          <g class="lit-icon lit" style="animation-delay:3.21s; color:#34d399"><circle cx="360" cy="65" r="19" fill="#0d1220" stroke="#34d399" stroke-width="2"/><use href="#ic-check" x="349" y="54" width="22" height="22"/></g>
-          <text x="360" y="98" text-anchor="middle" class="lbl-sub">Guardrail proposed</text>
+        <div class="graph-label">Example: a Friday deploy pattern</div>
+        <svg viewBox="0 0 400 100" style="width:100%; height:100px; overflow:visible;">
+          <path class="g-edge lit" style="animation-delay:0s" d="M50,50 L160,50"/>
+          <path class="g-edge lit" style="animation-delay:1.07s" d="M160,50 L270,50"/>
+          <path class="g-edge lit" style="animation-delay:2.14s" d="M270,50 L360,50"/>
+          <g class="lit-icon lit" style="animation-delay:0s; color:#fbbf24"><circle cx="50" cy="50" r="19" fill="#0d1220" stroke="#fbbf24" stroke-width="2"/><use href="#ic-server" x="39" y="39" width="22" height="22"/></g>
+          <g class="lit-icon lit" style="animation-delay:1.07s; color:#fb7185"><circle cx="160" cy="50" r="19" fill="#0d1220" stroke="#fb7185" stroke-width="2"/><use href="#ic-pulse" x="149" y="39" width="22" height="22"/></g>
+          <g class="lit-icon lit" style="animation-delay:2.14s; color:#818cf8"><circle cx="270" cy="50" r="19" fill="#0d1220" stroke="#818cf8" stroke-width="2"/><use href="#ic-graph" x="259" y="39" width="22" height="22"/></g>
+          <g class="lit-icon lit" style="animation-delay:3.21s; color:#34d399"><circle cx="360" cy="50" r="19" fill="#0d1220" stroke="#34d399" stroke-width="2"/><use href="#ic-check" x="349" y="39" width="22" height="22"/></g>
         </svg>
+        <div class="pf-story on-dark">
+          <div class="pf-step lit" style="animation-delay:0s"><b>1</b> Someone deploys on a Friday afternoon.</div>
+          <div class="pf-step lit" style="animation-delay:1.07s"><b>2</b> The site starts breaking soon after.</div>
+          <div class="pf-step lit" style="animation-delay:2.14s"><b>3</b> Memory: this exact chain has happened 4 times before.</div>
+          <div class="pf-step lit" style="animation-delay:3.21s"><b>4</b> It suggests a rule: no deploys after 4pm on Fridays.</div>
+        </div>
       </div>
     </div>
 
     <div class="product-block reverse">
       <div class="p-text">
-        <div class="kicker">02 — Beyond human checklists</div>
-        <h3>Checklists a human writes go stale. Intellicore's don't.</h3>
-        <p>A runbook captures what someone knew the day they wrote it. Intellicore's checklist is a live query against the graph — regenerated, never stale.</p>
+        <div class="kicker">02 — Checklists are the past. Context is the future.</div>
+        <h3>We don't hand your team a checklist. We tap them on the shoulder.</h3>
+        <p>A written checklist can only repeat what someone thought of on the day they wrote it. Intellicore doesn't maintain a checklist — it tells your team, in the moment: <em>"this exact thing happened before, and here's exactly what fixed it."</em></p>
         <ul class="p-list">
-          <li><span class="bullet">✓</span> Every item carries prior occurrences, confidence, blast radius.</li>
-          <li><span class="bullet">✓</span> Disappears the moment it's no longer true.</li>
+          <li><span class="bullet">✓</span> No outdated instructions — every suggestion is based on what's actually happening right now.</li>
+          <li><span class="bullet">✓</span> It only speaks up when it's relevant, and goes quiet the moment it's not.</li>
         </ul>
       </div>
       <div class="p-visual">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:11px; color:#7c88a8;">
+          <span style="text-decoration:line-through;">📋 Static checklist</span> → <span style="color:#34d399; font-weight:600;">🧠 Memory's live nudge</span>
+        </div>
         <div class="checklist-card">
           <div class="checklist-row">
             <div class="cb done"></div>
@@ -505,29 +533,30 @@
 
     <div class="product-block">
       <div class="p-text">
-        <div class="kicker">03 — Institutional memory</div>
-        <h3>When an engineer rolls off, none of this leaves with them</h3>
-        <p>The graph is the institution's memory, not one person's. A new engineer inherits every pattern on day one — and a fix proven in staging carries its evidence straight into production.</p>
+        <div class="kicker">03 — Nothing is lost when someone leaves</div>
+        <h3>The memory lives in the graph — not in any one person's head</h3>
+        <p>A new team member starts day one already knowing everything the graph knows.</p>
         <ul class="p-list">
-          <li><span class="bullet">✓</span> Zero knowledge loss on team rotation.</li>
-          <li><span class="bullet">✓</span> BYOK — your own Anthropic, OpenAI or Gemini key. Nothing billed to Searce.</li>
+          <li><span class="bullet">✓</span> No re-learning the same problem twice.</li>
+          <li><span class="bullet">✓</span> You bring your own AI key — nothing billed to Searce.</li>
         </ul>
       </div>
       <div class="p-visual">
-        <div class="graph-label">Cross-environment reuse</div>
-        <svg viewBox="0 0 400 130" style="width:100%; height:130px; overflow:visible;">
-          <path class="g-edge lit" style="animation-delay:0s" d="M55,65 L165,45"/>
-          <path class="g-edge lit" style="animation-delay:0.8s" d="M55,65 L165,85"/>
-          <path class="g-edge lit" style="animation-delay:1.6s" d="M165,45 L300,45"/>
-          <path class="g-edge lit" style="animation-delay:2.4s" d="M165,85 L300,85"/>
-          <g class="lit-icon lit" style="animation-delay:0s; color:#34d399"><circle cx="55" cy="65" r="20" fill="#0d1220" stroke="#34d399" stroke-width="2"/><use href="#ic-check" x="44" y="54" width="22" height="22"/></g>
-          <text x="55" y="98" text-anchor="middle" class="lbl-sub">Proven in staging</text>
-          <g class="lit-icon lit" style="animation-delay:0.8s; color:#38bdf8"><circle cx="165" cy="45" r="13" fill="#0d1220" stroke="#38bdf8" stroke-width="1.6"/><use href="#ic-graph" x="157" y="37" width="16" height="16"/></g>
-          <g class="lit-icon lit" style="animation-delay:1.6s; color:#818cf8"><circle cx="165" cy="85" r="13" fill="#0d1220" stroke="#818cf8" stroke-width="1.6"/><use href="#ic-graph" x="157" y="77" width="16" height="16"/></g>
-          <g class="lit-icon lit" style="animation-delay:1.6s; color:#fbbf24"><circle cx="300" cy="45" r="17" fill="#0d1220" stroke="#fbbf24" stroke-width="2"/><use href="#ic-check" x="291" y="36" width="18" height="18"/></g>
-          <g class="lit-icon lit" style="animation-delay:2.4s; color:#fbbf24"><circle cx="300" cy="85" r="17" fill="#0d1220" stroke="#fbbf24" stroke-width="2"/><use href="#ic-check" x="291" y="76" width="18" height="18"/></g>
-          <text x="300" y="112" text-anchor="middle" class="lbl-sub">Production, with evidence</text>
+        <div class="graph-label">Example: one fix, everywhere it's needed</div>
+        <svg viewBox="0 0 400 100" style="width:100%; height:100px; overflow:visible;">
+          <path class="g-edge lit" style="animation-delay:0s" d="M55,50 L165,50"/>
+          <path class="g-edge lit" style="animation-delay:1.07s" d="M165,50 L280,30"/>
+          <path class="g-edge lit" style="animation-delay:1.07s" d="M165,50 L280,70"/>
+          <g class="lit-icon lit" style="animation-delay:0s; color:#34d399"><circle cx="55" cy="50" r="19" fill="#0d1220" stroke="#34d399" stroke-width="2"/><use href="#ic-check" x="44" y="39" width="22" height="22"/></g>
+          <g class="lit-icon lit" style="animation-delay:1.07s; color:#38bdf8"><circle cx="165" cy="50" r="19" fill="#0d1220" stroke="#38bdf8" stroke-width="2"/><use href="#ic-graph" x="153" y="38" width="24" height="24"/></g>
+          <g class="lit-icon lit" style="animation-delay:2.14s; color:#fbbf24"><circle cx="280" cy="30" r="14" fill="#0d1220" stroke="#fbbf24" stroke-width="1.8"/><use href="#ic-check" x="272" y="22" width="16" height="16"/></g>
+          <g class="lit-icon lit" style="animation-delay:2.14s; color:#fbbf24"><circle cx="280" cy="70" r="14" fill="#0d1220" stroke="#fbbf24" stroke-width="1.8"/><use href="#ic-check" x="272" y="62" width="16" height="16"/></g>
         </svg>
+        <div class="pf-story on-dark">
+          <div class="pf-step lit" style="animation-delay:0s"><b>1</b> A fix is tried and proven safe in a test environment.</div>
+          <div class="pf-step lit" style="animation-delay:1.07s"><b>2</b> Memory remembers it worked, with proof attached.</div>
+          <div class="pf-step lit" style="animation-delay:2.14s"><b>3</b> Every other account that needs it gets the same fix, automatically.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -539,7 +568,7 @@
     <div class="section-head center">
       <div class="eyebrow" style="justify-content:center"><span class="dot"></span> One graph, five pillars</div>
       <h2>Every discipline, fused by Memory</h2>
-      <p>Not five tools bolted together. Each card: the event, the graph, the outcome.</p>
+      <p>Not five separate tools — one shared Memory behind all five. Each card below plays out a real example: something happens, Memory recognizes it, then the fix.</p>
     </div>
     <div class="pillars-grid">
 
@@ -560,7 +589,11 @@
             <text x="260" y="80" text-anchor="middle" class="pf-lbl-sub">Scaled 6 min early</text>
           </svg>
         </div>
-        <div class="pillar-caption">CPU predicted to breach → <span class="hl">matched pattern</span> → scaled before impact.</div>
+        <div class="pf-story">
+          <div class="pf-step lit" style="animation-delay:0s"><b>1</b> checkout-service's CPU is climbing toward a breach.</div>
+          <div class="pf-step lit" style="animation-delay:1.07s"><b>2</b> Memory recognizes this — it's happened 6 times before.</div>
+          <div class="pf-step lit" style="animation-delay:2.14s"><b>3</b> Scaled up 6 minutes early. No downtime.</div>
+        </div>
       </div>
 
       <!-- FinOps -->
@@ -580,7 +613,11 @@
             <text x="260" y="80" text-anchor="middle" class="pf-lbl-sub">$42/run saved</text>
           </svg>
         </div>
-        <div class="pillar-caption">Cost spike flagged in <span class="hl">12 minutes</span> — same fix as Jul 15, reused.</div>
+        <div class="pf-story">
+          <div class="pf-step lit" style="animation-delay:0s"><b>1</b> BigQuery spend jumps 340% overnight.</div>
+          <div class="pf-step lit" style="animation-delay:1.07s"><b>2</b> Memory matches it to the exact spike from Jul 15.</div>
+          <div class="pf-step lit" style="animation-delay:2.14s"><b>3</b> Same fix applied — $42 saved, automatically.</div>
+        </div>
       </div>
 
       <!-- Cloud Security -->
@@ -600,7 +637,11 @@
             <text x="260" y="80" text-anchor="middle" class="pf-lbl-sub">Remediated + evidence</text>
           </svg>
         </div>
-        <div class="pillar-caption">Matched across <span class="hl">3 accounts, 96% confidence</span> — audit-ready.</div>
+        <div class="pf-story">
+          <div class="pf-step lit" style="animation-delay:0s"><b>1</b> A security group is left open to the whole internet.</div>
+          <div class="pf-step lit" style="animation-delay:1.07s"><b>2</b> Memory: this exact mistake happened on 3 other accounts.</div>
+          <div class="pf-step lit" style="animation-delay:2.14s"><b>3</b> Fixed instantly, with proof for the auditor attached.</div>
+        </div>
       </div>
 
       <!-- DevOps -->
@@ -620,7 +661,11 @@
             <text x="260" y="80" text-anchor="middle" class="pf-lbl-sub">Blocked pre-deploy</text>
           </svg>
         </div>
-        <div class="pillar-caption">Matches the <span class="hl">May 9</span> incident — least-privilege suggested before it ships.</div>
+        <div class="pf-story">
+          <div class="pf-step lit" style="animation-delay:0s"><b>1</b> A CI robot is about to be granted full admin access.</div>
+          <div class="pf-step lit" style="animation-delay:1.07s"><b>2</b> Memory: this exact grant caused a breach on May 9.</div>
+          <div class="pf-step lit" style="animation-delay:2.14s"><b>3</b> Blocked before it ships. A safer permission suggested instead.</div>
+        </div>
       </div>
 
       <!-- AIOps -->
@@ -640,7 +685,11 @@
             <text x="260" y="80" text-anchor="middle" class="pf-lbl-sub">Executed, 0 regressions</text>
           </svg>
         </div>
-        <div class="pillar-caption">Agent correlates with Memory and <span class="hl">acts</span> — not just alerts.</div>
+        <div class="pf-story">
+          <div class="pf-step lit" style="animation-delay:0s"><b>1</b> 5 warning signs appear at once, across different systems.</div>
+          <div class="pf-step lit" style="animation-delay:1.07s"><b>2</b> Memory connects them to a pattern it's solved before.</div>
+          <div class="pf-step lit" style="animation-delay:2.14s"><b>3</b> Fixed automatically. No one has to wake up.</div>
+        </div>
       </div>
 
       <!-- Memory — the graph that connects all five -->
@@ -668,7 +717,11 @@
             <text x="150" y="96" text-anchor="middle" class="pf-lbl-sub">reused everywhere out</text>
           </svg>
         </div>
-        <div class="pillar-caption">Every pillar writes to <span class="hl">one graph</span> — Security informs CloudOps automatically.</div>
+        <div class="pf-story">
+          <div class="pf-step lit" style="animation-delay:0s"><b>1</b> Five different teams each spot part of a problem.</div>
+          <div class="pf-step lit" style="animation-delay:1s"><b>2</b> One shared graph connects all five, instantly.</div>
+          <div class="pf-step lit" style="animation-delay:1.8s"><b>3</b> The fix reaches every account it applies to.</div>
+        </div>
       </div>
 
     </div>

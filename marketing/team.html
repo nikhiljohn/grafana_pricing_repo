@@ -68,32 +68,13 @@
   .founder-avatar {
     width: 180px; height: 180px; border-radius: 20px; margin: 0 auto;
     background: linear-gradient(135deg, #0f172a, #1e293b); display: grid; place-items: center;
-    color: #fff; font-size: 56px; font-weight: 800;
+    color: #fff; font-size: 56px; font-weight: 800; overflow: hidden;
   }
+  .founder-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .founder-name { font-size: 24px; font-weight: 700; }
   .founder-title { font-size: 14px; color: var(--emerald-ink); font-weight: 600; margin-bottom: 14px; }
-  .founder-quote {
-    font-size: 19px; font-weight: 500; line-height: 1.5; color: var(--text);
-    border-left: 3px solid var(--emerald); padding-left: 18px; margin: 16px 0;
-    font-style: italic;
-  }
-  .founder-quote .draft-flag {
-    display: block; font-size: 11px; font-style: normal; font-weight: 700;
-    color: var(--amber-ink); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 8px;
-  }
   .founder-bio { font-size: 14.5px; color: var(--muted); margin-top: 12px; }
   .founder-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--blue-ink); margin-top: 16px; }
-
-  /* ── Mentor ── */
-  .mentor-card {
-    display: flex; align-items: center; gap: 24px; border: 1px solid var(--border);
-    border-radius: 16px; padding: 26px; background: var(--panel-2);
-  }
-  .mentor-avatar { width: 64px; height: 64px; border-radius: 14px; background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; display: grid; place-items: center; font-size: 22px; font-weight: 800; flex-shrink: 0; }
-  .mentor-name { font-size: 16px; font-weight: 700; }
-  .mentor-role { font-size: 12.5px; color: var(--muted-2); margin-bottom: 6px; }
-  .mentor-bio { font-size: 13.5px; color: var(--muted); }
-  .mentor-link { font-size: 12.5px; font-weight: 600; color: var(--blue-ink); margin-top: 6px; display: inline-block; }
 
   /* ── Team grid ── */
   .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
@@ -102,17 +83,16 @@
   .team-avatar {
     width: 68px; height: 68px; border-radius: 50%; margin: 0 auto 14px;
     display: grid; place-items: center; font-size: 22px; font-weight: 800; color: #fff;
+    overflow: hidden;
   }
+  .team-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .team-name { font-size: 15px; font-weight: 700; }
   .team-role { font-size: 12.5px; color: var(--muted-2); margin: 4px 0 10px; }
-  .team-bio { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
-  .team-link { font-size: 12px; font-weight: 600; color: var(--blue-ink); }
-
-  .draft-note {
-    font-size: 12px; color: var(--amber-ink); background: rgba(180,83,9,0.08);
-    border: 1px solid rgba(180,83,9,0.22); border-radius: 10px; padding: 10px 14px;
-    margin-bottom: 30px; text-align: center;
+  .team-quote {
+    font-size: 12.5px; color: var(--text); line-height: 1.5; margin-bottom: 12px;
+    font-style: italic; border-left: 2px solid var(--emerald); padding-left: 10px; text-align: left;
   }
+  .team-link { font-size: 12px; font-weight: 600; color: var(--blue-ink); }
 
   /* ── Bench note ── */
   .bench-card {
@@ -140,7 +120,6 @@
     .founder-card { grid-template-columns: 1fr; text-align: center; }
     .founder-quote { border-left: none; border-top: 3px solid var(--emerald); padding-left: 0; padding-top: 14px; }
     .team-grid { grid-template-columns: repeat(2, 1fr); }
-    .mentor-card { flex-direction: column; text-align: center; }
     .nav-links { display: none; }
     .page-hero h1 { font-size: 32px; }
   }
@@ -180,12 +159,6 @@
   <p>Intellicore CMP is built and operated by Searce's CSRE squad — engineers who've learned cloud and AI first-hand, running production workloads for 200 of the world's top enterprises on GCP and AWS.</p>
 </div>
 
-<div class="container">
-  <div class="draft-note">
-    📝 Editorial note: the bios and quote below are drafts pending confirmation from each person — titles and highlights should be reviewed before this page is considered final.
-  </div>
-</div>
-
 <section>
   <div class="container">
     <div class="section-head">
@@ -194,35 +167,13 @@
     </div>
     <div class="founder-card">
       <div>
-        <div class="founder-avatar">HP</div>
+        <div class="founder-avatar"><img src="team-photos/hardik.jpg" alt="Hardik Parekh"></div>
       </div>
       <div>
         <div class="founder-name">Hardik Parekh</div>
         <div class="founder-title">Founder &amp; CEO, Searce</div>
         <p class="founder-bio">Hardik built Searce around a simple bet: the enterprises that win the next decade won't be the ones that adopted AI — they'll be the ones that became AI-native, where intelligence is a structural part of how the business runs, not a feature bolted onto it. Intellicore CMP is that bet applied to cloud operations: a platform that doesn't just monitor your infrastructure, but remembers it.</p>
-        <div class="founder-quote">
-          "The future belongs to companies that are AI-native from the ground up — not ones that bolted AI onto yesterday's processes."
-          <span class="draft-flag">Draft quote — replace with Hardik's own words</span>
-        </div>
         <a class="founder-link" href="https://www.linkedin.com/in/parekhhardik/" target="_blank" rel="noopener">View LinkedIn →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section style="background:var(--navy-2); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
-  <div class="container">
-    <div class="section-head">
-      <div class="eyebrow" style="justify-content:center"><span class="dot"></span> Mentorship</div>
-      <h2>Mentored by</h2>
-    </div>
-    <div class="mentor-card">
-      <div class="mentor-avatar">VM</div>
-      <div>
-        <div class="mentor-name">Vamsi Medishetti</div>
-        <div class="mentor-role">Mentor to the Intellicore engineering team</div>
-        <p class="mentor-bio">Guidance and technical mentorship for the engineers building Intellicore CMP's Memory graph and AIOps layer.</p>
-        <a class="mentor-link" href="https://www.linkedin.com/in/vamsimed/" target="_blank" rel="noopener">View LinkedIn →</a>
       </div>
     </div>
   </div>
@@ -238,34 +189,34 @@
     <div class="team-grid">
 
       <div class="team-card">
-        <div class="team-avatar" style="background:linear-gradient(135deg,#0284c7,#38bdf8);">HG</div>
+        <div class="team-avatar"><img src="team-photos/harish.jpg" alt="Harish Gurram"></div>
         <div class="team-name">Harish Gurram</div>
-        <div class="team-role">Cloud &amp; AI Engineer</div>
-        <p class="team-bio">CSRE squad member working across CloudOps and platform reliability for Intellicore's managed customer book.</p>
+        <div class="team-role">Director, CSRE Delivery</div>
+        <p class="team-quote">"Our job is simple: solve every customer's problem faster than anyone else in the world — Intellicore is how we make that true at scale."</p>
         <a class="team-link" href="https://www.linkedin.com/in/harish-gurram-149b5260/" target="_blank" rel="noopener">LinkedIn →</a>
       </div>
 
       <div class="team-card">
-        <div class="team-avatar" style="background:linear-gradient(135deg,#b45309,#fbbf24);">CR</div>
+        <div class="team-avatar"><img src="team-photos/chandan.jpg" alt="Chandan Rudani"></div>
         <div class="team-name">Chandan Rudani</div>
-        <div class="team-role">Cloud &amp; AI Engineer</div>
-        <p class="team-bio">CSRE squad member contributing to FinOps and cost-optimization tooling on Intellicore CMP.</p>
+        <div class="team-role">Senior Manager, Cloud Security &amp; Reliability Engineering — leads the India Squad</div>
+        <p class="team-quote">"Security shouldn't slow a team down — it should remember, so nobody has to make the same mistake twice."</p>
         <a class="team-link" href="https://www.linkedin.com/in/chandan-rudani/" target="_blank" rel="noopener">LinkedIn →</a>
       </div>
 
       <div class="team-card">
-        <div class="team-avatar" style="background:linear-gradient(135deg,#e11d48,#fb7185);">MP</div>
+        <div class="team-avatar"><img src="team-photos/mukur.jpg" alt="Mukur Panchani"></div>
         <div class="team-name">Mukur Panchani</div>
-        <div class="team-role">Cloud &amp; AI Engineer</div>
-        <p class="team-bio">CSRE squad member focused on Cloud Security and compliance automation within Intellicore CMP.</p>
+        <div class="team-role">Squad Lead</div>
+        <p class="team-quote">"A squad is only as good as what it remembers between incidents. That's the whole idea behind Intellicore."</p>
         <a class="team-link" href="https://www.linkedin.com/in/mukur-panchani/" target="_blank" rel="noopener">LinkedIn →</a>
       </div>
 
       <div class="team-card">
-        <div class="team-avatar" style="background:linear-gradient(135deg,#059669,#34d399);">NJ</div>
+        <div class="team-avatar"><img src="team-photos/nikhil.jpg" alt="Nikhil John"></div>
         <div class="team-name">Nikhil John</div>
-        <div class="team-role">Cloud &amp; AI Engineer</div>
-        <p class="team-bio">CSRE squad member working on Intellicore CMP's platform architecture and cloud infrastructure.</p>
+        <div class="team-role">Director, CSR — leads the Practice for India Region</div>
+        <p class="team-quote">"Every account we manage should get smarter over time — not just monitored, but genuinely understood."</p>
         <a class="team-link" href="https://www.linkedin.com/in/nikhil-john-cloud/" target="_blank" rel="noopener">LinkedIn →</a>
       </div>
 

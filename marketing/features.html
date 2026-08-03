@@ -65,10 +65,14 @@
   .feature-head .sub { font-size: 14px; color: var(--muted-2); margin-top: 2px; }
 
   .cap-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .cap-card { border: 1px solid var(--border); border-radius: 14px; padding: 20px; background: var(--panel); }
-  .cap-card h3 { font-size: 15px; margin-bottom: 8px; }
-  .cap-card p { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
-  .cap-card .tag { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 999px; margin-bottom: 10px; }
+  .cap-card { border: 1px solid var(--border); border-radius: 14px; padding: 18px; background: var(--panel); }
+  .cap-card h3 { font-size: 14.5px; margin-bottom: 6px; }
+  .cap-card p { font-size: 13px; color: var(--muted); line-height: 1.45; margin-bottom: 10px; }
+  .cap-card .example {
+    font-size: 12px; color: var(--emerald-ink); background: rgba(5,150,105,0.07);
+    border-left: 2px solid var(--emerald); padding: 6px 10px; border-radius: 0 6px 6px 0;
+  }
+  .cap-card .example b { color: var(--text); font-weight: 600; }
 
   .cta-section { text-align: center; padding: 90px 0; }
   .cta-box { border-radius: 24px; border: 1px solid var(--border); background: radial-gradient(circle at 50% 0%, rgba(52,211,153,0.1), transparent 60%), var(--panel); padding: 56px 40px; }
@@ -140,28 +144,28 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(5,150,105,0.12); color:#059669;">⌘</div>
-      <div><h2>Command Center</h2><div class="sub">The daily briefing — one screen, every pillar, every managed customer</div></div>
+      <div><h2>Command Center</h2><div class="sub">One screen. Every pillar. Every customer.</div></div>
     </div>
     <div class="cap-grid">
       <div class="cap-card">
-        <span class="tag" style="background:rgba(5,150,105,0.1); color:#059669;">Scores</span>
-        <h3>Five pillar health scores</h3>
-        <p>CloudOps, FinOps, Cloud Security, DevOps and AIOps each roll up to a single score with a one-line status note — healthy, warning, or actively being worked by an agent.</p>
+        <h3>Health scores</h3>
+        <p>All 5 pillars, one score each.</p>
+        <div class="example"><b>Example:</b> "Cloud Security: 78 — 5 SSH groups open"</div>
       </div>
       <div class="cap-card">
-        <span class="tag" style="background:rgba(225,29,72,0.1); color:#e11d48;">Attention queue</span>
         <h3>Needs Your Attention</h3>
-        <p>Live cards ranked by severity, each with a Memory line explaining why it matters — a prior occurrence, a confidence score, an evidence trail — so triage doesn't start from zero.</p>
+        <p>What to fix first, and why it matters.</p>
+        <div class="example"><b>Example:</b> "Seen 12 times before, 96% sure of the fix"</div>
       </div>
       <div class="cap-card">
-        <span class="tag" style="background:rgba(2,132,199,0.1); color:#0284c7;">Org switcher</span>
-        <h3>Multi-customer book</h3>
-        <p>Switch between managed customers and their environments (production, staging, UAT, dev) from one dropdown. Every pillar page re-renders for whichever account is selected.</p>
+        <h3>Switch customers</h3>
+        <p>One dropdown, every managed account.</p>
+        <div class="example"><b>Example:</b> Netcore prod → ShoppersStop staging, instantly</div>
       </div>
       <div class="cap-card">
-        <span class="tag" style="background:rgba(180,83,9,0.1); color:#b45309;">Reporting</span>
-        <h3>One-click PDF reports</h3>
-        <p>A branded, board-ready health report generates client-side for whichever pillar and customer is currently in view — scores, findings, and patterns as a downloadable PDF.</p>
+        <h3>One-click reports</h3>
+        <p>A PDF for your CIO, ready in seconds.</p>
+        <div class="example"><b>Example:</b> Board-ready health report, no formatting needed</div>
       </div>
     </div>
   </div>
@@ -171,13 +175,29 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(2,132,199,0.12); color:#0284c7;">☁</div>
-      <div><h2>CloudOps</h2><div class="sub">Reliability, capacity, and the causal chain behind every incident</div></div>
+      <div><h2>CloudOps</h2><div class="sub">Keeps your servers and databases running smoothly</div></div>
     </div>
     <div class="cap-grid">
-      <div class="cap-card"><h3>Compute &amp; GKE monitoring</h3><p>Per-instance CPU, memory, and cost, with the last incident on each resource surfaced inline — not buried in a separate dashboard.</p></div>
-      <div class="cap-card"><h3>Incident causal chains</h3><p>Every incident links to what preceded it and what it caused — a Friday deploy that led to a P2, traced automatically from the Memory graph.</p></div>
-      <div class="cap-card"><h3>Serverless &amp; pipeline health</h3><p>Function invocation rates, latency, and error rates; data pipeline run history with duration and next-run scheduling.</p></div>
-      <div class="cap-card"><h3>Recurring-pattern detection</h3><p>Capacity patterns — like GKE hitting memory pressure at a consistent 65% of projected load — get named and tracked across every occurrence.</p></div>
+      <div class="cap-card">
+        <h3>Watches every server</h3>
+        <p>CPU, memory, cost — one place.</p>
+        <div class="example"><b>Example:</b> "checkout-service at 87% CPU, was fine yesterday"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Traces the "why"</h3>
+        <p>Links what caused what.</p>
+        <div class="example"><b>Example:</b> "This Friday deploy caused Monday's outage"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Watches apps &amp; pipelines</h3>
+        <p>Not just servers — data jobs too.</p>
+        <div class="example"><b>Example:</b> "Nightly data job usually takes 40 min — it's at 2 hours"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Spots repeat problems</h3>
+        <p>Names a pattern once it repeats.</p>
+        <div class="example"><b>Example:</b> "This server always struggles at 65% load — resize it"</div>
+      </div>
     </div>
   </div>
 </section>
@@ -186,13 +206,29 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(180,83,9,0.12); color:#b45309;">$</div>
-      <div><h2>FinOps</h2><div class="sub">Cost anomalies matched to known patterns, in minutes not days</div></div>
+      <div><h2>FinOps</h2><div class="sub">Catches cost spikes before they become a bill shock</div></div>
     </div>
     <div class="cap-grid">
-      <div class="cap-card"><h3>Anomaly detection with root cause</h3><p>A cost spike is matched against prior spikes on the same resource class — same query shape, same root cause — with a confidence score and a suggested fix.</p></div>
-      <div class="cap-card"><h3>Optimization tracking</h3><p>Applied and pending recommendations (committed-use discounts, right-sizing, lifecycle policies) with actual savings realized, not just projected.</p></div>
-      <div class="cap-card"><h3>Cost-by-pillar breakdown</h3><p>Spend attributed to CloudOps, SecOps, DevOps and AIOps individually, each with its own trend line and Memory note on what changed.</p></div>
-      <div class="cap-card"><h3>Forecasting</h3><p>Month-ahead cost projections that account for pending optimizations and known seasonal patterns (like pre-sale traffic ramps).</p></div>
+      <div class="cap-card">
+        <h3>Explains cost spikes</h3>
+        <p>Not just "spend went up" — why.</p>
+        <div class="example"><b>Example:</b> "Same bug as Jul 15 — same fix works"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Tracks real savings</h3>
+        <p>What was suggested, and what it actually saved.</p>
+        <div class="example"><b>Example:</b> "Right-sizing applied — saving $67/month, confirmed"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Cost by team</h3>
+        <p>Which pillar is spending what.</p>
+        <div class="example"><b>Example:</b> "AIOps spend up 15% this month — here's why"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Forecasts next month</h3>
+        <p>Accounts for fixes already in motion.</p>
+        <div class="example"><b>Example:</b> "$1.14M this month → $1.02M next, after 2 fixes land"</div>
+      </div>
     </div>
   </div>
 </section>
@@ -201,13 +237,29 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(225,29,72,0.12); color:#e11d48;">🛡</div>
-      <div><h2>Cloud Security</h2><div class="sub">Findings, IAM risk, and compliance evidence — attached automatically</div></div>
+      <div><h2>Cloud Security</h2><div class="sub">Fixes security gaps and keeps audit-ready proof</div></div>
     </div>
     <div class="cap-grid">
-      <div class="cap-card"><h3>Findings with Memory context</h3><p>Every finding shows how many times it's been seen, the last resolution, and a confidence score for auto-fix — sourced from your own remediation history, not a generic playbook.</p></div>
-      <div class="cap-card"><h3>IAM risk scoring</h3><p>Service accounts and users ranked by risk with plain-language reasoning — "Editor since creation, memory shows 8 similar cases resolved with custom roles."</p></div>
-      <div class="cap-card"><h3>Compliance frameworks</h3><p>CIS Benchmark, NIST 800-53, ISO 27001, and PCI-DSS tracked as live pass/fail scores, not a point-in-time audit snapshot.</p></div>
-      <div class="cap-card"><h3>Auto-remediation with evidence</h3><p>High-confidence fixes (like restricting SSH to a VPN CIDR) apply automatically and attach compliance evidence to the remediation record — no separate evidence-collection step.</p></div>
+      <div class="cap-card">
+        <h3>Findings with history</h3>
+        <p>Not a generic playbook — your own history.</p>
+        <div class="example"><b>Example:</b> "Seen 12 times, always fixed the same way"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Flags risky access</h3>
+        <p>Who has too much access, and why it's risky.</p>
+        <div class="example"><b>Example:</b> "deploy-bot has Editor, only ever uses Viewer"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Compliance, live</h3>
+        <p>CIS, NIST, ISO, PCI — always current, not a one-time audit.</p>
+        <div class="example"><b>Example:</b> "PCI-DSS: 93% passing, updated in real time"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Fixes with proof attached</h3>
+        <p>High-confidence fixes apply themselves, evidence included.</p>
+        <div class="example"><b>Example:</b> SSH restricted to VPN + audit evidence, automatically</div>
+      </div>
     </div>
   </div>
 </section>
@@ -216,13 +268,29 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(99,102,241,0.12); color:#6366f1;">⌥</div>
-      <div><h2>DevOps</h2><div class="sub">Change guardrails learned from your own incidents</div></div>
+      <div><h2>DevOps</h2><div class="sub">Stops risky changes before they ship</div></div>
     </div>
     <div class="cap-grid">
-      <div class="cap-card"><h3>Risk-scored change log</h3><p>Every change — a role binding, a machine-type change, a query pattern shift — is scored Low/Medium/High with the Memory reasoning behind the score.</p></div>
-      <div class="cap-card"><h3>Orchestration requests</h3><p>Provisioning requests (a new VM, a GCS bucket, an IAM role) queued for approval with estimated cost and risk, informed by how similar requests played out before.</p></div>
-      <div class="cap-card"><h3>Patch compliance</h3><p>Days-behind tracking per resource with severity, plus Memory notes on why a patch was deferred (a change freeze, a compatibility test in progress).</p></div>
-      <div class="cap-card"><h3>Pre-deploy guardrails</h3><p>A prior incident — like a CI bot granted Editor — becomes a standing rule that blocks the same pattern before it ships again.</p></div>
+      <div class="cap-card">
+        <h3>Scores every change</h3>
+        <p>Low, medium, or high risk — with reasoning.</p>
+        <div class="example"><b>Example:</b> "IAM grant to a bot: HIGH risk, here's why"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Approves new resources</h3>
+        <p>New server or database requests, with cost upfront.</p>
+        <div class="example"><b>Example:</b> "New VM request: $45/mo, low risk, similar to 12 others"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Tracks overdue patches</h3>
+        <p>What's behind, and why it was delayed.</p>
+        <div class="example"><b>Example:</b> "26 days behind — delayed for a change freeze"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Learns from mistakes</h3>
+        <p>One bad incident becomes a permanent rule.</p>
+        <div class="example"><b>Example:</b> "Blocked — same grant caused a breach in May"</div>
+      </div>
     </div>
   </div>
 </section>
@@ -231,13 +299,29 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(5,150,105,0.12); color:#059669;">✦</div>
-      <div><h2>AIOps</h2><div class="sub">Agents that act on Memory, not just alert on a threshold</div></div>
+      <div><h2>AIOps</h2><div class="sub">AI agents that fix things, not just alert you</div></div>
     </div>
     <div class="cap-grid">
-      <div class="cap-card"><h3>Autonomous agents</h3><p>Purpose-built agents (security auto-remediation, cost anomaly, predictive operations) each carry their own confidence threshold and current status — active, investigating, or idle.</p></div>
-      <div class="cap-card"><h3>Full audit trail</h3><p>Every AI decision is logged with its reasoning, the Memory match that informed it, and its outcome — executed, awaiting approval, or flagged for human review.</p></div>
-      <div class="cap-card"><h3>Memory Chat</h3><p>Ask plain-language questions — "what changed in the last 24h?", "what's our biggest cost risk?" — answered from the graph, with cited events and patterns.</p></div>
-      <div class="cap-card"><h3>Transparent cost</h3><p>Token usage and spend broken down by feature (auto-remediation, anomaly analysis, reports) — all billed to the customer's own BYOK key, never marked up.</p></div>
+      <div class="cap-card">
+        <h3>Agents that act</h3>
+        <p>Each one watches for something specific.</p>
+        <div class="example"><b>Example:</b> "Security agent: active, watching for open ports"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Shows its reasoning</h3>
+        <p>Every AI decision, logged and explained.</p>
+        <div class="example"><b>Example:</b> "Fixed it because: seen before, 91% confident"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Ask it questions</h3>
+        <p>Plain English, answered from your own data.</p>
+        <div class="example"><b>Example:</b> "What changed in the last 24 hours?"</div>
+      </div>
+      <div class="cap-card">
+        <h3>You see what it costs</h3>
+        <p>Billed to your own AI key — never marked up.</p>
+        <div class="example"><b>Example:</b> "847K tokens this month — $2.40 total"</div>
+      </div>
     </div>
   </div>
 </section>
@@ -246,13 +330,29 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(5,150,105,0.16); color:#059669;">🧠</div>
-      <div><h2>Memory</h2><div class="sub">The graph underneath every pillar — the actual product</div></div>
+      <div><h2>Memory</h2><div class="sub">The brain underneath everything else on this page</div></div>
     </div>
     <div class="cap-grid">
-      <div class="cap-card"><h3>Timeline of entries</h3><p>Every ticket becomes an entry tagged by pillar and customer, with a confidence score and a running count of how many times it's been reused.</p></div>
-      <div class="cap-card"><h3>Incident patterns</h3><p>Recurring behaviors — surfaced once occurrence count and confidence both clear threshold — with occurrence counts and auto-resolution rates.</p></div>
-      <div class="cap-card"><h3>Remediation library</h3><p>Proven fixes with success rates, so a new fix is only auto-executed once it has a track record, not on its first attempt.</p></div>
-      <div class="cap-card"><h3>Cross-pillar learnings</h3><p>Insights that span disciplines — "IAM changes correlate with 40% of security findings within 48h" — that a single-pillar tool would never surface.</p></div>
+      <div class="cap-card">
+        <h3>Remembers every event</h3>
+        <p>Every ticket becomes something it can reuse.</p>
+        <div class="example"><b>Example:</b> "This fix has been used 12 times — 100% success"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Names recurring problems</h3>
+        <p>3+ times, and it gets a name.</p>
+        <div class="example"><b>Example:</b> "'Friday deploy risk' — happened 4 times"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Keeps a library of fixes</h3>
+        <p>Only trusted once it has a track record.</p>
+        <div class="example"><b>Example:</b> "This fix: 100% success rate, 12 uses"</div>
+      </div>
+      <div class="cap-card">
+        <h3>Connects the dots across teams</h3>
+        <p>Insights no single team would ever notice alone.</p>
+        <div class="example"><b>Example:</b> "IAM changes cause 40% of security issues"</div>
+      </div>
     </div>
   </div>
 </section>
@@ -261,11 +361,19 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(56,189,248,0.12); color:#0284c7;">▤</div>
-      <div><h2>Assets &amp; Alerts</h2><div class="sub">The inventory and the interrupt queue</div></div>
+      <div><h2>Assets &amp; Alerts</h2><div class="sub">Everything you own, everything that needs a look</div></div>
     </div>
     <div class="cap-grid">
-      <div class="cap-card"><h3>Asset / CMDB inventory</h3><p>Every resource across GCP and AWS — VMs, Cloud SQL, Cloud Run, EC2 — with cost, region, state, and last-seen timestamp in one searchable table.</p></div>
-      <div class="cap-card"><h3>Alert feed with filters</h3><p>Active, acknowledged, and resolved alerts across all pillars, each with baseline vs. current values so a spike's magnitude is immediately clear.</p></div>
+      <div class="cap-card">
+        <h3>Full inventory</h3>
+        <p>Every server, database, and app across GCP and AWS.</p>
+        <div class="example"><b>Example:</b> One searchable list, cost and status included</div>
+      </div>
+      <div class="cap-card">
+        <h3>One alert feed</h3>
+        <p>Active, handled, and resolved — all pillars, one place.</p>
+        <div class="example"><b>Example:</b> "Cost spike: $772 → $842/mo, +9%"</div>
+      </div>
     </div>
   </div>
 </section>
@@ -274,13 +382,29 @@
   <div class="container">
     <div class="feature-head">
       <div class="feature-icon" style="background:rgba(129,140,248,0.12); color:#6366f1;">⚙</div>
-      <div><h2>Platform &amp; Security</h2><div class="sub">How it's deployed, authenticated, and kept isolated</div></div>
+      <div><h2>Platform &amp; Security</h2><div class="sub">How your data stays yours, and only yours</div></div>
     </div>
     <div class="cap-grid">
-      <div class="cap-card"><h3>Per-customer isolation</h3><p>Every customer runs on its own VM with its own Postgres, Neo4j, and Redis — no shared database, no cross-tenant query risk.</p></div>
-      <div class="cap-card"><h3>Auth: TOTP 2FA + Google SSO</h3><p>Email/password with Google Authenticator-compatible 2FA, or Sign in with Google — session revocation backed by Redis, not just a stateless token.</p></div>
-      <div class="cap-card"><h3>BYOK, encrypted at rest</h3><p>Anthropic, OpenAI, or Gemini keys, encrypted with pgcrypto — only the last 4 characters are ever shown in the UI, the plaintext key never leaves the LLM call path.</p></div>
-      <div class="cap-card"><h3>Auto-TLS, locked-down network</h3><p>Caddy handles certificate provisioning automatically; only ports 80/443 are exposed. Postgres, Neo4j, and Redis are reachable only on the private network.</p></div>
+      <div class="cap-card">
+        <h3>Your own private copy</h3>
+        <p>Your own server and databases — nothing shared with anyone else.</p>
+        <div class="example"><b>Example:</b> One customer, one isolated environment</div>
+      </div>
+      <div class="cap-card">
+        <h3>Secure login</h3>
+        <p>Password + phone code, or Sign in with Google.</p>
+        <div class="example"><b>Example:</b> Same 2FA as your banking app</div>
+      </div>
+      <div class="cap-card">
+        <h3>Bring your own AI key</h3>
+        <p>Encrypted, never billed by Searce.</p>
+        <div class="example"><b>Example:</b> Only the last 4 digits of your key are ever shown</div>
+      </div>
+      <div class="cap-card">
+        <h3>Locked-down network</h3>
+        <p>Only the website is public — databases never are.</p>
+        <div class="example"><b>Example:</b> Automatic HTTPS, no manual certificate work</div>
+      </div>
     </div>
   </div>
 </section>
