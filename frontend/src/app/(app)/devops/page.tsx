@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApiData } from "@/lib/api";
+import { ApplyFixModal } from "@/components/ApplyFixModal";
 import {
   GitBranch,
   Brain,
@@ -358,7 +359,12 @@ function ChangesTab() {
 /*  ORCHESTRATION TAB                                                  */
 /* ================================================================== */
 function OrchestrationTab() {
-  const { data: orchRequests } = useApiData<OrchRequest[]>("/devops/orchestration", []);
+  const { data: orchData } = useApiData<OrchRequest[]>("/devops/orchestration", []);
+  // Local, mutable copy so "Approve" actually completes the request
+  // instead of being a decorative status badge — resyncs on org switch.
+  const [orchRequests, setOrchRequests] = useState<OrchRequest[]>([]);
+  useEffect(() => setOrchRequests(orchData), [orchData]);
+  const [approveTarget, setApproveTarget] = useState<OrchRequest | null>(null);
 
   return (
     <div className="space-y-6">
@@ -386,7 +392,11 @@ function OrchestrationTab() {
             4 requests waiting for approval
           </span>
         </div>
-        <button className="flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-900">
+        <button
+          disabled
+          title="Coming in V2 — dedicated orchestration review queue"
+          className="flex items-center gap-1 text-sm font-semibold text-amber-300 cursor-not-allowed"
+        >
           Review <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -408,6 +418,7 @@ function OrchestrationTab() {
                 <th className="px-5 py-3">Risk</th>
                 <th className="px-5 py-3">Status</th>
                 <th className="px-5 py-3">Memory</th>
+                <th className="px-5 py-3">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -432,12 +443,40 @@ function OrchestrationTab() {
                       <span className="text-xs leading-relaxed text-blue-700">{r.memory}</span>
                     </div>
                   </td>
+                  <td className="px-5 py-3">
+                    {r.status.includes("Pending") ? (
+                      <button
+                        onClick={() => setApproveTarget(r)}
+                        className="text-xs font-medium px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                      >
+                        Approve
+                      </button>
+                    ) : (
+                      <span className="text-xs text-slate-300">—</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      <ApplyFixModal
+        open={approveTarget !== null}
+        onClose={() => setApproveTarget(null)}
+        onConfirm={() => {
+          setOrchRequests((cur) =>
+            cur.map((x) => (x === approveTarget ? { ...x, status: "Completed" } : x)),
+          );
+        }}
+        pillar="DevOps"
+        title={approveTarget?.request ?? ""}
+        memoryContext={approveTarget?.memory ?? ""}
+        confidence={null}
+        fixDescription={`Applies to ${approveTarget?.resource ?? "the resource"} on ${approveTarget?.provider ?? ""}, estimated cost ${approveTarget?.estCost ?? "—"}.`}
+        confirmLabel="Approve"
+      />
     </div>
   );
 }

@@ -52,19 +52,19 @@ const PROFILES: Record<string, CloudOpsProfile> = {
   },
   aarti: {
     vms: [
-      { name: "erp-prod-app", type: "e2-standard-4", zone: "asia-south1-a", cpu: 41, memory: 55, status: "healthy", cost: "$210", lastIncident: "None" },
-      { name: "cloudsql-erp-primary", type: "db-custom-4-16384", zone: "asia-south1-a", cpu: 38, memory: 50, status: "healthy", cost: "$260", lastIncident: "None" },
-      { name: "batch-processing-vm", type: "e2-standard-2", zone: "asia-south1-b", cpu: 30, memory: 40, status: "healthy", cost: "$54", lastIncident: "None" },
-      { name: "bastion-audit", type: "e2-micro", zone: "asia-south1-a", cpu: 6, memory: 18, status: "healthy", cost: "$7", lastIncident: "None" },
+      { name: "erp-prod-app", type: "t3.large (EC2)", zone: "ap-south-1a", cpu: 41, memory: 55, status: "healthy", cost: "$78", lastIncident: "None" },
+      { name: "rds-erp-primary", type: "db.r5.xlarge (RDS)", zone: "ap-south-1a", cpu: 38, memory: 50, status: "healthy", cost: "$310", lastIncident: "None" },
+      { name: "batch-processing-ec2", type: "t3.medium (EC2)", zone: "ap-south-1b", cpu: 30, memory: 40, status: "healthy", cost: "$31", lastIncident: "None" },
+      { name: "bastion-audit", type: "t3.micro (EC2)", zone: "ap-south-1a", cpu: 6, memory: 18, status: "healthy", cost: "$8", lastIncident: "None" },
     ],
     incidents: [
       { time: "18d ago", workload: "Compute", resource: "erp-prod-app", issue: "Scheduled batch job overlap caused brief CPU contention", resolution: "Job scheduling window adjusted", duration: "6 min", status: "Resolved", statusColor: "bg-green-50 text-green-700" },
     ],
     serverless: [
-      { name: "compliance-report-gen", runtime: "Python 3.12", region: "asia-south1", invocations: "4,120", avgLatency: "310ms", errorRate: "0%", cost: "$22" },
+      { name: "compliance-report-gen", runtime: "Python 3.12 (Lambda)", region: "ap-south-1", invocations: "4,120", avgLatency: "310ms", errorRate: "0%", cost: "$14" },
     ],
     pipelines: [
-      { name: "erp-nightly-sync", type: "Cloud Composer", lastRun: "Today 01:00", duration: "26 min", status: "healthy", nextRun: "Tomorrow 01:00", cost: "$95" },
+      { name: "erp-nightly-sync", type: "AWS Step Functions", lastRun: "Today 01:00", duration: "26 min", status: "healthy", nextRun: "Tomorrow 01:00", cost: "$38" },
     ],
   },
   shopstop: {
@@ -72,6 +72,8 @@ const PROFILES: Record<string, CloudOpsProfile> = {
       { name: "checkout-service-prod", type: "n2-standard-4", zone: "asia-south1-a", cpu: 71, memory: 66, status: "warning", cost: "$280", lastIncident: "Egress anomaly (today)" },
       { name: "cart-service-prod", type: "e2-standard-4", zone: "asia-south1-a", cpu: 58, memory: 60, status: "healthy", cost: "$210", lastIncident: "None" },
       { name: "catalog-search-prod", type: "n2-standard-2", zone: "asia-south1-b", cpu: 33, memory: 45, status: "healthy", cost: "$140", lastIncident: "None" },
+      { name: "sap-hana-prod", type: "m3-megamem-64", zone: "asia-south1-a", cpu: 52, memory: 61, status: "healthy", cost: "$1,240", lastIncident: "None" },
+      { name: "sap-app-prod", type: "n2-highmem-8", zone: "asia-south1-a", cpu: 44, memory: 58, status: "healthy", cost: "$410", lastIncident: "None" },
       { name: "eks-analytics-prod", type: "m5.xlarge (AWS)", zone: "ap-south-1a", cpu: 47, memory: 52, status: "healthy", cost: "$320", lastIncident: "None" },
     ],
     incidents: [
@@ -99,20 +101,22 @@ const PROFILES: Record<string, CloudOpsProfile> = {
       { name: "asset-cdn-sync", type: "Cloud Run Jobs", lastRun: "Today 06:00", duration: "4 min", status: "healthy", nextRun: "Today 18:00", cost: "$8" },
     ],
   },
-  paynimbus: {
+  dmart: {
     vms: [
-      { name: "payments-api-prod", type: "n2-standard-4", zone: "ap-south-1a (AWS)", cpu: 52, memory: 58, status: "healthy", cost: "$260", lastIncident: "None" },
-      { name: "ledger-service-prod", type: "e2-standard-4", zone: "asia-south1-a", cpu: 46, memory: 55, status: "healthy", cost: "$230", lastIncident: "None" },
-      { name: "fraud-detection-prod", type: "n2-standard-2", zone: "asia-south1-b", cpu: 61, memory: 48, status: "healthy", cost: "$150", lastIncident: "None" },
+      { name: "gke-prod-commerce", type: "n2-standard-8", zone: "asia-south1-b", cpu: 81, memory: 91, status: "warning", cost: "$920", lastIncident: "checkout pods OOMKilled (today)" },
+      { name: "gke-prod-catalog", type: "n2-standard-4", zone: "asia-south1-b", cpu: 58, memory: 64, status: "healthy", cost: "$540", lastIncident: "None" },
+      { name: "cloudsql-commerce-primary", type: "db-custom-8-32768", zone: "asia-south1-a", cpu: 49, memory: 55, status: "healthy", cost: "$410", lastIncident: "None" },
+      { name: "bastion-prod", type: "e2-micro", zone: "asia-south1-a", cpu: 5, memory: 15, status: "healthy", cost: "$7", lastIncident: "None" },
     ],
     incidents: [
-      { time: "94d ago", workload: "Security", resource: "admin-key-rotation", issue: "Admin access key unused for 94 days", resolution: "Rotated + scoped down, PCI evidence attached", duration: "24h SLA", status: "Resolved", statusColor: "bg-green-50 text-green-700" },
+      { time: "today", workload: "Compute", resource: "gke-prod-commerce", issue: "hcl-commerce-checkout pods OOMKilled — JVM heap exceeded 2Gi memory limit under flash-sale load", resolution: "Raised pod memory limit + tuned -Xmx, HPA threshold adjusted", duration: "9 min", status: "Resolved", statusColor: "bg-green-50 text-green-700" },
+      { time: "55d ago", workload: "Compute", resource: "gke-prod-commerce", issue: "Node pool left over-provisioned 4 days after flash sale ended", resolution: "Added automated 48h post-sale scale-down", duration: "n/a", status: "Mitigated", statusColor: "bg-blue-50 text-blue-700" },
     ],
     serverless: [
-      { name: "transaction-webhook", runtime: "Java 21", region: "ap-south-1", invocations: "2,410,600", avgLatency: "68ms", errorRate: "0%", cost: "$520" },
+      { name: "order-webhook", runtime: "Java 21 (Cloud Run)", region: "asia-south1", invocations: "1,840,200", avgLatency: "74ms", errorRate: "0.01%", cost: "$310" },
     ],
     pipelines: [
-      { name: "settlement-batch", type: "AWS Batch", lastRun: "Today 00:30", duration: "52 min", status: "healthy", nextRun: "Tomorrow 00:30", cost: "$210" },
+      { name: "inventory-sync-hourly", type: "Dataflow", lastRun: "Today 11:00", duration: "11 min", status: "healthy", nextRun: "Today 12:00", cost: "$140" },
     ],
   },
 };

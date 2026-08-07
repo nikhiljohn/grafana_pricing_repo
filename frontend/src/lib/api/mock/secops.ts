@@ -41,12 +41,12 @@ const PROFILES: Record<string, SecOpsProfile> = {
   aarti: {
     findings: [
       { id: 1, severity: "critical", title: "5 security groups allow SSH from internet", resource: "erp-prod-app", account: "aarti-prod", cisCheck: "CIS 5.2", memorySeenCount: 12, memoryLastResolution: "Restricted to VPN CIDR 10.0.0.0/8", memoryConfidence: 96, memoryNote: "Auto-remediated across 3 Aarti accounts on Jul 12. Auto-fix confidence 96%.", actions: ["Auto-Fix", "Investigate"] },
-      { id: 2, severity: "high", title: "2 service accounts have Editor role by default", resource: "batch-processing-vm", account: "aarti-prod", cisCheck: "CIS 1.16", memorySeenCount: 8, memoryLastResolution: "Created custom least-privilege role", memoryConfidence: 88, memoryNote: "Over-privileged SAs found 8 times. Avg time to resolve: 25 min.", actions: ["Generate Role"] },
-      { id: 3, severity: "medium", title: "Audit logging retention below 1 year", resource: "erp-prod-app", account: "aarti-prod", cisCheck: "CIS 2.7", memorySeenCount: 0, memoryLastResolution: "", memoryConfidence: 0, memoryNote: "New finding, flagged ahead of Q3 audit.", actions: ["Investigate"] },
+      { id: 2, severity: "high", title: "2 IAM roles have AdministratorAccess by default", resource: "batch-processing-ec2", account: "aarti-prod", cisCheck: "CIS 1.16", memorySeenCount: 8, memoryLastResolution: "Created custom least-privilege policy", memoryConfidence: 88, memoryNote: "Over-privileged roles found 8 times. Avg time to resolve: 25 min.", actions: ["Generate Role"] },
+      { id: 3, severity: "medium", title: "CloudTrail log retention below 1 year", resource: "erp-prod-app", account: "aarti-prod", cisCheck: "CIS 2.7", memorySeenCount: 0, memoryLastResolution: "", memoryConfidence: 0, memoryNote: "New finding, flagged ahead of Q3 audit.", actions: ["Investigate"] },
     ],
     iam: [
-      { name: "erp-deploy-sa", type: "Service Account", risk: "High", riskColor: "text-rose-600 bg-rose-50", lastActive: "2h ago", memory: "Editor since creation. Memory: 8 similar cases resolved with custom roles." },
-      { name: "audit-readonly-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "6h ago", memory: "Appropriately scoped" },
+      { name: "erp-deploy-role", type: "IAM Role", risk: "High", riskColor: "text-rose-600 bg-rose-50", lastActive: "2h ago", memory: "AdministratorAccess since creation. Memory: 8 similar cases resolved with custom least-privilege policies." },
+      { name: "audit-readonly-role", type: "IAM Role", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "6h ago", memory: "Appropriately scoped" },
     ],
     compliance: [
       { name: "CIS Benchmark v1.4", pct: 78, passing: 34, failing: 9, notAssessed: 0, total: 43 },
@@ -87,21 +87,21 @@ const PROFILES: Record<string, SecOpsProfile> = {
       { date: "12d ago", finding: "deploy-bot Editor grant", action: "Guardrail suggested least-privilege role", result: "Blocked pre-deploy", time: "instant" },
     ],
   },
-  paynimbus: {
+  dmart: {
     findings: [
-      { id: 1, severity: "medium", title: "Admin access key unused for 94 days", resource: "payments-api-prod", account: "paynimbus-prod", cisCheck: "PCI-DSS 8.1.4", memorySeenCount: 3, memoryLastResolution: "Rotated + scoped down, PCI evidence attached", memoryConfidence: 90, memoryNote: "Prior key-rotation remediation on 2 fintech accounts. PCI-DSS evidence auto-attached.", actions: ["Auto-Fix"] },
-      { id: 2, severity: "low", title: "Quarterly PCI-DSS evidence package due in 5 days", resource: "compliance", account: "paynimbus-prod", cisCheck: "PCI-DSS 12.1", memorySeenCount: 4, memoryLastResolution: "Auto-attached from remediation history", memoryConfidence: 100, memoryNote: "100% of remediations this quarter shipped with evidence attached.", actions: ["Review"] },
+      { id: 1, severity: "medium", title: "3 hcl-commerce pods running without a non-root securityContext", resource: "gke-prod-commerce", account: "dmart-prod", cisCheck: "CIS Kubernetes 5.2.6", memorySeenCount: 2, memoryLastResolution: "Added runAsNonRoot + read-only root filesystem to pod spec", memoryConfidence: 85, memoryNote: "Same finding resolved on 2 other GKE workloads via a shared PodSecurity baseline template.", actions: ["Generate Role", "Investigate"] },
+      { id: 2, severity: "low", title: "GKE Workload Identity not enabled — pods use default node service account", resource: "gke-prod-catalog", account: "dmart-prod", cisCheck: "CIS Kubernetes 5.1.5", memorySeenCount: 1, memoryLastResolution: "Enabled Workload Identity, scoped per-service KSA", memoryConfidence: 80, memoryNote: "Recommend enabling Workload Identity before next workload onboarding.", actions: ["Investigate"] },
     ],
     iam: [
-      { name: "payments-admin-key", type: "Access Key", risk: "Medium", riskColor: "text-amber-600 bg-amber-50", lastActive: "94d ago", memory: "Stale key pattern. Memory: 3 prior rotations, all within SLA." },
-      { name: "fraud-detection-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "30m ago", memory: "Appropriately scoped" },
+      { name: "gke-default-node-sa", type: "Service Account", risk: "Medium", riskColor: "text-amber-600 bg-amber-50", lastActive: "1h ago", memory: "Used by 3 workloads pending Workload Identity migration." },
+      { name: "commerce-ci-deploy-sa", type: "Service Account", risk: "Low", riskColor: "text-green-600 bg-green-50", lastActive: "20m ago", memory: "Appropriately scoped to GKE deploy + Artifact Registry pull." },
     ],
     compliance: [
-      { name: "PCI-DSS v4.0", pct: 93, passing: 65, failing: 5, notAssessed: 0, total: 70 },
-      { name: "CIS Benchmark v1.4", pct: 89, passing: 38, failing: 5, notAssessed: 0, total: 43 },
+      { name: "CIS Kubernetes Benchmark v1.7", pct: 87, passing: 46, failing: 7, notAssessed: 0, total: 53 },
+      { name: "CIS Benchmark v1.4 (GCP)", pct: 92, passing: 40, failing: 3, notAssessed: 0, total: 43 },
     ],
     remediations: [
-      { date: "6h ago", finding: "Stale admin key (94d)", action: "Rotated + scoped down, PCI evidence attached", result: "Resolved", time: "24h SLA" },
+      { date: "12d ago", finding: "Non-root securityContext missing (2 workloads)", action: "Applied shared PodSecurity baseline template", result: "Resolved", time: "22 min" },
     ],
   },
 };

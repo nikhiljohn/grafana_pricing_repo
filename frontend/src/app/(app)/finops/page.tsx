@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApiData } from "@/lib/api";
+import { ApplyFixModal } from "@/components/ApplyFixModal";
 
 type FinOpsTab = "cost-intelligence" | "optimization-memory" | "anomalies" | "forecasting";
 
@@ -76,9 +77,22 @@ export default function FinOpsIntelligencePage() {
   const { data: monthlyTrend } = useApiData<MonthlyTrendPoint[]>("/finops/monthly-trend", []);
   const { data: pillars } = useApiData<PillarCost[]>("/finops/costs", []);
   const { data: optimizations } = useApiData<OptimizationRow[]>("/finops/optimizations", []);
-  const { data: anomalies } = useApiData<AnomalyItem[]>("/finops/anomalies", []);
+  const { data: anomaliesData } = useApiData<AnomalyItem[]>("/finops/anomalies", []);
   const { data: forecast } = useApiData<ForecastPoint[]>("/finops/forecast", []);
   const { data: riskFactors } = useApiData<string[]>("/finops/risk-factors", []);
+
+  // Local, mutable copy so "Apply Fix" actually resolves the anomaly
+  // instead of being decorative — resyncs when the org switcher changes.
+  const [anomalies, setAnomalies] = useState<AnomalyItem[]>([]);
+  useEffect(() => setAnomalies(anomaliesData), [anomaliesData]);
+  const [fixTarget, setFixTarget] = useState<AnomalyItem | null>(null);
+  const activeAnomaly = anomalies.find((a) => a.severity === "active");
+
+  function resolveAnomaly(a: AnomalyItem) {
+    setAnomalies((cur) =>
+      cur.map((x) => (x === a ? { ...x, severity: "resolved" as const, extra: "Resolved just now" } : x)),
+    );
+  }
 
   const maxCost = monthlyTrend.length ? Math.max(...monthlyTrend.map((m) => m.cost)) : 0;
 
@@ -189,37 +203,43 @@ export default function FinOpsIntelligencePage() {
         {tab === "cost-intelligence" && (
           <div className="space-y-6">
             {/* --- Active Anomaly Card --- */}
-            <div className="rounded-xl border-2 border-amber-400 bg-amber-50 p-5">
-              <div className="mb-3 flex items-center gap-2">
-                <span className="inline-block h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                <span className="text-sm font-semibold text-amber-700">ACTIVE ANOMALY</span>
+            {activeAnomaly && (
+              <div className="rounded-xl border-2 border-amber-400 bg-amber-50 p-5">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="inline-block h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-sm font-semibold text-amber-700">ACTIVE ANOMALY</span>
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-slate-800">{activeAnomaly.title}</h3>
+                <div className="mb-3 rounded-lg bg-white/70 p-4 text-sm text-slate-700 leading-relaxed">
+                  <span className="font-medium text-slate-800">Memory:</span> {activeAnomaly.memory}
+                </div>
+                <div className="mb-4 flex items-center gap-4">
+                  {activeAnomaly.confidence && (
+                    <span className="rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
+                      Confidence: {activeAnomaly.confidence}
+                    </span>
+                  )}
+                  {activeAnomaly.suggestedFix && (
+                    <span className="text-sm text-slate-600">
+                      Suggested fix: {activeAnomaly.suggestedFix}
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setFixTarget(activeAnomaly)}
+                    className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+                  >
+                    Apply Fix
+                  </button>
+                </div>
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-slate-800">
-                BigQuery cost spike: +340% in last 4 hours
-              </h3>
-              <div className="mb-3 rounded-lg bg-white/70 p-4 text-sm text-slate-700 leading-relaxed">
-                <span className="font-medium text-slate-800">Memory:</span> This matches the ETL spike pattern from
-                Jul 15 (30d ago). That incident cost $42 extra and was caused by an unoptimized JOIN on the 2TB{" "}
-                <code className="rounded bg-slate-100 px-1 py-0.5 text-xs font-mono">analytics.events</code> table.
-                Resolution: Added partition filter and optimized JOIN, reducing scan from 2TB to 45GB.
+            )}
+            {!activeAnomaly && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-800">
+                No active cost anomaly right now — FinOps is healthy.
               </div>
-              <div className="mb-4 flex items-center gap-4">
-                <span className="rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
-                  Confidence: 88% same root cause
-                </span>
-                <span className="text-sm text-slate-600">
-                  Suggested fix: Apply same partition filter to current query pipeline
-                </span>
-              </div>
-              <div className="flex gap-3">
-                <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
-                  Apply Fix
-                </button>
-                <button className="rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors">
-                  Investigate
-                </button>
-              </div>
-            </div>
+            )}
 
             {/* --- Cost by Pillar --- */}
             <div>
@@ -432,13 +452,27 @@ export default function FinOpsIntelligencePage() {
                   {/* Action buttons for active anomaly */}
                   {a.severity === "active" && (
                     <div className="mt-4 flex gap-3">
-                      <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
+                      <button
+                        onClick={() => setFixTarget(a)}
+                        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+                      >
                         Apply Fix
                       </button>
-                      <button className="rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors">
+                      <button
+                        disabled
+                        title="Coming in V2 — dedicated investigation view per anomaly"
+                        className="rounded-lg border border-blue-100 bg-white px-4 py-2 text-sm font-medium text-blue-300 cursor-not-allowed"
+                      >
                         Investigate
                       </button>
-                      <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                      <button
+                        onClick={() =>
+                          setAnomalies((cur) =>
+                            cur.map((x) => (x === a ? { ...x, severity: "false-positive" as const } : x)),
+                          )
+                        }
+                        className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                      >
                         Mark False Positive
                       </button>
                     </div>
@@ -541,6 +575,19 @@ export default function FinOpsIntelligencePage() {
           </div>
         )}
       </div>
+
+      <ApplyFixModal
+        open={fixTarget !== null}
+        onClose={() => setFixTarget(null)}
+        onConfirm={() => {
+          if (fixTarget) resolveAnomaly(fixTarget);
+        }}
+        pillar="FinOps"
+        title={fixTarget?.title ?? ""}
+        memoryContext={fixTarget?.memory ?? ""}
+        confidence={fixTarget?.confidence ?? null}
+        fixDescription={fixTarget?.suggestedFix ?? "Applies the cost-optimization fix Memory has already validated for this pattern."}
+      />
     </div>
   );
 }

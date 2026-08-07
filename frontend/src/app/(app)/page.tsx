@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card } from "@/components/charts";
 import { useApiData } from "@/lib/api";
 import { useOrg } from "@/lib/org-context";
+import { ApplyFixModal } from "@/components/ApplyFixModal";
+import { SCORE_METHODOLOGY_SUMMARY } from "@/lib/scoring";
 import type { ChangeItem, OpsScore } from "@/lib/api";
 
 /* ── data shapes served through the abstraction layer ─────────────────── */
@@ -45,7 +48,7 @@ function pillarBadgeColor(pillar: string): string {
   const map: Record<string, string> = {
     CloudOps: "bg-sky-100 text-sky-700",
     FinOps: "bg-amber-100 text-amber-700",
-    SecOps: "bg-red-100 text-red-700",
+    "Cloud Security": "bg-red-100 text-red-700",
     DevOps: "bg-violet-100 text-violet-700",
     AIOps: "bg-indigo-100 text-indigo-700",
   };
@@ -74,6 +77,7 @@ function CommandIcon() {
 
 export default function CommandCenterPage() {
   const { tenant, environment } = useOrg();
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
 
   const { data: intelligenceScores } = useApiData<OpsScore[]>(
     "/command-center/scores",
@@ -83,6 +87,13 @@ export default function CommandCenterPage() {
     "/command-center/attention",
     [],
   );
+  // Local, mutable copy so "Resolve" actually removes the item instead of
+  // being a decorative button — resyncs whenever the org switcher changes.
+  const [openAttention, setOpenAttention] = useState<AttentionItem[]>([]);
+  const [resolveTarget, setResolveTarget] = useState<AttentionItem | null>(null);
+  useEffect(() => {
+    setOpenAttention(attentionItems);
+  }, [attentionItems]);
   const { data: changeItems } = useApiData<ChangeItem[]>(
     "/command-center/changes",
     [],
@@ -116,7 +127,7 @@ export default function CommandCenterPage() {
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">
               Intelligence briefing for <span className="font-medium text-slate-700">{tenant.name}</span> ({environment}) — powered
-              by Memory across CloudOps, FinOps, SecOps, DevOps &amp; AIOps
+              by Memory across CloudOps, FinOps, Cloud Security, DevOps &amp; AIOps
             </p>
           </div>
         </div>
@@ -128,6 +139,25 @@ export default function CommandCenterPage() {
       </div>
 
       {/* ── 2. Intelligence Score Bar ──────────────────────────────────── */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-slate-400">Pillar Intelligence Scores</span>
+        <div className="relative">
+          <button
+            onClick={() => setShowScoreInfo((v) => !v)}
+            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600"
+          >
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 text-[10px]">
+              i
+            </span>
+            How is this calculated?
+          </button>
+          {showScoreInfo && (
+            <div className="absolute right-0 z-10 mt-2 w-80 rounded-lg border border-slate-200 bg-white p-4 text-xs leading-relaxed text-slate-600 shadow-lg">
+              {SCORE_METHODOLOGY_SUMMARY}
+            </div>
+          )}
+        </div>
+      </div>
       <div className="flex gap-3">
         {intelligenceScores.map((s) => {
           let pillBg = "bg-emerald-50 border-emerald-200";
@@ -174,7 +204,7 @@ export default function CommandCenterPage() {
           Needs Your Attention
         </h2>
         <div className="space-y-3">
-          {attentionItems.map((item, i) => (
+          {openAttention.map((item, i) => (
             <div
               key={i}
               className={`bg-white border border-slate-200 border-l-4 ${severityBorder[item.severity]} rounded-xl p-4`}
@@ -206,21 +236,51 @@ export default function CommandCenterPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 pt-1">
-                  <button className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors">
+                  <button
+                    onClick={() => setResolveTarget(item)}
+                    className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors"
+                  >
                     Resolve
                   </button>
-                  <button className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+                  <button
+                    disabled
+                    title="Coming in V2 — dedicated investigation view per event"
+                    className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-300 cursor-not-allowed"
+                  >
                     Investigate
                   </button>
-                  <button className="text-xs font-medium px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-600 transition-colors">
+                  <button
+                    onClick={() =>
+                      setOpenAttention((cur) => cur.filter((a) => a !== item))
+                    }
+                    className="text-xs font-medium px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                  >
                     Dismiss
                   </button>
                 </div>
               </div>
             </div>
           ))}
+          {openAttention.length === 0 && (
+            <p className="text-sm text-slate-400 py-2">
+              Nothing needs attention right now — everything is Resolved or Dismissed.
+            </p>
+          )}
         </div>
       </div>
+
+      <ApplyFixModal
+        open={resolveTarget !== null}
+        onClose={() => setResolveTarget(null)}
+        onConfirm={() => {
+          setOpenAttention((cur) => cur.filter((a) => a !== resolveTarget));
+        }}
+        pillar={resolveTarget?.pillar}
+        title={resolveTarget?.title ?? ""}
+        memoryContext={resolveTarget?.memory ?? ""}
+        confidence={null}
+        fixDescription="Applies the same remediation Memory has already validated for this pattern, then re-checks the resource to confirm it held."
+      />
 
       {/* ── 4. Two-column layout ───────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-4">

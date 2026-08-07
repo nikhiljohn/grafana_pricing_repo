@@ -218,8 +218,12 @@ function AnalysisView({
         <p className="mb-6 text-center text-sm text-slate-500">
           AI will analyse your {WORKLOAD_ANALYSIS_NAMES[workloadKey]} and generate prioritised findings.
         </p>
-        <button className="rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sky-700">
-          Run {catLabel} Analysis
+        <button
+          disabled
+          title="Coming in V2 — on-demand AI analysis runs"
+          className="rounded-lg bg-sky-200 px-5 py-2.5 text-sm font-medium text-white cursor-not-allowed"
+        >
+          Run {catLabel} Analysis (Coming in V2)
         </button>
       </div>
     </div>

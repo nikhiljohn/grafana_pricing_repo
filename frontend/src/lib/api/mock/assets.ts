@@ -21,23 +21,25 @@ const PROFILES: Record<string, Asset[]> = {
     { name: "aws-eks-analytics", subtitle: "m5.xlarge · 4 nodes", service: "EKS Clusters", project: "429617291000", region: "ap-south-1a", state: "RUNNING", costPerMonth: "$320.00", lastSeen: "Today, 12:20" },
   ],
   aarti: [
-    { name: "erp-prod-app", subtitle: "e2-standard-4", service: "VM Instances", project: "aarti-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$210.00", lastSeen: "Today, 11:50" },
-    { name: "cloudsql-erp-primary", subtitle: "db-custom-4-16384", service: "Cloud SQL Instances", project: "aarti-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$260.00", lastSeen: "Today, 11:52" },
-    { name: "batch-processing-vm", subtitle: "e2-standard-2", service: "VM Instances", project: "aarti-prod-1", region: "asia-south1-b", state: "RUNNING", costPerMonth: "$54.00", lastSeen: "Today, 11:40" },
+    { name: "erp-prod-app", subtitle: "t3.large", service: "EC2 Instances", project: "aarti-prod-1", region: "ap-south-1a", state: "RUNNING", costPerMonth: "$78.00", lastSeen: "Today, 11:50" },
+    { name: "rds-erp-primary", subtitle: "db.r5.xlarge", service: "RDS Instances", project: "aarti-prod-1", region: "ap-south-1a", state: "RUNNING", costPerMonth: "$310.00", lastSeen: "Today, 11:52" },
+    { name: "batch-processing-ec2", subtitle: "t3.medium", service: "EC2 Instances", project: "aarti-prod-1", region: "ap-south-1b", state: "RUNNING", costPerMonth: "$31.00", lastSeen: "Today, 11:40" },
   ],
   shopstop: [
     { name: "checkout-service-prod", subtitle: "n2-standard-4 · 12 instances", service: "VM Instances", project: "shopstop-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$280.00", lastSeen: "Today, 12:10" },
     { name: "cart-service-prod", subtitle: "e2-standard-4", service: "VM Instances", project: "shopstop-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$210.00", lastSeen: "Today, 12:11" },
+    { name: "sap-hana-prod", subtitle: "m3-megamem-64 (SAP HANA)", service: "VM Instances", project: "shopstop-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$1,240.00", lastSeen: "Today, 12:12" },
+    { name: "sap-app-prod", subtitle: "n2-highmem-8 (SAP ECC)", service: "VM Instances", project: "shopstop-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$410.00", lastSeen: "Today, 12:12" },
     { name: "eks-analytics-prod", subtitle: "m5.xlarge (AWS)", service: "EKS Clusters", project: "010863548913", region: "ap-south-1a", state: "RUNNING", costPerMonth: "$320.00", lastSeen: "Today, 12:05" },
   ],
   designx: [
     { name: "render-farm-prod", subtitle: "n2-highcpu-8 · 4 nodes", service: "VM Instances", project: "designx-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$390.00", lastSeen: "Today, 09:45" },
     { name: "asset-store-prod", subtitle: "e2-standard-2", service: "VM Instances", project: "designx-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$54.00", lastSeen: "Today, 09:44" },
   ],
-  paynimbus: [
-    { name: "payments-api-prod", subtitle: "n2-standard-4 (AWS)", service: "EC2 Instances", project: "paynimbus-prod-1", region: "ap-south-1a", state: "RUNNING", costPerMonth: "$260.00", lastSeen: "Today, 12:00" },
-    { name: "ledger-service-prod", subtitle: "e2-standard-4", service: "VM Instances", project: "paynimbus-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$230.00", lastSeen: "Today, 12:01" },
-    { name: "fraud-detection-prod", subtitle: "n2-standard-2", service: "VM Instances", project: "paynimbus-prod-1", region: "asia-south1-b", state: "RUNNING", costPerMonth: "$150.00", lastSeen: "Today, 12:02" },
+  dmart: [
+    { name: "gke-prod-commerce", subtitle: "n2-standard-8 · 6 nodes", service: "GKE Clusters", project: "dmart-prod-1", region: "asia-south1-b", state: "RUNNING", costPerMonth: "$920.00", lastSeen: "Today, 12:34" },
+    { name: "gke-prod-catalog", subtitle: "n2-standard-4 · 4 nodes", service: "GKE Clusters", project: "dmart-prod-1", region: "asia-south1-b", state: "RUNNING", costPerMonth: "$540.00", lastSeen: "Today, 12:34" },
+    { name: "cloudsql-commerce-primary", subtitle: "db-custom-8-32768", service: "Cloud SQL Instances", project: "dmart-prod-1", region: "asia-south1-a", state: "RUNNING", costPerMonth: "$410.00", lastSeen: "Today, 12:35" },
   ],
 };
 

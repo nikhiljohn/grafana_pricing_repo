@@ -5,7 +5,7 @@ Run: `make seed`  (or `python -m scripts.seed_demo` inside the backend container
 Seeds two things:
   1. `demo-tenant` — the account a logged-in Searce user authenticates as.
   2. The managed customer book (netcore, aarti, shopstop, designx,
-     paynimbus) — five tenants matching the customer demo script, each
+     dmart) — five tenants matching the customer demo script, each
      with its own distinct Memory graph. This is what the frontend's org
      switcher lets a CSRE user browse across.
 
@@ -36,7 +36,7 @@ CUSTOMER_BOOK = [
     ("aarti", "Aarti Industries", "advanced"),
     ("shopstop", "ShoppersStop", "elite"),
     ("designx", "DesignX", "foundation"),
-    ("paynimbus", "PayNimbus", "elite"),
+    ("dmart", "Dmart", "elite"),
 ]
 
 

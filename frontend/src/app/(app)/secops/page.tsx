@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApiData } from "@/lib/api";
+import { ApplyFixModal } from "@/components/ApplyFixModal";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -128,10 +129,16 @@ export default function SecOpsIntelligencePage() {
   const [activeTab, setActiveTab] = useState<Tab>("findings");
   const [severityFilter, setSeverityFilter] = useState<Severity>("all");
 
-  const { data: findings } = useApiData<Finding[]>("/secops/findings", []);
+  const { data: findingsData } = useApiData<Finding[]>("/secops/findings", []);
   const { data: iamIdentities } = useApiData<IamIdentityRow[]>("/secops/iam", []);
   const { data: complianceFrameworks } = useApiData<ComplianceFrameworkRow[]>("/secops/compliance", []);
   const { data: remediationLog } = useApiData<RemediationRow[]>("/secops/remediations", []);
+
+  // Local, mutable copy so "Auto-Fix" / "Generate Role" actually resolve
+  // the finding instead of being decorative — resyncs on org switch.
+  const [findings, setFindings] = useState<Finding[]>([]);
+  useEffect(() => setFindings(findingsData), [findingsData]);
+  const [fixTarget, setFixTarget] = useState<Finding | null>(null);
 
   const filteredFindings = severityFilter === "all"
     ? findings
@@ -297,20 +304,30 @@ export default function SecOpsIntelligencePage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        {f.actions.map((a) => (
-                          <button
-                            key={a}
-                            className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
-                              a === "Auto-Fix"
-                                ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                                : a === "Generate Role"
-                                  ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                                  : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-                            }`}
-                          >
-                            {a}
-                          </button>
-                        ))}
+                        {f.actions.map((a) =>
+                          a === "Auto-Fix" || a === "Generate Role" ? (
+                            <button
+                              key={a}
+                              onClick={() => setFixTarget(f)}
+                              className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+                                a === "Auto-Fix"
+                                  ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                  : "bg-emerald-600 text-white hover:bg-emerald-700"
+                              }`}
+                            >
+                              {a}
+                            </button>
+                          ) : (
+                            <button
+                              key={a}
+                              disabled
+                              title="Coming in V2 — dedicated investigation view per finding"
+                              className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-300 cursor-not-allowed"
+                            >
+                              {a}
+                            </button>
+                          ),
+                        )}
                       </div>
                     </div>
                   </div>
@@ -547,6 +564,19 @@ export default function SecOpsIntelligencePage() {
           </div>
         )}
       </div>
+
+      <ApplyFixModal
+        open={fixTarget !== null}
+        onClose={() => setFixTarget(null)}
+        onConfirm={() => {
+          setFindings((cur) => cur.filter((f) => f !== fixTarget));
+        }}
+        pillar="Cloud Security"
+        title={fixTarget?.title ?? ""}
+        memoryContext={fixTarget?.memoryNote ?? ""}
+        confidence={fixTarget?.memoryConfidence || null}
+        fixDescription="Applies the same remediation Memory has already validated for this finding, then re-scans the resource to confirm it's clear."
+      />
     </div>
   );
 }

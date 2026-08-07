@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApiData } from "@/lib/api";
 
 type FilterTab = "all" | "active" | "acknowledged" | "resolved";
@@ -25,11 +25,19 @@ const filterTabs: { key: FilterTab; label: string }[] = [
 ];
 
 export default function AlertsPage() {
-  const { data: alerts } = useApiData<Alert[]>("/alerts", []);
+  const { data: alertsData } = useApiData<Alert[]>("/alerts", []);
+  // Local, mutable copy so Acknowledge/Resolve actually change status
+  // instead of being decorative — resyncs when the org switcher changes.
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  useEffect(() => setAlerts(alertsData), [alertsData]);
   const [activeFilter, setActiveFilter] = useState<FilterTab>("active");
   const [expandedCards, setExpandedCards] = useState<Set<string>>(
     new Set(["1"])
   );
+
+  const setAlertStatus = (id: string, status: Alert["status"]) => {
+    setAlerts((cur) => cur.map((a) => (a.id === id ? { ...a, status } : a)));
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedCards((prev) => {
@@ -183,7 +191,11 @@ export default function AlertsPage() {
                         />
                       </svg>
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
+                    <button
+                      onClick={() => setAlertStatus(alert.id, "ACKNOWLEDGED")}
+                      disabled={alert.status !== "ACTIVE"}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
                       <svg
                         className="h-3.5 w-3.5 text-gray-400"
                         fill="none"
@@ -199,7 +211,11 @@ export default function AlertsPage() {
                       </svg>
                       Acknowledge
                     </button>
-                    <button className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
+                    <button
+                      onClick={() => setAlertStatus(alert.id, "RESOLVED")}
+                      disabled={alert.status === "RESOLVED"}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
                       <svg
                         className="h-3.5 w-3.5 text-gray-400"
                         fill="none"

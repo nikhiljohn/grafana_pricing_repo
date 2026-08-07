@@ -46,11 +46,11 @@ const PROFILES: Record<string, Alert[]> = {
       baseline: "roles/viewer", current: "roles/editor (blocked)", increase: "n/a", date: "Jul 22, 2026 14:20:00", type: "IAM_GUARDRAIL",
     },
   ],
-  paynimbus: [
+  dmart: [
     {
-      id: "1", title: "Stale admin key: 94 days unused", status: "ACTIVE",
-      description: "Admin access key on payments-api-prod has been unused for 94 days (PCI-DSS 8.1.4). Rotation queued.",
-      baseline: "0 days", current: "94 days", increase: "+94d", date: "Aug 3, 2026 02:00:00", type: "SECURITY_FINDING",
+      id: "1", title: "Pods OOMKilled: hcl-commerce-checkout", status: "ACTIVE",
+      description: "3 checkout pods on 'gke-prod-commerce' were OOMKilled during flash-sale traffic — JVM heap exceeded the 2Gi pod memory limit. Fix available at 91% confidence.",
+      baseline: "0 restarts/hr", current: "3 restarts/hr", increase: "+3", date: "Aug 3, 2026 14:05:00", type: "RESOURCE_PRESSURE",
     },
   ],
 };

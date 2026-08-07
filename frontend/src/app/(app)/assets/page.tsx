@@ -335,17 +335,33 @@ export default function AssetsPage() {
               <button className="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 border border-indigo-600 rounded-md">
                 1
               </button>
-              <button className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50">
+              <button
+                disabled
+                title="Coming in V2 — paginated asset browsing"
+                className="px-3 py-1.5 text-xs font-medium text-gray-300 bg-white border border-gray-200 rounded-md cursor-not-allowed"
+              >
                 2
               </button>
-              <button className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50">
+              <button
+                disabled
+                title="Coming in V2 — paginated asset browsing"
+                className="px-3 py-1.5 text-xs font-medium text-gray-300 bg-white border border-gray-200 rounded-md cursor-not-allowed"
+              >
                 3
               </button>
               <span className="px-1 text-xs text-gray-400">...</span>
-              <button className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50">
+              <button
+                disabled
+                title="Coming in V2 — paginated asset browsing"
+                className="px-3 py-1.5 text-xs font-medium text-gray-300 bg-white border border-gray-200 rounded-md cursor-not-allowed"
+              >
                 516
               </button>
-              <button className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-50">
+              <button
+                disabled
+                title="Coming in V2 — paginated asset browsing"
+                className="px-3 py-1.5 text-xs font-medium text-gray-300 bg-white border border-gray-200 rounded-md cursor-not-allowed"
+              >
                 Next
               </button>
             </div>

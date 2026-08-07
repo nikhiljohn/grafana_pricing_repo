@@ -95,17 +95,17 @@ const PROFILES: Record<string, AiOpsProfile> = {
       { time: "12d ago", decision: "Block Editor grant to deploy-bot", reasoning: "Matches the May 9 incident pattern that led to privilege escalation. Guardrail suggested least-privilege role instead.", outcome: "Executed", outcomeColor: "text-emerald-600" },
     ],
   },
-  paynimbus: {
-    activeAgents: 3, remediations30d: 9, tokens30d: "740K", tokenCost: "$2.20", memoryEntries: 27, successRate: "100%",
+  dmart: {
+    activeAgents: 4, remediations30d: 14, tokens30d: "890K", tokenCost: "$2.70", memoryEntries: 31, successRate: "93%",
     agents: [
-      { name: "Security Auto-Remediation Agent", status: "Active", statusColor: "bg-emerald-500", description: "Monitoring 17 findings. Watching for stale admin keys and PCI evidence requirements.", lastAction: "Rotated stale admin key, attached PCI evidence (6h ago)", confidence: 90 },
-      { name: "Compliance Evidence Agent", status: "Active", statusColor: "bg-emerald-500", description: "Auto-attaches PCI-DSS evidence to every remediation ahead of the quarterly package.", lastAction: "Attached evidence to key rotation (6h ago)", confidence: 100 },
+      { name: "Predictive HPA Agent", status: "Active", statusColor: "bg-emerald-500", description: "Monitoring pod memory/CPU across 4 hcl-commerce services ahead of flash-sale traffic.", lastAction: "Flagged checkout memory limit as under-sized before today's OOMKill (1h ago)", confidence: 91 },
+      { name: "Cost Anomaly Agent", status: "Active", statusColor: "bg-emerald-500", description: "Watching GKE node pool spend for post-sale over-provisioning.", lastAction: "Triggered automated scale-down 48h after last sale window (12d ago)", confidence: 88 },
     ],
     activity: [
-      { time: "6h ago", agent: "Security Agent", action: "Rotated stale admin key, attached PCI-DSS evidence", result: "Success", resultColor: "text-emerald-600", resultBg: "bg-emerald-50", icon: CheckCircle2 },
+      { time: "1h ago", agent: "Predictive HPA Agent", action: "Detected checkout pod memory limit under-sized for flash-sale load", result: "Fix suggested", resultColor: "text-amber-600", resultBg: "bg-amber-50", icon: Clock },
     ],
     auditTrail: [
-      { time: "6h ago", decision: "Rotate stale admin key", reasoning: "Key unused 94 days. Memory: 3 prior rotations on fintech accounts, all within 24h SLA. PCI evidence auto-attached.", outcome: "Executed", outcomeColor: "text-emerald-600" },
+      { time: "1h ago", decision: "Raise hcl-commerce-checkout pod memory limit", reasoning: "3rd OOMKill in 70 days under the same flash-sale traffic pattern. Memory confidence 91%, no prior regressions from this fix.", outcome: "Awaiting approval", outcomeColor: "text-amber-600" },
     ],
   },
 };

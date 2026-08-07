@@ -85,7 +85,7 @@ const netcoreProd: TenantProfile = {
   scores: [
     { pillar: "CloudOps", score: 92, status: "healthy", note: "" },
     { pillar: "FinOps", score: 71, status: "warning", note: "BigQuery cost anomaly active" },
-    { pillar: "SecOps", score: 91, status: "healthy", note: "" },
+    { pillar: "Cloud Security", score: 91, status: "healthy", note: "" },
     { pillar: "DevOps", score: 95, status: "healthy", note: "" },
     { pillar: "AIOps", score: null, status: "active", note: "4 agents running" },
   ],
@@ -113,7 +113,7 @@ const netcoreProd: TenantProfile = {
   changes: [
     { pillar: "CloudOps", detail: "31 VMs stable, 2 GKE node pools auto-scaled (resolved in 6-9 min)" },
     { pillar: "FinOps", detail: "$1.14M current month spend, +12% MoM. BigQuery anomaly flagged." },
-    { pillar: "SecOps", detail: "58 findings, 4 recurrences of resolved patterns. Posture score: 91." },
+    { pillar: "Cloud Security", detail: "58 findings, 4 recurrences of resolved patterns. Posture score: 91." },
     { pillar: "DevOps", detail: "112 deployments, 1 rollback (Terraform state lock, resolved 3 min)." },
     { pillar: "AIOps", detail: "1,240 tokens used, 5 auto-remediations triggered, 4 successful." },
   ],
@@ -144,7 +144,7 @@ const aartiProd: TenantProfile = {
   scores: [
     { pillar: "CloudOps", score: 94, status: "healthy", note: "" },
     { pillar: "FinOps", score: 90, status: "healthy", note: "" },
-    { pillar: "SecOps", score: 78, status: "critical", note: "5 SSH-open groups, mid-audit" },
+    { pillar: "Cloud Security", score: 78, status: "critical", note: "5 SSH-open groups, mid-audit" },
     { pillar: "DevOps", score: 93, status: "healthy", note: "" },
     { pillar: "AIOps", score: null, status: "active", note: "2 agents running" },
   ],
@@ -164,9 +164,9 @@ const aartiProd: TenantProfile = {
     },
   ],
   changes: [
-    { pillar: "CloudOps", detail: "18 VMs stable, all within compliance-mandated regions (asia-south1)." },
-    { pillar: "FinOps", detail: "$186K current month spend, +3% MoM. No anomalies." },
-    { pillar: "SecOps", detail: "43 findings, 12 recurrences of a known SSH pattern. Posture score: 78 (mid-audit)." },
+    { pillar: "CloudOps", detail: "18 EC2 instances stable, all within compliance-mandated region (ap-south-1)." },
+    { pillar: "FinOps", detail: "$22K current month spend, +3% MoM. No anomalies." },
+    { pillar: "Cloud Security", detail: "43 findings, 12 recurrences of a known SSH pattern. Posture score: 78 (mid-audit)." },
     { pillar: "DevOps", detail: "22 deployments, 0 failures. Patch compliance: 91%." },
     { pillar: "AIOps", detail: "540 tokens used, 2 auto-remediations queued pending compliance sign-off." },
   ],
@@ -196,7 +196,7 @@ const shopstopProd: TenantProfile = {
   scores: [
     { pillar: "CloudOps", score: 82, status: "warning", note: "egress anomaly ahead of sale" },
     { pillar: "FinOps", score: 88, status: "healthy", note: "" },
-    { pillar: "SecOps", score: 92, status: "healthy", note: "" },
+    { pillar: "Cloud Security", score: 92, status: "healthy", note: "" },
     { pillar: "DevOps", score: 90, status: "healthy", note: "" },
     { pillar: "AIOps", score: null, status: "active", note: "5 agents running" },
   ],
@@ -217,8 +217,8 @@ const shopstopProd: TenantProfile = {
   ],
   changes: [
     { pillar: "CloudOps", detail: "64 VMs stable, checkout-service pool pre-scaled to 3x for sale window." },
-    { pillar: "FinOps", detail: "$412K current month spend, +6% MoM ahead of sale traffic." },
-    { pillar: "SecOps", detail: "29 findings, all low severity. Posture score: 92." },
+    { pillar: "FinOps", detail: "$220K current month spend, +6% MoM ahead of sale traffic (incl. SAP HANA workloads)." },
+    { pillar: "Cloud Security", detail: "29 findings, all low severity. Posture score: 92." },
     { pillar: "DevOps", detail: "38 deployments, 0 failures. Deploy freeze begins 48h before sale." },
     { pillar: "AIOps", detail: "2,100 tokens used, predictive scaling agent active on 5 services." },
   ],
@@ -248,7 +248,7 @@ const designxProd: TenantProfile = {
   scores: [
     { pillar: "CloudOps", score: 96, status: "healthy", note: "" },
     { pillar: "FinOps", score: 93, status: "healthy", note: "" },
-    { pillar: "SecOps", score: 90, status: "healthy", note: "" },
+    { pillar: "Cloud Security", score: 90, status: "healthy", note: "" },
     { pillar: "DevOps", score: 85, status: "warning", note: "risky IAM change caught pre-deploy" },
     { pillar: "AIOps", score: null, status: "active", note: "2 agents running" },
   ],
@@ -263,8 +263,8 @@ const designxProd: TenantProfile = {
   ],
   changes: [
     { pillar: "CloudOps", detail: "12 VMs stable, all serverless-first workloads within thresholds." },
-    { pillar: "FinOps", detail: "$34K current month spend, flat MoM." },
-    { pillar: "SecOps", detail: "9 findings, all low. Posture score: 90." },
+    { pillar: "FinOps", detail: "$10K current month spend, flat MoM." },
+    { pillar: "Cloud Security", detail: "9 findings, all low. Posture score: 90." },
     { pillar: "DevOps", detail: "64 deployments, 1 guardrail block (risky IAM grant, awaiting least-privilege fix)." },
     { pillar: "AIOps", detail: "310 tokens used, 1 guardrail suggestion generated." },
   ],
@@ -288,55 +288,55 @@ const designxProd: TenantProfile = {
   timeline: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 };
 
-/* ── PayNimbus — Fintech/Payments — Cloud Security / IAM hero ──────── */
-const paynimbusProd: TenantProfile = {
+/* ── Dmart — Retail/E-commerce — CloudOps / Kubernetes hero ─────────── */
+const dmartProd: TenantProfile = {
   scores: [
-    { pillar: "CloudOps", score: 93, status: "healthy", note: "" },
-    { pillar: "FinOps", score: 91, status: "healthy", note: "" },
-    { pillar: "SecOps", score: 80, status: "warning", note: "stale admin key, PCI evidence attached" },
-    { pillar: "DevOps", score: 94, status: "healthy", note: "" },
-    { pillar: "AIOps", score: null, status: "active", note: "3 agents running" },
+    { pillar: "CloudOps", score: 84, status: "warning", note: "checkout pods OOMKilled during flash sale" },
+    { pillar: "FinOps", score: 90, status: "healthy", note: "" },
+    { pillar: "Cloud Security", score: 92, status: "healthy", note: "" },
+    { pillar: "DevOps", score: 93, status: "healthy", note: "" },
+    { pillar: "AIOps", score: null, status: "active", note: "4 agents running" },
   ],
   attention: [
     {
       severity: "amber",
-      pillar: "Cloud Security",
-      title: "Admin access key unused for 94 days",
+      pillar: "CloudOps",
+      title: "hcl-commerce-checkout pods OOMKilled during flash-sale traffic",
       memory:
-        "Prior key-rotation remediation on 2 fintech accounts. Rotate + scope-down; PCI-DSS evidence auto-attached.",
+        "3rd time this pattern has occurred in 70 days. JVM heap exceeds the pod's 2Gi memory limit under flash-sale load. Same fix (raise memory limit + tune -Xmx) resolved it in under 10 min last time.",
     },
     {
       severity: "blue",
-      pillar: "SecOps",
-      title: "Quarterly PCI-DSS evidence package due in 5 days",
-      memory: "Last cycle: 100% of remediations auto-attached evidence, zero manual collection needed.",
+      pillar: "DevOps",
+      title: "Helm rollout to hcl-commerce-catalog pending approval",
+      memory: "Last 4 rollouts to this service were zero-downtime canary deploys.",
     },
   ],
   changes: [
-    { pillar: "CloudOps", detail: "26 VMs stable across AWS + GCP. All payment-tier resources isolated per PCI scope." },
-    { pillar: "FinOps", detail: "$248K current month spend, +2% MoM." },
-    { pillar: "SecOps", detail: "17 findings, all tied to key rotation policy. Posture score: 80." },
-    { pillar: "DevOps", detail: "19 deployments, 0 failures. Change freeze in effect for PCI window." },
-    { pillar: "AIOps", detail: "780 tokens used, 1 auto-remediation queued (key rotation, awaiting approval)." },
+    { pillar: "CloudOps", detail: "GKE node pool auto-scaled 3x for flash-sale traffic; 2 checkout pods restarted after OOMKill." },
+    { pillar: "FinOps", detail: "$70.4K current month spend, +3% MoM. Node pool scale-down automation saved $860 last cycle." },
+    { pillar: "Cloud Security", detail: "6 findings, all low severity. Posture score: 92." },
+    { pillar: "DevOps", detail: "41 deployments this week, 1 Helm chart rollback on hcl-commerce-search (resolved 6 min)." },
+    { pillar: "AIOps", detail: "620 tokens used, predictive HPA agent active on 4 commerce services." },
   ],
   patterns: [
-    { pattern: "Admin keys unused 90+ days", firstSeen: "94d ago", occurrences: 2, lastResolution: "Rotate + scope-down, auto-attach PCI-DSS evidence", confidence: 90 },
-    { pattern: "Quarterly PCI evidence collection", firstSeen: "94d ago", occurrences: 4, lastResolution: "Auto-attached from remediation history", confidence: 100 },
+    { pattern: "hcl-commerce-checkout OOMKilled under flash-sale load", firstSeen: "70d ago", occurrences: 3, lastResolution: "Raised pod memory limit + tuned JVM -Xmx", confidence: 91 },
+    { pattern: "Node pool over-provisioned after sale window", firstSeen: "55d ago", occurrences: 2, lastResolution: "Auto scale-down 48h post-sale", confidence: 88 },
   ],
   workingWell: [
-    "100% of remediations this quarter shipped with PCI-DSS evidence attached",
-    "Zero findings on the payment-processing tier for 60d",
-    "All admin key rotations completed within SLA (24h)",
-    "Change freeze compliance: 100% during PCI review windows",
+    "Predictive HPA scaling active on checkout, catalog, search, and orders services",
+    "Zero downtime through the last 3 flash-sale events",
+    "Post-sale node pool scale-down saved $860/mo automatically",
+    "40+ GKE deploys/week with 0% rollback rate outside the 1 Helm chart issue",
   ],
   csre: [
-    { label: "Last review", value: "45 min ago by Searce CSRE" },
-    { label: "Next scheduled review", value: "Tomorrow 9:00 AM IST" },
-    { label: "Open tickets", value: "2 (key rotation, PCI evidence package)" },
-    { label: "Recommendations applied this month", value: "5" },
-    { label: "Estimated savings from recommendations", value: "$180/mo" },
+    { label: "Last review", value: "1h ago by Searce CSRE" },
+    { label: "Next scheduled review", value: "Tomorrow 11:00 AM IST" },
+    { label: "Open tickets", value: "1 (OOMKill pattern, permanent memory-limit fix in review)" },
+    { label: "Recommendations applied this month", value: "6" },
+    { label: "Estimated savings from recommendations", value: "$860/mo" },
   ],
-  timeline: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+  timeline: [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
 };
 
 const PROD_PROFILES: Record<string, TenantProfile> = {
@@ -344,7 +344,7 @@ const PROD_PROFILES: Record<string, TenantProfile> = {
   aarti: aartiProd,
   shopstop: shopstopProd,
   designx: designxProd,
-  paynimbus: paynimbusProd,
+  dmart: dmartProd,
 };
 
 function toEndpoints(p: TenantProfile) {

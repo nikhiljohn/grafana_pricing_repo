@@ -3,7 +3,7 @@
 Used by the seed script to populate the demo Memory graph. `demo-tenant`
 (the account a logged-in Searce user actually authenticates as) keeps its
 original 180-day generic narrative. The five customer tenants in the
-managed book (netcore, aarti, shopstop, designx, paynimbus) each get a
+managed book (netcore, aarti, shopstop, designx, dmart) each get a
 narrative matching their story in the customer demo script, so switching
 the org switcher in the UI reflects a genuinely different Memory graph
 per customer — not just relabeled copies of the same data.
@@ -375,6 +375,14 @@ def _shopstop_events() -> list[dict]:
             "resource_id": "checkout-service-prod", "resource_type": "vm", "environment": "production",
         })
 
+    events.append({
+        "id": "shopstop_sap_stable", "source": "gcp_monitoring", "event_type": "WorkloadHealthCheck",
+        "category": "reliability", "severity": "info", "timestamp": _now_offset(14, 9),
+        "title": "SAP HANA workload passed quarterly performance review",
+        "summary": "sap-hana-prod (m3-megamem-64) stable at 52% CPU / 61% memory — no action needed.",
+        "resource_id": "sap-hana-prod", "resource_type": "vm", "environment": "production",
+    })
+
     return sorted(events, key=lambda e: e["timestamp"])
 
 
@@ -407,30 +415,64 @@ def _designx_events() -> list[dict]:
     return sorted(events, key=lambda e: e["timestamp"])
 
 
-def _paynimbus_events() -> list[dict]:
-    """PayNimbus — Fintech/Payments — Cloud Security/IAM hero: stale admin key, PCI evidence."""
+def _dmart_events() -> list[dict]:
+    """Dmart — Retail/E-commerce — CloudOps/Kubernetes hero: HCL Commerce on GKE, OOMKilled checkout pods."""
+    rng = random.Random(103)
     events: list[dict] = []
 
-    events.append({
-        "id": "paynimbus_stale_key", "source": "scc", "event_type": "SecurityFinding",
-        "category": "security", "severity": "warning", "timestamp": _now_offset(0.25, 2),
-        "title": "Admin access key unused for 94 days",
-        "summary": "PCI-DSS 8.1.4 — stale key requires rotation.",
-        "resource_id": "payments-admin-key", "resource_type": "access_key", "environment": "production",
-    })
-    for i, days_ago in enumerate([210, 105]):
+    for i, days_ago in enumerate([70, 40, 0.05]):
         events.append({
-            "id": f"paynimbus_key_rotation_{i}", "source": "internal", "event_type": "KeyRotated",
-            "category": "security", "severity": "info", "timestamp": _now_offset(days_ago, 10),
-            "title": "Prior admin key rotation (fintech pattern)",
-            "summary": "Rotated + scoped down; PCI-DSS evidence auto-attached.",
-            "resource_id": "payments-admin-key", "resource_type": "access_key", "environment": "production",
+            "id": f"dmart_oomkill_{i}",
+            "source": "gcp_monitoring", "event_type": "PodOOMKilled", "category": "reliability",
+            "severity": "warning" if days_ago > 1 else "critical",
+            "timestamp": _now_offset(days_ago, 14),
+            "title": "hcl-commerce-checkout pods OOMKilled during flash-sale traffic",
+            "summary": "JVM heap exceeded the pod's 2Gi memory limit under flash-sale load.",
+            "resource_id": "gke-prod-commerce", "resource_type": "gke_cluster", "environment": "production",
+        })
+
+    for i, days_ago in enumerate([55, 20]):
+        events.append({
+            "id": f"dmart_nodepool_overprov_{i}",
+            "source": "gcp_monitoring", "event_type": "CostSpike", "category": "cost",
+            "severity": "warning", "timestamp": _now_offset(days_ago, 8),
+            "title": "GKE node pool left over-provisioned after flash-sale window",
+            "summary": "Node pool stayed scaled to 3x for 4 days after the sale ended.",
+            "resource_id": "gke-prod-commerce", "resource_type": "gke_cluster",
+            "amount_inr": float(rng.randint(60_000, 140_000)), "environment": "production",
+        })
+
+    events.append({
+        "id": "dmart_scaledown_automation", "source": "internal", "event_type": "GuardrailTriggered",
+        "category": "deployment", "severity": "info", "timestamp": _now_offset(53, 10),
+        "title": "Automated 48h post-sale node pool scale-down added",
+        "summary": "Prevents the over-provisioning pattern seen after the last 2 sale windows.",
+        "resource_id": "gke-prod-commerce", "resource_type": "gke_cluster", "environment": "production",
+    })
+
+    for i, days_ago in enumerate([12, 6]):
+        events.append({
+            "id": f"dmart_podsec_{i}", "source": "scc", "event_type": "SecurityFinding",
+            "category": "security", "severity": "warning", "timestamp": _now_offset(days_ago, 9),
+            "title": "Pod running without non-root securityContext",
+            "summary": "hcl-commerce workload missing runAsNonRoot (CIS Kubernetes 5.2.6).",
+            "resource_id": "gke-prod-catalog" if i else "gke-prod-commerce",
+            "resource_type": "gke_cluster", "environment": "production",
+        })
+
+    for i, days_ago in enumerate([65, 48, 30, 9]):
+        events.append({
+            "id": f"dmart_deploy_{i}", "source": "internal", "event_type": "DeploymentApplied",
+            "category": "deployment", "severity": "info", "timestamp": _now_offset(days_ago, 9),
+            "title": "Helm rollout succeeded", "summary": "hcl-commerce-catalog canary rolled out, 0 errors.",
+            "resource_id": "gke-prod-catalog", "resource_type": "gke_cluster", "environment": "production",
         })
     events.append({
-        "id": "paynimbus_pci_package", "source": "internal", "event_type": "ComplianceEvidenceRequested",
-        "category": "security", "severity": "info", "timestamp": _now_offset(85, 9),
-        "title": "Quarterly PCI-DSS evidence package", "summary": "Evidence auto-attached from remediation history.",
-        "environment": "production",
+        "id": "dmart_helm_rollback", "source": "internal", "event_type": "DeploymentRolledBack",
+        "category": "deployment", "severity": "warning", "timestamp": _now_offset(0.3, 9),
+        "title": "Helm chart rollback — hcl-commerce-search v3.4.2",
+        "summary": "Latency regression detected in canary; rolled back to v3.4.1 within 6 min.",
+        "resource_id": "gke-prod-commerce", "resource_type": "gke_cluster", "environment": "production",
     })
 
     return sorted(events, key=lambda e: e["timestamp"])
@@ -442,7 +484,7 @@ TENANT_EVENT_BUILDERS = {
     "aarti": _aarti_events,
     "shopstop": _shopstop_events,
     "designx": _designx_events,
-    "paynimbus": _paynimbus_events,
+    "dmart": _dmart_events,
 }
 
 

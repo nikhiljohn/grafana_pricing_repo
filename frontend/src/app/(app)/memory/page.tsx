@@ -4,12 +4,12 @@ import { useState } from "react";
 import { useApiData } from "@/lib/api";
 
 type MainTab = "all" | "patterns" | "remediation" | "learnings";
-type PillarFilter = "All" | "CloudOps" | "FinOps" | "SecOps" | "DevOps" | "AIOps";
+type PillarFilter = "All" | "CloudOps" | "FinOps" | "Cloud Security" | "DevOps" | "AIOps";
 
 interface MemoryEntry {
   id: number;
   daysAgo: string;
-  pillar: "CloudOps" | "FinOps" | "SecOps" | "DevOps";
+  pillar: "CloudOps" | "FinOps" | "Cloud Security" | "DevOps";
   confidence: number;
   title: string;
   context: string;
@@ -33,7 +33,7 @@ interface RemediationRow {
   timesApplied: number;
   successRate: string;
   lastApplied: string;
-  pillar: "SecOps" | "CloudOps" | "FinOps";
+  pillar: "Cloud Security" | "CloudOps" | "FinOps";
 }
 
 interface LearningCard {
@@ -44,7 +44,7 @@ interface LearningCard {
 const pillarColors: Record<string, string> = {
   CloudOps: "bg-blue-100 text-blue-700",
   FinOps: "bg-amber-100 text-amber-700",
-  SecOps: "bg-red-100 text-red-700",
+  "Cloud Security": "bg-red-100 text-red-700",
   DevOps: "bg-purple-100 text-purple-700",
   AIOps: "bg-emerald-100 text-emerald-700",
 };
@@ -95,7 +95,7 @@ export default function MemoryPage() {
     { key: "learnings", label: "Learnings" },
   ];
 
-  const pillars: PillarFilter[] = ["All", "CloudOps", "FinOps", "SecOps", "DevOps", "AIOps"];
+  const pillars: PillarFilter[] = ["All", "CloudOps", "FinOps", "Cloud Security", "DevOps", "AIOps"];
 
   const filteredEntries = memoryEntries.filter((e) => {
     const matchPillar = pillarFilter === "All" || e.pillar === pillarFilter;

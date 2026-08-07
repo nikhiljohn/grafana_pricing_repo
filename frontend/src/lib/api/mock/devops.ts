@@ -47,13 +47,13 @@ const PROFILES: Record<string, DevOpsProfile> = {
   },
   aarti: {
     changes: [
-      { time: "4h ago", resource: "erp-prod-app", resourceType: "VM", changeType: "Machine type unchanged, scheduled patch applied", risk: "Low", memory: "Memory: routine maintenance window." },
+      { time: "4h ago", resource: "erp-prod-app", resourceType: "EC2", changeType: "Instance type unchanged, scheduled patch applied", risk: "Low", memory: "Memory: routine maintenance window." },
     ],
     orchestration: [
-      { ticket: "CL-18", request: "Provision audit-readonly SA", resource: "custom role", provider: "GCP", estCost: "—", risk: "Low", status: "Pending", memory: "Memory: least-privilege role, no prior issues with this pattern." },
+      { ticket: "CL-18", request: "Provision audit-readonly IAM role", resource: "custom policy", provider: "AWS", estCost: "—", risk: "Low", status: "Pending", memory: "Memory: least-privilege role, no prior issues with this pattern." },
     ],
     patches: [
-      { resource: "erp-prod-app", type: "VM (Ubuntu)", currentVer: "22.04.4", targetVer: "22.04.5", severity: "Medium", daysBehind: "14d", memory: "Memory: scheduled for next maintenance window." },
+      { resource: "erp-prod-app", type: "EC2 (Ubuntu)", currentVer: "22.04.4", targetVer: "22.04.5", severity: "Medium", daysBehind: "14d", memory: "Memory: scheduled for next maintenance window." },
     ],
     patterns: [
       "IAM changes correlate with 35% of security findings within 48h.",
@@ -101,24 +101,26 @@ const PROFILES: Record<string, DevOpsProfile> = {
     ],
     velocity: VELOCITY_BASE.map((v) => ({ ...v, count: Math.round(v.count * 0.1) })),
   },
-  paynimbus: {
+  dmart: {
     changes: [
-      { time: "6h ago", resource: "payments-admin-key", resourceType: "IAM", changeType: "Key rotated", risk: "Low", memory: "Memory: routine rotation after 94-day staleness finding, PCI evidence attached." },
+      { time: "1h ago", resource: "gke-prod-commerce", resourceType: "GKE", changeType: "Pod memory limit raised, HPA threshold adjusted", risk: "Low", memory: "Memory: post-incident fix for the 3rd OOMKill occurrence today." },
+      { time: "5h ago", resource: "hcl-commerce-search", resourceType: "Helm", changeType: "Chart rollback to v3.4.1", risk: "MEDIUM", memory: "Memory: v3.4.2 regressed search latency, rolled back within 6 min." },
     ],
     orchestration: [
-      { ticket: "CL-27", request: "Rotate payments-admin-key", resource: "access key", provider: "AWS", estCost: "—", risk: "Low", status: "Completed", memory: "Memory: 3rd rotation of this pattern, all within 24h SLA." },
+      { ticket: "CL-63", request: "Helm rollout hcl-commerce-catalog v2.9.0", resource: "GKE deployment", provider: "GCP", estCost: "—", risk: "Low", status: "Pending approval", memory: "Memory: last 4 rollouts to this service were zero-downtime canary deploys." },
     ],
     patches: [
-      { resource: "ledger-service-prod", type: "VM (Amazon Linux)", currentVer: "2023.4", targetVer: "2023.5", severity: "High", daysBehind: "9d", memory: "Memory: PCI change-freeze window ends in 2 days, patch queued." },
+      { resource: "gke-prod-commerce", type: "GKE (1.29)", currentVer: "1.29.3", targetVer: "1.29.6", severity: "High", daysBehind: "24d", memory: "Memory: routine minor version bump, schedule during low-traffic window." },
     ],
     patterns: [
-      "Change freeze compliance during PCI review windows: 100%.",
-      "Admin key rotations complete within SLA (24h) 100% of the time.",
+      "hcl-commerce-checkout OOMKills correlate with flash-sale traffic 100% of the time (3/3 occurrences).",
+      "GKE Helm deployments have a 96% success rate (24 of 25 rollouts, 1 rollback).",
     ],
     deployments: [
-      { time: "Today 00:30", name: "settlement-batch", target: "AWS Batch", success: true, summary: "Nightly settlement completed, 0 errors." },
+      { time: "Today 14:20", name: "deploy-hcl-commerce-checkout", target: "GKE", success: true, summary: "Memory limit fix rolled out. 0 errors in canary." },
+      { time: "Today 09:05", name: "rollback-hcl-commerce-search", target: "GKE", success: true, summary: "Rolled back to v3.4.1 after latency regression." },
     ],
-    velocity: VELOCITY_BASE.map((v) => ({ ...v, count: Math.round(v.count * 0.2) })),
+    velocity: VELOCITY_BASE.map((v) => ({ ...v, count: Math.round(v.count * 0.55) })),
   },
 };
 

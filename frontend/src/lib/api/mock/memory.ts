@@ -113,9 +113,9 @@ const TENANT_MEMORY: Record<string, TenantMemory> = {
       },
       {
         id: 2, daysAgo: "18d ago", pillar: "Cloud Security", confidence: 82,
-        title: "Over-privileged service account pattern",
-        context: "Service accounts created with Editor/Owner roles as default across 2 projects.",
-        learning: "Custom roles with least-privilege reduce security findings by 60%. Avg creation time: 25 min.",
+        title: "Over-privileged IAM role pattern",
+        context: "IAM roles created with AdministratorAccess as default across 2 AWS accounts.",
+        learning: "Custom least-privilege policies reduce security findings by 60%. Avg creation time: 25 min.",
         applied: 8,
       },
       {
@@ -211,33 +211,43 @@ const TENANT_MEMORY: Record<string, TenantMemory> = {
     ],
   },
 
-  paynimbus: {
+  dmart: {
     entries: [
       {
-        id: 1, daysAgo: "6h ago", pillar: "Cloud Security", confidence: 90,
-        title: "Stale admin key rotation",
-        context: "Admin access key unused for 94 days — 3rd occurrence across 2 fintech accounts.",
-        learning: "Rotate + scope down, with PCI-DSS evidence auto-attached to the remediation record.",
+        id: 1, daysAgo: "1h ago", pillar: "CloudOps", confidence: 91,
+        title: "hcl-commerce-checkout OOMKilled under flash-sale load",
+        context: "JVM heap on checkout pods exceeds the 2Gi memory limit under flash-sale traffic — 3rd occurrence in 70 days.",
+        learning: "Raise the pod memory limit and tune the -Xmx heap flag together; HPA memory threshold alone isn't enough for JVM workloads.",
         applied: 3,
       },
       {
-        id: 2, daysAgo: "94d ago", pillar: "Cloud Security", confidence: 100,
-        title: "PCI-DSS evidence auto-attach",
-        context: "Quarterly PCI evidence package required manual collection in past cycles.",
-        learning: "Every remediation now auto-attaches its own evidence — zero manual collection needed for the audit package.",
-        applied: 4,
+        id: 2, daysAgo: "55d ago", pillar: "FinOps", confidence: 88,
+        title: "Node pool left over-provisioned after flash sale",
+        context: "GKE node pool stayed scaled to 3x for 4 days after 2 separate sale windows ended.",
+        learning: "Automated 48h post-sale scale-down saves ~$860/mo without affecting next-sale readiness.",
+        applied: 2,
+      },
+      {
+        id: 3, daysAgo: "12d ago", pillar: "Cloud Security", confidence: 85,
+        title: "Non-root securityContext missing on commerce pods",
+        context: "3 hcl-commerce pods ran without runAsNonRoot across 2 GKE workloads.",
+        learning: "A shared PodSecurity baseline template applied once now covers every new commerce deployment.",
+        applied: 2,
       },
     ],
     patterns: [
-      { name: "Stale Admin Keys (90+ days)", occurrences: 3, autoResolved: 100, avgTime: "24h SLA", trend: "Stable", bars: [1, 0, 1, 0, 1, 1] },
-      { name: "PCI Evidence Auto-Attach", occurrences: 4, autoResolved: 100, avgTime: "instant", trend: "Improving", bars: [1, 1, 1, 1, 1, 1] },
+      { name: "hcl-commerce Checkout OOMKilled", occurrences: 3, autoResolved: 67, avgTime: "9 min", trend: "New", bars: [0, 0, 1, 0, 1, 1] },
+      { name: "Post-Sale Node Pool Over-Provisioning", occurrences: 2, autoResolved: 100, avgTime: "automated, 48h", trend: "Improving", bars: [0, 1, 0, 0, 1, 0] },
+      { name: "Non-Root securityContext Missing", occurrences: 2, autoResolved: 100, avgTime: "22 min", trend: "Stable", bars: [1, 0, 0, 1, 0, 0] },
     ],
     remediationLibrary: [
-      { fix: "Rotate + scope-down stale admin key", confidence: 90, timesApplied: 3, successRate: "100%", lastApplied: "6h ago", pillar: "Cloud Security" },
-      { fix: "Auto-attach PCI-DSS evidence to remediation", confidence: 100, timesApplied: 4, successRate: "100%", lastApplied: "94d ago", pillar: "Cloud Security" },
+      { fix: "Raise pod memory limit + tune JVM -Xmx", confidence: 91, timesApplied: 3, successRate: "67%", lastApplied: "1h ago", pillar: "CloudOps" },
+      { fix: "Automated 48h post-sale node pool scale-down", confidence: 88, timesApplied: 2, successRate: "100%", lastApplied: "55d ago", pillar: "FinOps" },
+      { fix: "Apply shared PodSecurity baseline template", confidence: 85, timesApplied: 2, successRate: "100%", lastApplied: "12d ago", pillar: "Cloud Security" },
     ],
     learnings: [
-      { insight: "For a payments company, a stale admin key is an audit finding waiting to happen — Memory carries the fintech-specific remediation and attaches PCI evidence automatically.", crossPillar: "Cloud Security × Compliance" },
+      { insight: "A Java commerce platform on Kubernetes fails at the JVM heap boundary, not the pod's CPU boundary — Memory now checks heap headroom, not just CPU/memory percentage, before flash-sale events.", crossPillar: "CloudOps × AIOps" },
+      { insight: "Cost and reliability are the same incident here: the fix that stops the OOMKill (right-sized pods) is also the fix that stops node-pool over-provisioning.", crossPillar: "CloudOps × FinOps" },
     ],
   },
 };

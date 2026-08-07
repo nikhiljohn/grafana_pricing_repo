@@ -34,7 +34,7 @@ const PROFILES: Record<string, FinOpsProfile> = {
     costs: [
       { name: "CloudOps", cost: 640000, breakdown: "GKE $410K, Cloud SQL $130K, Networking $100K", sparkData: [520, 560, 590, 610, 630, 640], sparkColor: "#3b82f6", memory: "Right-sized GKE node pools saved $18K/mo since Jun." },
       { name: "AI / Vertex", cost: 310000, breakdown: "Vertex inference $260K, BigQuery ML $50K", sparkData: [180, 210, 240, 270, 290, 310], sparkColor: "#f59e0b", memory: "GPU spend growing with inference traffic. Reserved slot review scheduled." },
-      { name: "SecOps", cost: 42000, breakdown: "SCC Premium, Wiz", sparkData: [40, 41, 42, 42, 42, 42], sparkColor: "#10b981", memory: "Stable, no anomalies." },
+      { name: "Cloud Security", cost: 42000, breakdown: "SCC Premium, Wiz", sparkData: [40, 41, 42, 42, 42, 42], sparkColor: "#10b981", memory: "Stable, no anomalies." },
       { name: "DevOps", cost: 86000, breakdown: "Cloud Build, Artifact Registry", sparkData: [95, 98, 96, 94, 98, 86], sparkColor: "#8b5cf6", memory: "2nd-gen Functions migration cut cold-start cost." },
     ],
     optimizations: [
@@ -64,33 +64,34 @@ const PROFILES: Record<string, FinOpsProfile> = {
 
   aarti: {
     monthlyTrend: [
-      { month: "Feb", cost: 172000 }, { month: "Mar", cost: 176000 }, { month: "Apr", cost: 179000 },
-      { month: "May", cost: 181000 }, { month: "Jun", cost: 183000 }, { month: "Jul", cost: 186000 },
+      { month: "Feb", cost: 19800 }, { month: "Mar", cost: 20200 }, { month: "Apr", cost: 20700 },
+      { month: "May", cost: 21100 }, { month: "Jun", cost: 21600 }, { month: "Jul", cost: 22400 },
     ],
     costs: [
-      { name: "CloudOps", cost: 120000, breakdown: "Compute $80K, Cloud SQL $30K, Networking $10K", sparkData: [100, 105, 110, 113, 117, 120], sparkColor: "#3b82f6", memory: "Stable compliance-region workloads." },
-      { name: "SecOps", cost: 38000, breakdown: "SCC Premium, audit tooling", sparkData: [30, 32, 34, 35, 36, 38], sparkColor: "#10b981", memory: "Rising slightly with Q3 audit prep tooling." },
+      { name: "CloudOps", cost: 15600, breakdown: "EC2 $10.2K, RDS $3.8K, Networking $1.6K", sparkData: [12800, 13400, 14000, 14500, 15100, 15600], sparkColor: "#3b82f6", memory: "Stable compliance-region workloads on ap-south-1." },
+      { name: "Cloud Security", cost: 4600, breakdown: "GuardDuty, Security Hub, audit tooling", sparkData: [3600, 3800, 4000, 4200, 4400, 4600], sparkColor: "#10b981", memory: "Rising slightly with Q3 audit prep tooling." },
     ],
     optimizations: [
-      { recommendation: "Cloud SQL committed use discount", appliedDate: null, savings: "est. $22/mo", status: "available", memory: "db-custom-4-16384 running 24/7 for 8 months — stable pattern." },
+      { recommendation: "RDS reserved instance (1-yr, no upfront)", appliedDate: null, savings: "est. $340/mo", status: "available", memory: "db.r5.xlarge running 24/7 for 8 months — stable pattern, reservation breaks even in 4 months." },
     ],
     anomalies: [],
     forecast: [
-      { month: "Aug", cost: 189000, note: "Flat spend, audit tooling stable." },
+      { month: "Aug", cost: 22900, note: "Flat spend, audit tooling stable." },
     ],
     riskFactors: [
-      "Cloud SQL instance approaching 75% storage capacity — may need resize by Sep.",
+      "RDS instance approaching 75% storage capacity — may need resize by Sep.",
     ],
   },
 
   shopstop: {
     monthlyTrend: [
-      { month: "Feb", cost: 340000 }, { month: "Mar", cost: 355000 }, { month: "Apr", cost: 362000 },
-      { month: "May", cost: 378000 }, { month: "Jun", cost: 390000 }, { month: "Jul", cost: 412000 },
+      { month: "Feb", cost: 182000 }, { month: "Mar", cost: 189000 }, { month: "Apr", cost: 194000 },
+      { month: "May", cost: 201000 }, { month: "Jun", cost: 208000 }, { month: "Jul", cost: 220000 },
     ],
     costs: [
-      { name: "CloudOps", cost: 260000, breakdown: "Compute $180K, AWS EKS $50K, Networking $30K", sparkData: [210, 220, 230, 240, 250, 260], sparkColor: "#3b82f6", memory: "Pre-scaled 3x for sale window — cost bump is expected, not anomalous." },
-      { name: "AIOps", cost: 44000, breakdown: "Predictive scaling agent, Vertex AI", sparkData: [28, 32, 36, 38, 41, 44], sparkColor: "#f59e0b", memory: "Predictive scaling agent running on 5 services ahead of sale." },
+      { name: "CloudOps", cost: 138000, breakdown: "Compute $96K, AWS EKS $26K, Networking $16K", sparkData: [112, 118, 122, 128, 133, 138], sparkColor: "#3b82f6", memory: "Pre-scaled 3x for sale window — cost bump is expected, not anomalous." },
+      { name: "SAP Workloads", cost: 46000, breakdown: "SAP HANA on Compute Engine $34K, SAP app tier $12K", sparkData: [40, 41, 42, 43, 44, 46], sparkColor: "#8b5cf6", memory: "SAP ECC + HANA on dedicated memory-optimized VMs — stable, no anomalies." },
+      { name: "AIOps", cost: 23000, breakdown: "Predictive scaling agent, Vertex AI", sparkData: [15, 17, 19, 20, 21, 23], sparkColor: "#f59e0b", memory: "Predictive scaling agent running on 5 services ahead of sale." },
     ],
     optimizations: [
       { recommendation: "Right-size catalog-search after sale window", appliedDate: null, savings: "est. $18/mo", status: "available", memory: "Sale-window over-provisioning should scale back within 72h of event end." },
@@ -105,7 +106,7 @@ const PROFILES: Record<string, FinOpsProfile> = {
       },
     ],
     forecast: [
-      { month: "Aug", cost: 450000, note: "Sale-window spend elevated, expected to normalize by Aug 10." },
+      { month: "Aug", cost: 238000, note: "Sale-window spend elevated, expected to normalize by Aug 10." },
     ],
     riskFactors: [
       "Pre-sale traffic ramp typically adds 10-15% to compute spend for ~5 days.",
@@ -114,41 +115,43 @@ const PROFILES: Record<string, FinOpsProfile> = {
 
   designx: {
     monthlyTrend: [
-      { month: "Feb", cost: 29000 }, { month: "Mar", cost: 30500 }, { month: "Apr", cost: 31200 },
-      { month: "May", cost: 32000 }, { month: "Jun", cost: 33400 }, { month: "Jul", cost: 34000 },
+      { month: "Feb", cost: 8600 }, { month: "Mar", cost: 8900 }, { month: "Apr", cost: 9100 },
+      { month: "May", cost: 9400 }, { month: "Jun", cost: 9700 }, { month: "Jul", cost: 10000 },
     ],
     costs: [
-      { name: "CloudOps", cost: 22000, breakdown: "Render farm $18K, Storage $4K", sparkData: [18, 19, 20, 20, 21, 22], sparkColor: "#3b82f6", memory: "Render farm usage flat, no anomalies." },
-      { name: "DevOps", cost: 6000, breakdown: "Cloud Build, Artifact Registry", sparkData: [5, 5, 6, 6, 6, 6], sparkColor: "#8b5cf6", memory: "Stable build minutes after caching improvements." },
+      { name: "CloudOps", cost: 7800, breakdown: "Render farm $6.2K, Storage $1.6K", sparkData: [6400, 6700, 7000, 7300, 7500, 7800], sparkColor: "#3b82f6", memory: "Render farm usage flat, no anomalies." },
+      { name: "DevOps", cost: 1600, breakdown: "Cloud Build, Artifact Registry", sparkData: [1300, 1350, 1420, 1480, 1550, 1600], sparkColor: "#8b5cf6", memory: "Stable build minutes after caching improvements." },
     ],
     optimizations: [
       { recommendation: "Switch thumbnail-generator to 2nd gen Functions", appliedDate: "Jun 3", savings: "$12/mo", status: "applied", memory: "Cold start p99 improved 2.1s to 340ms." },
     ],
     anomalies: [],
     forecast: [
-      { month: "Aug", cost: 34500, note: "Flat spend expected." },
+      { month: "Aug", cost: 10200, note: "Flat spend expected." },
     ],
     riskFactors: [],
   },
 
-  paynimbus: {
+  dmart: {
     monthlyTrend: [
-      { month: "Feb", cost: 228000 }, { month: "Mar", cost: 233000 }, { month: "Apr", cost: 237000 },
-      { month: "May", cost: 240000 }, { month: "Jun", cost: 243000 }, { month: "Jul", cost: 248000 },
+      { month: "Feb", cost: 60000 }, { month: "Mar", cost: 62500 }, { month: "Apr", cost: 64800 },
+      { month: "May", cost: 66200 }, { month: "Jun", cost: 68100 }, { month: "Jul", cost: 70400 },
     ],
     costs: [
-      { name: "CloudOps", cost: 165000, breakdown: "Payments API $90K, Ledger $50K, Fraud detection $25K", sparkData: [140, 145, 150, 155, 160, 165], sparkColor: "#3b82f6", memory: "Stable, PCI-scoped tier isolated on dedicated capacity." },
-      { name: "SecOps", cost: 51000, breakdown: "Key management, PCI evidence tooling, IAM audit", sparkData: [42, 44, 46, 48, 50, 51], sparkColor: "#10b981", memory: "Rising slightly ahead of quarterly PCI evidence package." },
+      { name: "CloudOps", cost: 48000, breakdown: "GKE node pools (HCL Commerce) $36K, Cloud SQL $8K, Networking $4K", sparkData: [39000, 41000, 43000, 44500, 46200, 48000], sparkColor: "#3b82f6", memory: "Node pool auto-scaled during flash-sale windows — cost bump is expected, not anomalous." },
+      { name: "DevOps", cost: 9200, breakdown: "Cloud Build, Artifact Registry, GKE Autopilot overhead", sparkData: [7200, 7600, 8000, 8400, 8800, 9200], sparkColor: "#8b5cf6", memory: "CI pipeline for hcl-commerce-* services, 40+ deploys/week." },
+      { name: "AIOps", cost: 6800, breakdown: "Predictive HPA agent, Vertex AI", sparkData: [4200, 4600, 5100, 5600, 6200, 6800], sparkColor: "#f59e0b", memory: "Predictive pod-scaling agent watching checkout + catalog services ahead of sale events." },
     ],
     optimizations: [
-      { recommendation: "Committed use discount on payments-api tier", appliedDate: "May 20", savings: "$310/mo", status: "applied", memory: "1-yr CUD, stable 24/7 usage pattern for 11 months." },
+      { recommendation: "Right-size hcl-commerce-catalog memory requests", appliedDate: null, savings: "est. $410/mo", status: "available", memory: "Catalog pods request 4Gi but use 2.1Gi p95 — matches the pattern found on checkout in May." },
+      { recommendation: "Scale node pool back down 48h after flash sale", appliedDate: "Jun 12", savings: "$860/mo", status: "applied", memory: "Post-sale scale-down automation added after 2 sale windows left nodes over-provisioned for days." },
     ],
     anomalies: [],
     forecast: [
-      { month: "Aug", cost: 251000, note: "Flat spend, PCI evidence tooling cost stable." },
+      { month: "Aug", cost: 74500, note: "Flash-sale week elevates node pool spend, expected to normalize within 72h." },
     ],
     riskFactors: [
-      "Ledger service storage growing ~4%/mo — review retention policy by Q4.",
+      "GKE node pool cost grows with each flash-sale event — post-sale scale-down automation reduces this but isn't universal across all node pools yet.",
     ],
   },
 };
