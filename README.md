@@ -253,6 +253,9 @@ cost breakdown. Because of BYOK, LLM inference is never a platform cost.
 | `docs/FEATURE_AUDIT.md` | What's dynamic vs. seed data, per page |
 | `docs/GCP_ARCHITECTURE.md` | GCP topologies + cost to operate |
 | `docs/PRD-intellicore-memory.md` | Product requirements for Intellicore Memory |
+| `docs/PRODUCT_BUILD.md` | Snapshot of what's actually built — demo-ready pass, customer book, what's not built yet |
+| `marketing/WEBSITE.md` | The standalone marketing site — pages, design system, deployment |
+| `BACKLOG.md` | Larger roadmap items not yet built |
 
 ---
 
