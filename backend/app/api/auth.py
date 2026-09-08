@@ -23,14 +23,18 @@ request to the app; a 401 there sends the browser to /login.
 
 import base64
 import io
+import secrets
 import uuid
 from datetime import timedelta
+from urllib.parse import urlencode
 
 import bcrypt
+import httpx
 import pyotp
 import qrcode
 import qrcode.image.svg
 from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi.responses import RedirectResponse
 from jose import JWTError
 from pydantic import BaseModel
 from sqlalchemy import text
@@ -207,3 +211,169 @@ async def logout(request: Request, response: Response) -> dict:
 async def me(request: Request) -> dict:
     payload = await _require_session(request)
     return {"email": payload.get("email"), "tenant_id": payload.get("tenant_id")}
+
+
+GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+GOOGLE_TOKENINFO_URL = "https://oauth2.googleapis.com/tokeninfo"
+
+
+@router.get("/google/login")
+async def google_login(request: Request) -> RedirectResponse:
+    from app.config import get_settings
+    settings = get_settings()
+    if not settings.google_oauth_enabled:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Google SSO is not configured")
+
+    # CSRF state stored in Redis for 10 minutes
+    state = secrets.token_urlsafe(32)
+    rd = request.query_params.get("rd", "/")
+    await get_client().set(f"oauth:state:{state}", rd, ex=600)
+
+    # Build the first allowed domain as the hd hint
+    # (Google only accepts a single hd value, but we verify all allowed on callback)
+    hd_hint = settings.google_oauth_allowed_domains_list[0]
+
+    params = {
+        "client_id": settings.google_oauth_client_id,
+        "redirect_uri": str(request.base_url).rstrip("/") + "/auth/google/callback",
+        "response_type": "code",
+        "scope": "openid email profile",
+        "hd": hd_hint,
+        "state": state,
+        "access_type": "online",
+        "prompt": "select_account",
+    }
+    return RedirectResponse(f"{GOOGLE_AUTH_URL}?{urlencode(params)}")
+
+
+@router.get("/google/callback")
+async def google_callback(
+    request: Request,
+    response: Response,
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+) -> RedirectResponse:
+    from app.config import get_settings
+    settings = get_settings()
+
+    # Handle user-denied or errors
+    if error or not code or not state:
+        return RedirectResponse(f"/login?error={error or 'cancelled'}")
+
+    # Verify CSRF state
+    rd_bytes = await get_client().get(f"oauth:state:{state}")
+    if not rd_bytes:
+        return RedirectResponse("/login?error=state_mismatch")
+    await get_client().delete(f"oauth:state:{state}")
+    redirect_to = rd_bytes if isinstance(rd_bytes, str) else rd_bytes.decode()
+
+    # Exchange code for tokens
+    redirect_uri = str(request.base_url).rstrip("/") + "/auth/google/callback"
+    async with httpx.AsyncClient() as client:
+        token_resp = await client.post(
+            GOOGLE_TOKEN_URL,
+            data={
+                "code": code,
+                "client_id": settings.google_oauth_client_id,
+                "client_secret": settings.google_oauth_client_secret,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code",
+            },
+        )
+    if not token_resp.is_success:
+        return RedirectResponse("/login?error=token_exchange_failed")
+    tokens = token_resp.json()
+    id_token = tokens.get("id_token")
+    if not id_token:
+        return RedirectResponse("/login?error=no_id_token")
+
+    # Verify the ID token via Google's tokeninfo endpoint
+    async with httpx.AsyncClient() as client:
+        info_resp = await client.get(GOOGLE_TOKENINFO_URL, params={"id_token": id_token})
+    if not info_resp.is_success:
+        return RedirectResponse("/login?error=token_invalid")
+    info = info_resp.json()
+
+    email = info.get("email", "")
+    email_verified = info.get("email_verified") in (True, "true")
+    hd = info.get("hd", "")   # hosted domain from Google
+
+    if not email or not email_verified:
+        return RedirectResponse("/login?error=email_not_verified")
+
+    # Check domain is allowed
+    allowed = settings.google_oauth_allowed_domains_list
+    if hd not in allowed and not any(email.endswith(f"@{d}") for d in allowed):
+        return RedirectResponse("/login?error=domain_not_allowed")
+
+    # Find or create user
+    google_name = info.get("name") or email.split("@")[0]
+    async for session in get_session():
+        row = (
+            await session.execute(
+                text("SELECT id, tenant_id, email FROM users WHERE lower(email) = lower(:email)"),
+                {"email": email},
+            )
+        ).mappings().first()
+
+        if not row:
+            # Auto-provision internal Searce users into the demo tenant
+            # (production: look up the tenant by domain mapping)
+            new_id = str(uuid.uuid4())
+            await session.execute(
+                text(
+                    """INSERT INTO users (id, tenant_id, email, name, password_hash, role, totp_confirmed)
+                       VALUES (:id, 'demo-tenant', :email, :name, '', 'viewer', TRUE)
+                       ON CONFLICT (tenant_id, email) DO NOTHING"""
+                ),
+                {"id": new_id, "email": email, "name": google_name},
+            )
+            await session.commit()
+            row = (
+                await session.execute(
+                    text("SELECT id, tenant_id, email FROM users WHERE lower(email) = lower(:email)"),
+                    {"email": email},
+                )
+            ).mappings().first()
+        else:
+            await session.execute(
+                text("UPDATE users SET last_login_at = NOW() WHERE id = :id"),
+                {"id": row["id"]},
+            )
+            await session.commit()
+        break
+    else:
+        row = None
+
+    if not row:
+        return RedirectResponse("/login?error=user_creation_failed")
+
+    # Issue session (same as TOTP flow)
+    sid = str(uuid.uuid4())
+    ttl = REMEMBER_SESSION  # Google SSO users always get the long session
+    session_token = encode_token(
+        {
+            "uid": str(row["id"]),
+            "tenant_id": row["tenant_id"],
+            "email": row["email"],
+            "purpose": "session",
+            "sid": sid,
+            "sso": "google",
+        },
+        ttl,
+    )
+    await get_client().set(f"session:{sid}", str(row["id"]), ex=int(ttl.total_seconds()))
+
+    resp = RedirectResponse(redirect_to, status_code=302)
+    resp.set_cookie(SESSION_COOKIE, session_token, max_age=int(ttl.total_seconds()), **_COOKIE_KWARGS)
+    return resp
+
+
+@router.get("/google/status")
+async def google_status() -> dict:
+    """Let the frontend know if Google SSO is configured."""
+    from app.config import get_settings
+    settings = get_settings()
+    return {"enabled": settings.google_oauth_enabled}

@@ -9,7 +9,7 @@
 	# Public: the login page shell, its static assets, and the auth API
 	# that implements the login itself. Nothing else is reachable without
 	# a valid session.
-	@public path /login /login/* /_next/* /favicon.ico /api/auth/login /api/auth/totp/verify
+	@public path /login /login/* /_next/* /favicon.ico /api/auth/login /api/auth/totp/verify /api/auth/google/login /api/auth/google/callback /api/auth/google/status
 
 	handle @public {
 		handle_path /api/* {

@@ -57,6 +57,22 @@ class Settings(BaseSettings):
     ingest_worker_interval_seconds: int = Field(default=60)
     pattern_detector_interval_seconds: int = Field(default=900)
 
+    # Google Workspace SSO
+    google_oauth_client_id: str = Field(default="")
+    google_oauth_client_secret: str = Field(default="")
+    # Comma-separated list of allowed Google Workspace hosted domains.
+    # e.g. "searce.com" or "searce.com,customer.com"
+    # Empty string = Google SSO disabled.
+    google_oauth_allowed_domains: str = Field(default="")
+
+    @property
+    def google_oauth_enabled(self) -> bool:
+        return bool(self.google_oauth_client_id and self.google_oauth_client_secret and self.google_oauth_allowed_domains)
+
+    @property
+    def google_oauth_allowed_domains_list(self) -> list[str]:
+        return [d.strip() for d in self.google_oauth_allowed_domains.split(",") if d.strip()]
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
