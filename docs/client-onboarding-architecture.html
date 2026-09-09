@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intellicore CMP — Client Onboarding Architecture</title>
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#f4f6fb; --panel:#ffffff; --panel2:#f1f4fa; --border:#e2e7f2;
+    --text:#10182b; --muted:#4b5670; --muted2:#8992ac;
+    --emerald:#34d399; --blue:#38bdf8; --violet:#818cf8; --amber:#fbbf24; --rose:#fb7185;
+    --emerald-ink:#059669; --blue-ink:#0284c7; --violet-ink:#6366f1; --amber-ink:#b45309; --rose-ink:#e11d48;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+       background:var(--bg2);color:var(--text);line-height:1.5;padding:32px 20px}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1,h2,h3{font-weight:700;letter-spacing:-0.02em}
+  h1{font-size:28px;margin-bottom:6px}
+  h2{font-size:18px;margin:36px 0 14px}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:8px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--emerald-ink);
+    background:rgba(5,150,105,.08);border:1px solid rgba(5,150,105,.22);
+    padding:5px 11px;border-radius:999px;margin-bottom:16px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--emerald-ink)}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px}
+
+  /* ── architecture diagram ── */
+  .stack{display:flex;flex-direction:column;align-items:center;gap:0}
+  .node{border:1px solid var(--border);border-radius:12px;padding:11px 16px;background:var(--panel);
+        text-align:center;min-width:150px}
+  .node .t{font-weight:700;font-size:13px}
+  .node .d{font-size:11px;color:var(--muted2);margin-top:2px}
+  .edge{width:2px;height:20px;background:var(--border)}
+  .edge-label{font-size:10px;color:var(--muted2);padding:3px 0}
+  .edge-node{border-color:rgba(5,150,105,.4);background:radial-gradient(circle at 80% 0%,rgba(52,211,153,.10),transparent 60%),var(--panel)}
+  .row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;width:100%}
+  .gate{border:1px dashed var(--violet-ink);border-radius:12px;padding:9px 16px;background:rgba(99,102,241,.05);
+        text-align:center;font-size:12px;color:var(--violet-ink);font-weight:600}
+  .data-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:620px}
+  .data{border:1px solid var(--border);border-radius:12px;padding:11px;text-align:center;background:var(--panel2)}
+  .data .t{font-weight:700;font-size:12px}
+  .data .d{font-size:10px;color:var(--muted2);margin-top:2px}
+  .internal{font-size:10px;color:var(--muted2);margin-top:10px;text-align:center}
+  .byok{border:1px solid rgba(2,132,199,.3);background:rgba(2,132,199,.05);border-radius:12px;
+        padding:10px 16px;font-size:12px;color:var(--blue-ink);font-weight:600;text-align:center}
+
+  /* ── steps ── */
+  ol.steps{list-style:none;counter-reset:s}
+  ol.steps li{counter-increment:s;position:relative;padding-left:40px;margin-bottom:14px;font-size:14px}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:-1px;width:26px;height:26px;
+    border-radius:8px;background:linear-gradient(135deg,var(--emerald),#10b981);color:#062018;
+    font-weight:700;font-size:12px;display:grid;place-items:center}
+  ol.steps b{font-weight:700}
+  ol.steps .n{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted2)}
+  td.y{color:var(--rose-ink);font-weight:600;white-space:nowrap}
+  td.n{color:var(--muted2);white-space:nowrap}
+  code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .warn{border-left:3px solid var(--amber-ink);background:rgba(180,83,9,.05);
+        border-radius:0 12px 12px 0;padding:16px 18px;margin-top:14px}
+  .warn h3{font-size:14px;color:var(--amber-ink);margin-bottom:6px}
+  .warn p{font-size:13px;color:var(--muted);margin-bottom:8px}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .ok-list,.gap-list{font-size:13px;padding-left:18px;color:var(--muted)}
+  .ok-list li,.gap-list li{margin-bottom:5px}
+  .pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;
+        text-transform:uppercase;letter-spacing:.05em}
+  .pill-ok{background:rgba(5,150,105,.10);color:var(--emerald-ink)}
+  .pill-gap{background:rgba(225,29,72,.10);color:var(--rose-ink)}
+  @media(max-width:760px){.split,.data-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="dot"></span>Intellicore CMP</div>
+  <h1>Onboarding a New Client</h1>
+  <p class="sub">Architecture, steps and requirements — as the repo actually implements them.</p>
+
+  <h2>1 · Isolation model</h2>
+  <div class="card">
+    <p style="font-size:14px;margin-bottom:10px">
+      <b>One VM per customer, per environment.</b> Not a shared multi-tenant cluster.
+      The schema is tenant-aware and <code>TENANT_MODE</code> supports <code>multi</code>,
+      but provisioning always writes <code>TENANT_MODE=single</code>.
+    </p>
+    <div class="row" style="justify-content:flex-start">
+      <div class="node"><div class="t">intellicore-acme-staging</div><div class="d">e2-standard-2 · own IP · own DB</div></div>
+      <div class="node"><div class="t">intellicore-acme-production</div><div class="d">e2-standard-4 · own IP · own DB</div></div>
+    </div>
+    <p style="font-size:12.5px;color:var(--muted);margin-top:12px">
+      <b>Buys:</b> hard data isolation, no query-scoping bugs possible, per-customer billing,
+      blast radius of exactly one customer. &nbsp;<b>Costs:</b> spend scales linearly — no pooling.
+    </p>
+  </div>
+
+  <h2>2 · What runs on a customer VM</h2>
+  <div class="card">
+    <div class="stack">
+      <div class="node" style="border-color:var(--muted2)"><div class="t">Internet</div></div>
+      <div class="edge"></div><div class="edge-label">:80 · :443 &nbsp;(only ports exposed)</div><div class="edge"></div>
+
+      <div class="node edge-node" style="min-width:230px">
+        <div class="t">Caddy — <code>intellicore-edge</code></div>
+        <div class="d">auto-TLS · Let's Encrypt HTTP-01 · &lt;ip&gt;.sslip.io</div>
+      </div>
+      <div class="edge"></div>
+
+      <div class="gate">forward_auth gate → backend <code>/auth/session/check</code><br>
+        <span style="font-weight:400;font-size:11px">401 ⇒ 302 to /login · bypassed only for the <code>@public</code> allowlist</span></div>
+      <div class="edge"></div>
+
+      <div class="row">
+        <div>
+          <div class="edge-label" style="text-align:center">/api/* <span style="color:var(--muted2)">(prefix stripped)</span></div>
+          <div class="node"><div class="t">backend</div><div class="d">FastAPI · :8000</div></div>
+        </div>
+        <div>
+          <div class="edge-label" style="text-align:center">/*</div>
+          <div class="node"><div class="t">frontend</div><div class="d">Next.js 14 · :3000</div></div>
+        </div>
+      </div>
+      <div class="edge"></div>
+
+      <div class="data-row">
+        <div class="data"><div class="t">PostgreSQL</div><div class="d">tenants · users<br>audit · guardrails</div></div>
+        <div class="data"><div class="t">Neo4j</div><div class="d">operational<br>memory graph</div></div>
+        <div class="data"><div class="t">Redis</div><div class="d">cache ·<br>sessions</div></div>
+      </div>
+      <div class="internal">↑ compose network only — never bound to host ports</div>
+
+      <div class="edge"></div>
+      <div class="byok">BYOK egress → Anthropic / OpenAI / Gemini &nbsp;<span style="font-weight:400">(customer's own key)</span></div>
+    </div>
+
+    <p style="font-size:12.5px;color:var(--muted);margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
+      <b>Only Caddy binds host ports.</b> <code>curl localhost:3000</code> on the VM returns nothing — expected, not a fault.
+      <b>SSH is IAP-only</b>; port 22 is never open to the internet.
+    </p>
+  </div>
+
+  <h2>3 · Required before you start</h2>
+  <div class="card" style="padding-top:14px">
+    <table>
+      <tr><th>Requirement</th><th>Detail</th><th>Blocker?</th></tr>
+      <tr><td><b>GCP project</b></td><td>Customer's own or a shared Searce one, billing enabled</td><td class="y">Yes</td></tr>
+      <tr><td><b>Billing permission</b></td><td><code>billing.resourceAssociations.create</code> — only to link a <i>new</i> project</td><td class="n">Conditional</td></tr>
+      <tr><td><b><code>gcloud</code> authenticated</b></td><td>Cloud Shell is simplest — already authed</td><td class="y">Yes</td></tr>
+      <tr><td><b>Customer admin email</b></td><td>First login + Let's Encrypt contact</td><td class="y">Yes</td></tr>
+      <tr><td><b>Region decision</b></td><td>Default <code>asia-south1</code> — drives data residency</td><td class="y">Yes</td></tr>
+      <tr><td><b>Customer LLM key</b></td><td>BYOK — pasted in Settings after go-live</td><td class="n">For AI only</td></tr>
+      <tr><td><b>Custom domain</b></td><td>Optional — <code>sslip.io</code> needs no DNS at all</td><td class="n">No</td></tr>
+    </table>
+  </div>
+
+  <h2>4 · The steps &nbsp;<span style="font-size:13px;font-weight:400;color:var(--muted)">— 15–25 min per environment</span></h2>
+  <div class="card">
+    <ol class="steps">
+      <li><b>Reserve static IP</b> → derive <code>&lt;ip-with-dashes&gt;.sslip.io</code>
+        <span class="n">No DNS work required — sslip.io resolves it, Caddy gets a real LE cert for it.</span></li>
+      <li><b>Open firewall</b> :80 and :443
+        <span class="n">:80 must be reachable — Let's Encrypt needs it for the HTTP-01 challenge.</span></li>
+      <li><b>Create VM</b> — Ubuntu 22.04, 50 GB pd-balanced, Docker via startup script</li>
+      <li><b>Wait for Docker</b> — polls 30 × 10 s</li>
+      <li><b>Package repo at HEAD</b> and <code>scp</code> to the VM</li>
+      <li><b>Generate secrets</b> — Postgres, Neo4j, JWT, credentials, admin password
+        <span class="n">Generated on the operator's machine so the admin password can be printed once.</span></li>
+      <li><b>Write <code>.env.prod</code></b> (chmod 600) → <code>docker compose up -d --build</code></li>
+      <li><b>Bootstrap admin</b> via <code>scripts.create_admin</code></li>
+      <li><b>Verify</b> — login, TOTP enrolment, paste BYOK key, download a PDF report</li>
+    </ol>
+    <div style="border-top:1px solid var(--border);margin-top:6px;padding-top:14px;font-size:13px;color:var(--muted)">
+      Run once with <code>ENVIRONMENT=staging</code>, validate, then again with
+      <code>ENVIRONMENT=production</code> — a separate VM, IP and database.
+      <b style="color:var(--rose-ink)">The generated admin password is printed once and stored nowhere else.</b>
+    </div>
+  </div>
+
+  <h2>5 · Cost per customer</h2>
+  <div class="card" style="padding-top:14px">
+    <table>
+      <tr><th></th><th>On-demand</th><th>1-yr committed use</th></tr>
+      <tr><td>Production (<code>e2-standard-4</code>)</td><td>~$145/mo</td><td>~$105/mo</td></tr>
+      <tr><td>Staging (<code>e2-standard-2</code>)</td><td>~$85–95/mo</td><td>~$60/mo</td></tr>
+      <tr><td>LLM inference</td><td colspan="2"><b style="color:var(--emerald-ink)">$0 to platform</b> — customer brings their own key</td></tr>
+    </table>
+    <p style="font-size:12.5px;color:var(--muted);margin-top:10px">
+      Staging + production ≈ <b>$230/mo on-demand</b>, ~$165/mo committed. Linear: 10 production customers ≈ $1,450/mo.
+    </p>
+  </div>
+
+  <h2>6 · Ready vs not ready</h2>
+  <div class="split">
+    <div class="card">
+      <span class="pill pill-ok">Production ready</span>
+      <ul class="ok-list" style="margin-top:12px">
+        <li>Isolated infra per customer, one command</li>
+        <li>TLS, session auth, TOTP 2FA, IAP-only SSH</li>
+        <li>BYOK keys encrypted at rest (pgcrypto); only last 4 chars returned</li>
+        <li>Tenant-scoped schema with cascade deletes</li>
+        <li>Audit log table</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="pill pill-gap">Not ready</span>
+      <ul class="gap-list" style="margin-top:12px">
+        <li><b>No cloud provider integration at all</b></li>
+        <li>No <code>google-cloud-*</code>, <code>boto3</code> or Azure SDK in <code>pyproject.toml</code></li>
+        <li><code>cloud_accounts</code> table is never written outside the seed</li>
+        <li>All pillar data served from <code>lib/api/mock/*.ts</code></li>
+        <li>No automated backups attached by the script</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="warn">
+    <h3>What this means for a client conversation</h3>
+    <p>Onboarding today delivers a <b>fully working, isolated, branded pilot environment</b> — genuinely
+    useful for sales, POCs and validating UX with a real customer. It does <b>not</b> deliver a system
+    observing their actual cloud estate. A client told "this is monitoring your environment" would be misled.</p>
+    <p style="margin-bottom:0"><b>Closing the gap needs:</b> a read-only role in the customer's cloud;
+    ingestion for billing export, asset inventory and security findings; a scheduled sync writing to
+    <code>cloud_accounts</code>; backend endpoints serving it; and
+    <code>NEXT_PUBLIC_DATA_SOURCE=api</code> in the frontend build. None of that is scoped in the repo today.</p>
+  </div>
+
+  <h2>7 · Operational constraints worth knowing</h2>
+  <div class="card">
+    <ul class="gap-list" style="color:var(--muted)">
+      <li><b>New GCP projects may be blocked</b> — the current operator lacks <code>billing.resourceAssociations.create</code>.</li>
+      <li><b>The seed demo user cannot log in</b> — <code>01-schema.sql</code> has a placeholder bcrypt hash that reads like a working credential. Always use <code>create_admin</code>.</li>
+      <li><b>Postgres passwords are baked in at first init</b> — regenerating <code>.env.prod</code> later breaks the backend; fixing it is destructive.</li>
+      <li><b>Region is effectively permanent</b> — confirm residency before the first run.</li>
+      <li><b>Two provisioning paths exist</b> — <code>provision-customer.sh</code> (proven) and the <code>provision:customer</code> CI job (untested).</li>
+      <li><b>Single VM means a reboot is downtime</b> — no failover. Above ~99.5% SLA, Topology A will not hold (~$505–850/mo).</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
