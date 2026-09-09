@@ -227,6 +227,20 @@ Each org has a distinct narrative to support sales demos:
 
 Active development branch: `claude/intellicore-cmp-review-j4fbts`
 
+## Source control & CI/CD
+
+The canonical remote is **Searce GitLab** (`gitlab.searce.com`), not GitHub.
+GitHub Actions were removed in the migration; `.gitlab-ci.yml` is the single
+source of CI/CD truth — validate → build → deploy → provision.
+
+Deploys **push** a tarball to the GCP VM over an IAP tunnel; the VM never pulls
+from GitLab. So the VM needs no deploy token and no network path to the Searce
+perimeter. Never reintroduce a `git fetch` deploy step on the VM.
+
+`gitlab.searce.com` is only reachable from inside the Searce network — it
+returns 403 to the public internet. Anything that talks to it must run from the
+VPN. Migration runbook: `deploy/gcp/MIGRATE_TO_GITLAB.md`.
+
 ---
 
 ## How to run locally

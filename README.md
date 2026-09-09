@@ -139,7 +139,7 @@ intellicore-cmp/
 **Prereqs**: Docker Desktop, Make, Node 20+ (only if you want to run frontend outside Docker), Python 3.11+ (same).
 
 ```bash
-git clone https://github.com/<your-org>/intellicore-cmp.git
+git clone https://gitlab.searce.com/<group>/intellicore-cmp.git
 cd intellicore-cmp
 cp .env.example .env
 # Edit .env — set ANTHROPIC_API_KEY at minimum
@@ -221,25 +221,31 @@ make test-backend      # pytest only
 make test-frontend     # jest + playwright
 ```
 
-CI runs on every PR (`.github/workflows/`).
+CI runs on every merge request (`.gitlab-ci.yml`).
 
 ---
 
 ## Deployment & CI/CD
 
-GitHub Actions pipelines (`.github/workflows/`):
+GitLab CI/CD pipeline (`.gitlab-ci.yml`) — a single file with four stages:
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `ci.yml` | push / PR to `main`, `staging` | Lint + build frontend, syntax-check backend |
-| `deploy-staging.yml` | push to `staging` | Deploy to the staging GCP VM |
-| `deploy-production.yml` | push to `main` | Deploy to production with health check + auto-rollback |
-| `deploy-customer.yml` | manual dispatch | Provision a **new per-customer** GCP VM (static IP, TLS, Docker, generated `.env.prod`) |
+| Job | Stage | Trigger | Purpose |
+|-----|-------|---------|---------|
+| `frontend:lint` | validate | push / MR to `main`, `staging` | `next lint` |
+| `backend:check` | validate | push / MR to `main`, `staging` | Byte-compile the FastAPI app |
+| `frontend:build` | build | push / MR to `main`, `staging` | Production Next.js build |
+| `deploy:staging` | deploy | push to `staging` | Deploy to the staging GCP VM over IAP |
+| `deploy:production` | deploy | push to `main` | Deploy to production with health check + auto-rollback |
+| `provision:customer` | provision | manual (Run pipeline) | Provision a **new per-customer** GCP VM (static IP, TLS, Docker, generated `.env.prod`) |
+
+Deploys reach the VM through a **GCP IAP tunnel** — port 22 is never open to the
+internet. Code is shipped as a tarball rather than pulled by the VM, so the VM
+needs no GitLab credentials and no network path to `gitlab.searce.com`.
 
 Every new customer gets an isolated single-VM deployment. For a scripted
 **staging → production** onboarding, see **`deploy/NEW_CUSTOMER.md`** — it uses
 `deploy/gcp/provision-customer.sh` (reserves IP, creates the VM, generates
-secrets, deploys, bootstraps the admin) or the `deploy-customer.yml` workflow.
+secrets, deploys, bootstraps the admin) or the `provision:customer` CI job.
 Env contract: `deploy/gcp/.env.prod.example`.
 
 ## GCP architecture & cost

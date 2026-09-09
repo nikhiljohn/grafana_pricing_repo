@@ -3,7 +3,7 @@
 Intellicore CMP runs **one isolated VM per customer per environment** (hard data
 isolation, simplest billing). To onboard a customer you stand up **staging**
 first, validate, then **production**. Two ways to do it: a one-shot script, or
-the GitHub Actions workflow.
+the GitLab CI/CD provisioning job.
 
 ---
 
@@ -64,22 +64,32 @@ Override the VM size with `MACHINE_TYPE=e2-standard-4` if needed.
 
 ---
 
-## Option B — GitHub Actions workflow
+## Option B — GitLab CI/CD provisioning job
 
-Use `.github/workflows/deploy-customer.yml` (**Actions → Deploy Customer
-Environment → Run workflow**). Inputs: customer name, GCP project, region,
-machine type, admin email. Requires repo secrets/vars:
+Use the `provision:customer` job in `.gitlab-ci.yml`
+(**CI/CD → Pipelines → Run pipeline**). GitLab has no `workflow_dispatch`, so
+the inputs are pipeline variables that appear as fields on the Run pipeline
+form: `CUSTOMER_NAME`, `CUSTOMER_GCP_PROJECT_ID`, `CUSTOMER_REGION`,
+`CUSTOMER_MACHINE_TYPE`, `CUSTOMER_ADMIN_EMAIL`.
 
-- Secret `GCP_SA_KEY` — service-account JSON (Compute Admin + OS Login/SSH)
-- Variable `GCP_PROJECT_ID` (or pass per-run)
+Fill the form, run the pipeline, then start the manual `provision:customer`
+job. Requires these CI/CD variables:
 
-Run it once with a staging name and once with a production name. The workflow
-provisions the VM and deploys, printing the URL + credentials in the run log.
+- `GCP_SA_KEY` (**File** type) — service-account JSON (Compute Admin + IAP
+  tunnel + OS Login/SSH). Protect it; do **not** mask it (JSON can't be masked).
+- `GCP_PROJECT_ID` (Variable) — used for runner auth; the customer's own
+  project comes from `CUSTOMER_GCP_PROJECT_ID`.
 
-For **ongoing deploys** to existing customer envs, use the branch-based
-pipelines: push to `staging` → `deploy-staging.yml`; push to `main` →
-`deploy-production.yml` (health check + auto-rollback). These build into a new
-directory and swap, so they never leave stale files.
+Run it once with a staging name and once with a production name. The job
+provisions the VM and deploys, printing the URL + credentials in the job log.
+
+> The generated admin password is printed **once** in the job log and stored
+> nowhere else. Copy it immediately.
+
+For **ongoing deploys** to existing customer envs, use the branch-based jobs:
+push to `staging` → `deploy:staging`; push to `main` → `deploy:production`
+(health check + auto-rollback). These unpack into a new directory and swap, so
+they never leave stale files, and they preserve the VM's existing `.env.prod`.
 
 ---
 

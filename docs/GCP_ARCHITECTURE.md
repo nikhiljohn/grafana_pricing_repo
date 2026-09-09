@@ -18,7 +18,7 @@ services) when their scale or SLA warrants it.
 ### Topology A — Single-VM (current default, per-customer isolation)
 
 Everything runs as Docker Compose on one VM behind Caddy (auto-TLS via sslip.io).
-This is what `deploy-customer.yml` provisions today.
+This is what the `provision:customer` CI job provisions today.
 
 ```mermaid
 flowchart TB
@@ -160,7 +160,7 @@ DNS) adds a flat **~$20–50/mo** regardless of customer count.
 
 ## Recommendations
 
-1. **Default new customers to Topology A** via the `deploy-customer.yml` pipeline.
+1. **Default new customers to Topology A** via the `provision:customer` CI job.
    It's cheap (~$105–145/mo), fully isolated, and provisions in minutes.
 2. **Buy 1-year committed-use discounts** on steady-state VMs to save ~35%.
 3. **Right-size**: pilots and small tenants on `e2-standard-2`; standard on

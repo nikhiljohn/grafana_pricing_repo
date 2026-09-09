@@ -27,8 +27,10 @@ HTTPS, and getting a valid admin login.
 | `.env.prod` on the VM | ✅ Generated (see §4 for the gotcha) |
 | Admin user | ✅ Created via `create_admin.py` |
 | **Caddy / HTTPS serving** | ⚠️ **In progress — see §3** |
+| GitHub Actions → GitLab CI port | ✅ Done — all 4 workflows now in `.gitlab-ci.yml`; `.github/` removed |
+| Repo pushed to Searce GitLab | ❌ Not done — needs Searce VPN, see `deploy/gcp/MIGRATE_TO_GITLAB.md` |
 | GitLab CI/CD variables | ❌ Not done |
-| VM git remote → Searce GitLab | ❌ Still points at GitHub |
+| VM git remote → Searce GitLab | ➖ No longer needed — deploys ship a tarball over IAP, the VM never pulls |
 
 ---
 
@@ -211,19 +213,25 @@ non-Searce account is rejected with `domain_not_allowed`.
 | `VM_USER` | Variable | `nikhil_john_searce_com` |
 | `DOMAIN` | Variable | `35-200-215-108.sslip.io` |
 
-**d. Point the VM's git remote at Searce GitLab.** The pipeline does
-`git fetch origin main && git reset --hard origin/main` on the VM. The remote is
-still GitHub, so CI deploys would pull the wrong source.
+**d. Push the repo to Searce GitLab.** Not yet done — `gitlab.searce.com` 403s
+from outside the Searce perimeter, so this must run from a laptop on the VPN.
+Full runbook: **`deploy/gcp/MIGRATE_TO_GITLAB.md`**.
 ```bash
-# On the VM:
-git remote set-url origin https://gitlab.searce.com/<group>/intellicore-cmp.git
-# Needs a deploy token for HTTPS pulls:
-#   GitLab → Settings → Repository → Deploy Tokens (scope: read_repository)
-#   git remote set-url origin https://<token-user>:<token>@gitlab.searce.com/<group>/intellicore-cmp.git
+export GITLAB_URL="https://gitlab.searce.com/<group>/intellicore-cmp.git"
+bash deploy/gcp/migrate-to-gitlab.sh
 ```
+Mirrors all three branches (each carries unique work — the `architecture`
+branch alone holds the whole `marketing/` site), creates `main`, and verifies.
 
-**e. Merge this branch to `main`.** The pipeline only fires on `main`
-(`.gitlab-ci.yml` rules). Nothing auto-deploys until the work lands there.
+> The VM's git remote no longer matters. Deploys package a tarball and copy it
+> over the IAP tunnel; the VM never pulls from GitLab, so no deploy token is
+> needed and no VM→GitLab network path has to exist.
+
+**e. Create `main` and make it the default.** There is currently **no `main`
+branch** — GitHub's default is `claude/grafana-pricing-page-yTE5w`. The
+pipeline's `deploy:production` only fires on `main`, so nothing auto-deploys
+until it exists. The migration script creates it; setting it as the default
+branch is a manual step (Settings → Repository → Branch defaults).
 
 ---
 
@@ -288,7 +296,9 @@ git fetch origin main && git reset --hard origin/main && bash deploy/gcp/update.
 | `deploy/gcp/update.sh` | Incremental redeploy. Called by CI. Expects `.env.prod` at repo root. |
 | `deploy/gcp/.env.prod.example` | Template documenting every env var. |
 | `deploy/gcp/GITLAB_CI.md` | Full CI/CD setup guide + IAP troubleshooting. |
-| `.gitlab-ci.yml` | Two stages: `frontend:build`, then `deploy:production` via IAP SSH. `main` only. |
+| `.gitlab-ci.yml` | **The** CI/CD pipeline. Four stages: validate → build → deploy → provision. Six jobs, ported from the deleted GitHub Actions. Deploys ship a tarball over IAP with health check + auto-rollback. |
+| `deploy/gcp/MIGRATE_TO_GITLAB.md` | GitHub → GitLab migration runbook. Network constraint, branch inventory, CI variables. |
+| `deploy/gcp/migrate-to-gitlab.sh` | Mirrors all branches/tags to GitLab, creates `main`, verifies every ref. Run from the Searce VPN. |
 | `backend/scripts/create_admin.py` | Provisions/resets the admin user. Reads `ADMIN_EMAIL` / `ADMIN_PASSWORD`. |
 | `backend/app/api/auth.py` | Password + TOTP login, plus the three Google SSO endpoints. |
 | `backend/app/config.py` | `google_oauth_enabled` gates the SSO button. |

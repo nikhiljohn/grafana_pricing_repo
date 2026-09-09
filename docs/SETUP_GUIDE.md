@@ -14,8 +14,8 @@
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/nikhiljohn/grafana_pricing_repo.git
-cd grafana_pricing_repo
+git clone https://gitlab.searce.com/<group>/intellicore-cmp.git
+cd intellicore-cmp
 ```
 
 ### 2. Frontend
@@ -209,34 +209,43 @@ This file talks to the real backend and is functional.
 
 ## CI/CD Pipelines
 
-### GitHub Actions Workflows
+### GitLab CI/CD Jobs (`.gitlab-ci.yml`)
 
-| Workflow | Trigger | What It Does |
-|----------|---------|--------------|
-| `ci.yml` | Push/PR to `main`/`staging` | Lint + build frontend, syntax-check backend |
-| `deploy-staging.yml` | Push to `staging` | Package → SCP to staging VM → docker compose up |
-| `deploy-production.yml` | Push to `main` | Build test → deploy to prod VM → health check → auto-rollback on failure |
-| `deploy-customer.yml` | Manual dispatch | Provision new GCP VM → install Docker → deploy → generate credentials |
+| Job | Stage | Trigger | What It Does |
+|-----|-------|---------|--------------|
+| `frontend:lint` | validate | Push/MR to `main`/`staging` | `next lint` |
+| `backend:check` | validate | Push/MR to `main`/`staging` | Byte-compile the FastAPI app |
+| `frontend:build` | build | Push/MR to `main`/`staging` | Production Next.js build |
+| `deploy:staging` | deploy | Push to `staging` | Package → SCP over IAP → `update.sh` |
+| `deploy:production` | deploy | Push to `main` | Build → deploy over IAP → health check → auto-rollback on failure |
+| `provision:customer` | provision | Manual (Run pipeline) | Provision new GCP VM → install Docker → deploy → generate credentials |
 
-### Required Secrets
+### Required CI/CD Variables
 
-| Secret/Variable | Where | Purpose |
-|-----------------|-------|---------|
-| `GCP_SA_KEY` | Secret | GCP service account JSON (Compute Admin, SSH) |
+Set these in **Settings → CI/CD → Variables**.
+
+| Variable | Type | Purpose |
+|----------|------|---------|
+| `GCP_SA_KEY` | File | GCP service account JSON. Protect: yes. **Mask: no** — JSON cannot be masked. |
 | `GCP_PROJECT_ID` | Variable | GCP project ID |
-| `VM_NAME` | Variable | Target VM name (optional, has defaults) |
-| `VM_ZONE` | Variable | GCP zone (optional, defaults to asia-south1-a) |
+| `VM_NAME` | Variable | Target VM name |
+| `VM_ZONE` | Variable | GCP zone (e.g. `asia-south1-a`) |
+| `VM_USER` | Variable | SSH user on the VM |
+| `DOMAIN` | Variable | Public hostname, used for the environment URL |
+| `STAGING_VM_NAME` / `STAGING_VM_ZONE` / `STAGING_DOMAIN` | Variable | Staging only, if a staging VM exists |
 
 ### Per-Customer Deployment
 
-Run via GitHub Actions → "Deploy Customer Environment" → fill inputs:
-- **Customer name**: lowercase, no spaces (e.g., `acme-corp`)
-- **GCP Project ID**: customer's GCP project
-- **Region**: deployment region
-- **Machine type**: VM size
-- **Admin email**: first admin user's email
+Run via **CI/CD → Pipelines → Run pipeline**, fill in the form fields, then
+start the manual `provision:customer` job:
 
-The workflow provisions a VM, configures Docker, deploys, and outputs:
+- **`CUSTOMER_NAME`**: lowercase, no spaces (e.g., `acme-corp`)
+- **`CUSTOMER_GCP_PROJECT_ID`**: customer's GCP project
+- **`CUSTOMER_REGION`**: deployment region
+- **`CUSTOMER_MACHINE_TYPE`**: VM size
+- **`CUSTOMER_ADMIN_EMAIL`**: first admin user's email
+
+The job provisions a VM, configures Docker, deploys, and outputs:
 - URL (via sslip.io for auto-TLS)
 - Admin credentials
 
