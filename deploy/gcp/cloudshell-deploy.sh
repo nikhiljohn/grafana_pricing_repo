@@ -13,8 +13,15 @@
 #
 #   curl -fsSL https://raw.githubusercontent.com/nikhiljohn/grafana_pricing_repo/claude/intellicore-cmp-review-j4fbts/deploy/gcp/cloudshell-deploy.sh | bash
 #
+# The VM was originally provisioned by tar/scp (every one of the old deploy
+# paths packaged with --exclude=.git), so ~/intellicore-cmp has the code but
+# no git history. Step 2 bootstraps a shallow checkout in place the first time
+# it runs; subsequent runs are plain fetches. .env.prod is backed up outside
+# the repo before any git operation touches the tree.
+#
 # Overrides:
 #   BRANCH=<branch>     what to deploy (default: the review branch)
+#   REPO_URL=<url>      where to fetch from (default: the GitHub origin)
 #   VM=<name> ZONE=<z> PROJECT=<id> VM_USER=<user>
 #   REBUILD=no          skip --build (fast restart, no image rebuild)
 #
@@ -64,25 +71,63 @@ sudo usermod -aG docker "$(whoami)" 2>/dev/null || true
 # that make `git reset --hard` fail. Reclaim them before touching git.
 sudo chown -R "$(id -u):$(id -g)" ~/intellicore-cmp 2>/dev/null || true
 
-echo "── 1/7 · Fetch $BRANCH ────────────────────────────────────────"
-git fetch origin "$BRANCH"
-# Discard any local edits first, or the checkout below can refuse to move.
-git reset --hard HEAD 2>/dev/null || true
-git checkout -B deploy-head "origin/$BRANCH"
-ok "At $(git rev-parse --short HEAD) — $(git log -1 --pretty=%s | cut -c1-60)"
-
-echo "── 2/7 · Locate .env.prod ─────────────────────────────────────"
-# update.sh and the CI pipeline both read .env.prod from the REPO ROOT.
-# The setup script writes it to deploy/gcp/. Normalise once.
-if [ -f deploy/gcp/.env.prod ] && [ ! -f .env.prod ]; then
-  mv deploy/gcp/.env.prod .env.prod
-  ok "Moved deploy/gcp/.env.prod → repo root"
-fi
-[ -f .env.prod ] || die ".env.prod not found (checked repo root and deploy/gcp/).
+echo "── 1/8 · Safeguard .env.prod ──────────────────────────────────"
+# .env.prod holds every secret, is gitignored, and exists ONLY on this VM.
+# Stash a copy OUTSIDE the repo before any git operation touches the tree.
+ENVSRC=""
+for c in .env.prod deploy/gcp/.env.prod; do
+  [ -f "$c" ] && { ENVSRC="$c"; break; }
+done
+[ -n "$ENVSRC" ] || die ".env.prod not found (checked repo root and deploy/gcp/).
     It holds every secret and is gitignored, so it only exists on this VM.
     If it is genuinely gone, re-run deploy/gcp/setup-searce-gcp.sh."
+mkdir -p ~/intellicore-env-backup
+cp -a "$ENVSRC" ~/intellicore-env-backup/.env.prod
+chmod 600 ~/intellicore-env-backup/.env.prod
+ok "Backed up $ENVSRC → ~/intellicore-env-backup/.env.prod"
+
+echo "── 2/8 · Sync code to $BRANCH ─────────────────────────────────"
+REPO_URL="${REPO_URL:-https://github.com/nikhiljohn/grafana_pricing_repo.git}"
+BOOTSTRAP=0
+if [ ! -d .git ]; then
+  # Expected on this VM: it was provisioned by tar/scp, and every one of
+  # those deploy paths packaged with --exclude=.git. So the directory has
+  # the code but no history. Turn it into a real checkout, once.
+  warn "~/intellicore-cmp has no .git — provisioned by tar/scp."
+  warn "Bootstrapping a shallow checkout in place (one-time)."
+  git init -q
+  BOOTSTRAP=1
+fi
+git remote get-url origin >/dev/null 2>&1 || git remote add origin "$REPO_URL"
+echo "    origin: $(git remote get-url origin)"
+
+if [ "$BOOTSTRAP" = "1" ]; then
+  # Shallow: a deploy box needs the tree, not 25 commits of history.
+  git fetch --depth 1 origin "$BRANCH"
+else
+  git fetch origin "$BRANCH"
+fi
+
+# `reset --hard`, deliberately NOT `checkout`. After a fresh `git init`
+# every existing file is untracked, and checkout refuses to clobber
+# untracked files ("would be overwritten by checkout"). reset --hard
+# overwrites tracked paths without complaint and leaves ignored files —
+# .env.prod among them — alone.
+git reset --hard FETCH_HEAD
+git branch -M deploy-head 2>/dev/null || true
+ok "At $(git rev-parse --short HEAD) — $(git log -1 --pretty=%s | cut -c1-60)"
+
+echo "── 3/8 · Restore .env.prod ────────────────────────────────────"
+# Canonical location is the REPO ROOT: update.sh and the CI pipeline both
+# read ./.env.prod from there, while setup-searce-gcp.sh writes it to
+# deploy/gcp/. Normalise to the root.
+if [ ! -f .env.prod ]; then
+  cp -a ~/intellicore-env-backup/.env.prod .env.prod
+  ok "Restored .env.prod to repo root"
+else
+  ok ".env.prod present at repo root"
+fi
 chmod 600 .env.prod
-ok ".env.prod present at repo root"
 
 DOMAIN=$(grep -E '^DOMAIN=' .env.prod | head -1 | cut -d= -f2- | tr -d "\"' ")
 [ -n "$DOMAIN" ] || warn "DOMAIN not set in .env.prod — Caddy cannot issue a certificate"
@@ -93,7 +138,7 @@ echo "    DOMAIN=$DOMAIN"
 # so nothing binds :443 and the site is unreachable.
 DC="sudo docker compose --env-file .env.prod -f deploy/gcp/docker-compose.prod.yml"
 
-echo "── 3/7 · Tear down cleanly ────────────────────────────────────"
+echo "── 4/8 · Tear down cleanly ────────────────────────────────────"
 # Down BOTH compose files: the wrong one may be what's currently running.
 # No -v anywhere — that would destroy the Postgres volume.
 sudo docker compose --env-file .env.prod -f docker-compose.yml down --remove-orphans 2>/dev/null || true
@@ -103,7 +148,7 @@ sudo docker rm -f intellicore-postgres intellicore-neo4j intellicore-redis \
   intellicore-backend intellicore-frontend intellicore-edge 2>/dev/null || true
 ok "Old containers removed (volumes untouched)"
 
-echo "── 4/7 · Build & start (this is the slow part) ─────────────────"
+echo "── 5/8 · Build & start (this is the slow part) ─────────────────"
 $DC up -d $BUILD_FLAG
 ok "Stack started"
 
@@ -120,7 +165,7 @@ if sudo docker ps --format '{{.Names}}' | grep -q '^intellicore-edge$'; then
   fi
 fi
 
-echo "── 5/7 · Wait for health ──────────────────────────────────────"
+echo "── 6/8 · Wait for health ──────────────────────────────────────"
 for i in $(seq 1 24); do
   if sudo docker inspect -f '{{.State.Health.Status}}' intellicore-backend 2>/dev/null | grep -q healthy; then
     ok "Backend healthy"; break
@@ -131,13 +176,13 @@ for i in $(seq 1 24); do
 done
 echo ""
 
-echo "── 6/7 · Provision admin ──────────────────────────────────────"
+echo "── 7/8 · Provision admin ──────────────────────────────────────"
 # ADMIN_EMAIL / ADMIN_PASSWORD come from .env.prod via the container env,
 # so there is no password to retype. Also clears TOTP enrolment.
 $DC exec -T backend python -m scripts.create_admin \
   || warn "create_admin failed — see backend logs below"
 
-echo "── 7/7 · Verify ───────────────────────────────────────────────"
+echo "── 8/8 · Verify ───────────────────────────────────────────────"
 $DC ps
 echo ""
 
@@ -181,7 +226,7 @@ gcloud compute ssh "${VM_USER}@${VM}" \
   --tunnel-through-iap \
   --project="$PROJECT" \
   --ssh-flag="-o ServerAliveInterval=30" \
-  --command="export BRANCH='${BRANCH}'; ${REMOTE}"
+  --command="export BRANCH='${BRANCH}'; export REPO_URL='${REPO_URL:-}'; ${REMOTE}"
 
 # ── Public reachability, from Cloud Shell ───────────────────────────────────
 bold "── Public check ─────────────────────────────────────────────────────────"
