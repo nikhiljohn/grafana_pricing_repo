@@ -31,7 +31,7 @@ export function StatCard({
         </span>
         <div className={clsx("p-1.5 rounded-lg", toneStyles[tone])}>{icon}</div>
       </div>
-      <div className="text-3xl font-light text-searce-navy">{value}</div>
+      <div className="text-3xl font-light text-ic-text">{value}</div>
       {delta && <div className="text-xs text-slate-500 mt-1">{delta}</div>}
     </div>
   );

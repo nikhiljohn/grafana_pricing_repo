@@ -2,83 +2,438 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==================================================================== */
+/*  Design tokens — ported verbatim from the marketing site             */
+/*  (marketing/index.html, deployed at                                  */
+/*   storage.googleapis.com/intellicore-cmp-site-77682/index.html)      */
+/*                                                                      */
+/*  The site names its surface variables --navy/--panel from an older   */
+/*  dark palette but the values are light. Renamed here to what they    */
+/*  actually are, values unchanged.                                     */
+/* ==================================================================== */
+
+:root {
+  /* Surfaces */
+  --ic-bg: #ffffff;         /* site --navy    */
+  --ic-bg-2: #f4f6fb;       /* site --navy-2  */
+  --ic-panel: #ffffff;      /* site --panel   */
+  --ic-panel-2: #f1f4fa;    /* site --panel-2 */
+  --ic-border: #e2e7f2;     /* site --border  */
+
+  /* Text */
+  --ic-text: #10182b;
+  --ic-muted: #4b5670;
+  --ic-muted-2: #8992ac;
+
+  /* Vivid accents — for use against DARK canvases, where they glow.
+     On the site these appear inside the dark diagram cards. */
+  --ic-emerald: #34d399;
+  --ic-blue: #38bdf8;
+  --ic-violet: #818cf8;
+  --ic-amber: #fbbf24;
+  --ic-rose: #fb7185;
+
+  /* "Ink" accents — deeper shades of the same hues, for text/badges/icons
+     rendered directly on the light page background, where the vivid
+     versions above lack contrast. Emerald-ink is the primary brand accent. */
+  --ic-emerald-ink: #059669;
+  --ic-blue-ink: #0284c7;
+  --ic-violet-ink: #6366f1;
+  --ic-amber-ink: #b45309;
+  --ic-rose-ink: #e11d48;
+
+  /* Brand mark tile — the dark rounded square the logo glyph sits in */
+  --ic-mark-from: #0f172a;
+  --ic-mark-to: #1e293b;
+
+  --ic-nav-bg: rgba(255, 255, 255, 0.85);
+}
+
+/* Dark mode. The marketing site is light-only, so rather than invent a
+   palette we use the site's own *vivid* accents — which it already defines
+   for exactly this case: these hues drawn on a dark canvas. */
+html.dark {
+  --ic-bg: #0a1120;
+  --ic-bg-2: #0f1728;
+  --ic-panel: #111c33;
+  --ic-panel-2: #1b2740;
+  --ic-border: #22304a;
+
+  --ic-text: #f1f5f9;
+  --ic-muted: #cbd5e1;
+  --ic-muted-2: #94a3b8;
+
+  /* On dark, the ink shades are too deep — promote to the vivid set. */
+  --ic-emerald-ink: #34d399;
+  --ic-blue-ink: #60a5fa;
+  --ic-violet-ink: #818cf8;
+  --ic-amber-ink: #fbbf24;
+  --ic-rose-ink: #fb7185;
+
+  --ic-nav-bg: rgba(17, 28, 51, 0.85);
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
   }
   body {
-    @apply bg-slate-50 text-slate-900;
+    background-color: var(--ic-bg-2);
+    color: var(--ic-text);
+    line-height: 1.5;
+  }
+  /* Site typography: tight tracking on headings. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  Dark mode                                                          */
-/*  The pages use hardcoded light utilities (bg-white, text-slate-*).  */
-/*  Rather than add dark: variants to every element, we remap the      */
-/*  common surface / text / border / tint utilities under html.dark.   */
-/* ------------------------------------------------------------------ */
+/* ==================================================================== */
+/*  Component classes at marketing-site parity                          */
+/* ==================================================================== */
+
+@layer components {
+  /* Sticky translucent header — site `nav` */
+  .ic-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: var(--ic-nav-bg);
+    border-bottom: 1px solid var(--ic-border);
+  }
+
+  /* Logo tile — site `.brand-mark`. The favicon glyph sits inside this. */
+  .ic-brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--ic-mark-from), var(--ic-mark-to));
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--ic-border);
+    flex-shrink: 0;
+  }
+  .ic-brand-mark svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Wordmark — site `.brand` */
+  .ic-brand {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 17px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .ic-brand .ic-brand-mark {
+    align-self: center;
+  }
+
+  /* "CMP" hover-bloom: each letter reveals what it stands for.
+     Ported from the site's `.cmp-expand`. */
+  .cmp-expand {
+    display: inline;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: help;
+    color: var(--ic-muted-2);
+    font-weight: 500;
+    border-bottom: 1px dotted var(--ic-muted-2);
+  }
+  .cmp-letter {
+    position: relative;
+    font-weight: 700;
+    color: var(--ic-muted-2);
+    transition: color 0.2s;
+  }
+  .cmp-expand:hover .cmp-letter {
+    color: var(--ic-emerald-ink);
+  }
+  .cmp-word {
+    display: inline-block;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: 500;
+    color: var(--ic-text);
+    transition: max-width 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  }
+  .cmp-expand:hover .cmp-word {
+    opacity: 1;
+  }
+  .cmp-expand:hover .cmp-letter:nth-child(1) .cmp-word {
+    max-width: 60px;
+  }
+  .cmp-expand:hover .cmp-letter:nth-child(2) .cmp-word {
+    max-width: 130px;
+    transition-delay: 0.08s;
+  }
+  .cmp-expand:hover .cmp-letter:nth-child(3) .cmp-word {
+    max-width: 110px;
+    transition-delay: 0.16s;
+  }
+
+  /* Card — site `.pillar-card`, including the hover lift */
+  .ic-card {
+    border-radius: 16px;
+    border: 1px solid var(--ic-border);
+    background: var(--ic-panel);
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .ic-card-hover:hover {
+    transform: translateY(-4px);
+    border-color: var(--ic-emerald);
+  }
+
+  /* Buttons — site `.btn` / `.btn-primary` / `.btn-ghost` */
+  .ic-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ic-btn-primary {
+    background: linear-gradient(135deg, var(--ic-emerald), #10b981);
+    color: #062018;
+  }
+  .ic-btn-primary:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+  .ic-btn-ghost {
+    border-color: var(--ic-border);
+    color: var(--ic-text);
+  }
+  .ic-btn-ghost:hover {
+    background: var(--ic-panel-2);
+  }
+
+  /* Uppercase pill label — site `.eyebrow` */
+  .ic-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ic-emerald-ink);
+    background: rgba(5, 150, 105, 0.08);
+    border: 1px solid rgba(5, 150, 105, 0.22);
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+  .ic-eyebrow .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ic-emerald-ink);
+    box-shadow: 0 0 8px rgba(5, 150, 105, 0.5);
+  }
+
+  /* Gradient numerals — site `.stat b` */
+  .ic-stat-value {
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ic-emerald), var(--ic-blue));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* ==================================================================== */
+/*  Surface alignment                                                    */
+/*  Pages use hardcoded light utilities (bg-white, border-slate-200).    */
+/*  Rather than touch every call site, point those utilities at the      */
+/*  tokens above so the whole app inherits the site's surfaces.          */
+/* ==================================================================== */
+
+.bg-white {
+  background-color: var(--ic-panel);
+}
+.bg-slate-50,
+.bg-gray-50 {
+  background-color: var(--ic-bg-2);
+}
+.bg-slate-100,
+.bg-gray-100 {
+  background-color: var(--ic-panel-2);
+}
+.border-slate-100,
+.border-slate-200,
+.border-gray-100,
+.border-gray-200 {
+  border-color: var(--ic-border);
+}
+.divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--ic-border);
+}
+
+/* ==================================================================== */
+/*  Dark mode — remap the remaining hardcoded utilities                  */
+/*  (kept from the previous implementation, retuned to the tokens)       */
+/* ==================================================================== */
+
 html.dark {
   color-scheme: dark;
 }
-html.dark body {
-  background-color: #0a1120;
-  color: #e2e8f0;
-}
 
-/* Surfaces */
-html.dark .bg-white { background-color: #111c33 !important; }
-html.dark .bg-slate-50, html.dark .bg-gray-50 { background-color: #0f1728 !important; }
-html.dark .bg-slate-100, html.dark .bg-gray-100 { background-color: #1b2740 !important; }
-html.dark .bg-slate-200, html.dark .bg-gray-200 { background-color: #243049 !important; }
-html.dark .bg-slate-800 { background-color: #0f1728 !important; }
-html.dark .bg-slate-900, html.dark .bg-slate-950 { background-color: #0a1120 !important; }
+html.dark .bg-slate-200,
+html.dark .bg-gray-200 {
+  background-color: #243049 !important;
+}
+html.dark .bg-slate-800 {
+  background-color: var(--ic-bg-2) !important;
+}
+html.dark .bg-slate-900,
+html.dark .bg-slate-950 {
+  background-color: var(--ic-bg) !important;
+}
 
 /* Text */
-html.dark .text-slate-900, html.dark .text-slate-800,
-html.dark .text-gray-900, html.dark .text-gray-800 { color: #f1f5f9 !important; }
-html.dark .text-slate-700, html.dark .text-gray-700 { color: #e2e8f0 !important; }
-html.dark .text-slate-600, html.dark .text-gray-600 { color: #cbd5e1 !important; }
-html.dark .text-slate-500, html.dark .text-gray-500 { color: #94a3b8 !important; }
-html.dark .text-slate-400, html.dark .text-gray-400 { color: #64748b !important; }
-html.dark .text-white { color: #f8fafc !important; }
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-gray-900,
+html.dark .text-gray-800 {
+  color: var(--ic-text) !important;
+}
+html.dark .text-slate-700,
+html.dark .text-gray-700 {
+  color: #e2e8f0 !important;
+}
+html.dark .text-slate-600,
+html.dark .text-gray-600 {
+  color: var(--ic-muted) !important;
+}
+html.dark .text-slate-500,
+html.dark .text-gray-500 {
+  color: var(--ic-muted-2) !important;
+}
+html.dark .text-slate-400,
+html.dark .text-gray-400 {
+  color: #64748b !important;
+}
+html.dark .text-white {
+  color: #f8fafc !important;
+}
 
 /* Borders */
-html.dark .border-slate-100, html.dark .border-slate-200,
-html.dark .border-gray-100, html.dark .border-gray-200 { border-color: #22304a !important; }
-html.dark .border-slate-300, html.dark .border-gray-300 { border-color: #2b3a56 !important; }
+html.dark .border-slate-300,
+html.dark .border-gray-300 {
+  border-color: #2b3a56 !important;
+}
 
 /* Hover states */
-html.dark .hover\:bg-slate-50:hover, html.dark .hover\:bg-gray-50:hover { background-color: #1b2740 !important; }
-html.dark .hover\:bg-slate-100:hover, html.dark .hover\:bg-gray-100:hover { background-color: #243049 !important; }
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-gray-50:hover {
+  background-color: var(--ic-panel-2) !important;
+}
+html.dark .hover\:bg-slate-100:hover,
+html.dark .hover\:bg-gray-100:hover {
+  background-color: #243049 !important;
+}
 
-/* Accent tint backgrounds → translucent on dark */
-html.dark .bg-emerald-50, html.dark .bg-emerald-100 { background-color: rgba(16,185,129,0.14) !important; }
-html.dark .bg-green-50, html.dark .bg-green-100 { background-color: rgba(34,197,94,0.14) !important; }
-html.dark .bg-blue-50, html.dark .bg-blue-100 { background-color: rgba(59,130,246,0.16) !important; }
-html.dark .bg-indigo-50, html.dark .bg-indigo-100 { background-color: rgba(99,102,241,0.16) !important; }
-html.dark .bg-violet-50, html.dark .bg-violet-100 { background-color: rgba(139,92,246,0.16) !important; }
-html.dark .bg-red-50, html.dark .bg-rose-50, html.dark .bg-red-100 { background-color: rgba(239,68,68,0.14) !important; }
-html.dark .bg-amber-50, html.dark .bg-yellow-50, html.dark .bg-amber-100 { background-color: rgba(245,158,11,0.14) !important; }
-html.dark .bg-cyan-50, html.dark .bg-cyan-100 { background-color: rgba(6,182,212,0.14) !important; }
+/* Accent tints → translucent on dark */
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-100 {
+  background-color: rgba(52, 211, 153, 0.14) !important;
+}
+html.dark .bg-green-50,
+html.dark .bg-green-100 {
+  background-color: rgba(34, 197, 94, 0.14) !important;
+}
+html.dark .bg-blue-50,
+html.dark .bg-blue-100 {
+  background-color: rgba(56, 189, 248, 0.16) !important;
+}
+html.dark .bg-indigo-50,
+html.dark .bg-indigo-100 {
+  background-color: rgba(99, 102, 241, 0.16) !important;
+}
+html.dark .bg-violet-50,
+html.dark .bg-violet-100 {
+  background-color: rgba(129, 140, 248, 0.16) !important;
+}
+html.dark .bg-red-50,
+html.dark .bg-rose-50,
+html.dark .bg-red-100 {
+  background-color: rgba(251, 113, 133, 0.14) !important;
+}
+html.dark .bg-amber-50,
+html.dark .bg-yellow-50,
+html.dark .bg-amber-100 {
+  background-color: rgba(251, 191, 36, 0.14) !important;
+}
+html.dark .bg-cyan-50,
+html.dark .bg-cyan-100 {
+  background-color: rgba(6, 182, 212, 0.14) !important;
+}
 
-/* Accent text → lifted for contrast on dark tints */
-html.dark .text-emerald-700, html.dark .text-emerald-600, html.dark .text-emerald-800 { color: #34d399 !important; }
-html.dark .text-green-700, html.dark .text-green-600 { color: #4ade80 !important; }
-html.dark .text-blue-700, html.dark .text-blue-600, html.dark .text-blue-800 { color: #60a5fa !important; }
-html.dark .text-indigo-700, html.dark .text-indigo-600 { color: #818cf8 !important; }
-html.dark .text-violet-700, html.dark .text-violet-600 { color: #a78bfa !important; }
-html.dark .text-red-700, html.dark .text-red-600, html.dark .text-rose-700, html.dark .text-rose-600 { color: #f87171 !important; }
-html.dark .text-amber-700, html.dark .text-amber-600 { color: #fbbf24 !important; }
-html.dark .text-cyan-700, html.dark .text-cyan-600 { color: #22d3ee !important; }
+/* Accent text → vivid on dark */
+html.dark .text-emerald-700,
+html.dark .text-emerald-600,
+html.dark .text-emerald-800 {
+  color: var(--ic-emerald) !important;
+}
+html.dark .text-green-700,
+html.dark .text-green-600 {
+  color: #4ade80 !important;
+}
+html.dark .text-blue-700,
+html.dark .text-blue-600,
+html.dark .text-blue-800 {
+  color: var(--ic-blue) !important;
+}
+html.dark .text-indigo-700,
+html.dark .text-indigo-600 {
+  color: var(--ic-violet) !important;
+}
+html.dark .text-violet-700,
+html.dark .text-violet-600 {
+  color: #a78bfa !important;
+}
+html.dark .text-red-700,
+html.dark .text-red-600,
+html.dark .text-rose-700,
+html.dark .text-rose-600 {
+  color: var(--ic-rose) !important;
+}
+html.dark .text-amber-700,
+html.dark .text-amber-600 {
+  color: var(--ic-amber) !important;
+}
+html.dark .text-cyan-700,
+html.dark .text-cyan-600 {
+  color: #22d3ee !important;
+}
 
 /* Inputs */
-html.dark input, html.dark textarea, html.dark select {
-  background-color: #0f1728 !important;
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: var(--ic-bg-2) !important;
   color: #e2e8f0 !important;
-  border-color: #22304a !important;
+  border-color: var(--ic-border) !important;
 }
-html.dark input::placeholder, html.dark textarea::placeholder { color: #64748b !important; }
-
-/* Dividers */
-html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
-html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: #22304a !important; }
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}

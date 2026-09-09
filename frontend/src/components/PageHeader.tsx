@@ -15,7 +15,7 @@ export function PageHeader({
         <div className="text-[11px] uppercase tracking-widest font-medium mb-1" style={{ color: accent }}>
           {eyebrow}
         </div>
-        <h1 className="text-2xl font-semibold text-searce-navy">{title}</h1>
+        <h1 className="text-2xl font-semibold text-ic-text">{title}</h1>
         <p className="text-sm text-slate-500 mt-1 max-w-2xl">{subtitle}</p>
       </div>
       <div className="hidden md:flex items-center gap-2 text-xs text-slate-500 border border-slate-200 rounded-lg px-3 py-2 bg-white">
@@ -48,7 +48,7 @@ export function StatTile({
     <div className="bg-white border border-slate-200 rounded-xl p-5">
       <div className="text-xs uppercase tracking-wider text-slate-500 font-medium">{label}</div>
       <div className="flex items-end justify-between mt-2">
-        <div className="text-3xl font-light text-searce-navy">{value}</div>
+        <div className="text-3xl font-light text-ic-text">{value}</div>
         {spark}
       </div>
       {delta && <div className={`text-xs mt-1 ${toneMap[deltaTone]}`}>{delta}</div>}

@@ -203,7 +203,7 @@ export default function MemoryPage() {
             onClick={() => setActiveTab(t.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === t.key
-                ? "bg-slate-900 text-white"
+                ? "bg-gradient-to-br from-ic-emerald to-emerald-500 text-[#062018]"
                 : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
             }`}
           >
@@ -234,7 +234,7 @@ export default function MemoryPage() {
                 onClick={() => setPillarFilter(p)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                   pillarFilter === p
-                    ? "bg-slate-900 text-white"
+                    ? "bg-gradient-to-br from-ic-emerald to-emerald-500 text-[#062018]"
                     : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                 }`}
               >

@@ -263,7 +263,7 @@ function ProviderCard({
             value={key}
             onChange={(e) => setKey(e.target.value)}
             placeholder={meta.placeholder}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm focus:border-searce-blue focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm focus:border-ic-emerald-ink focus:outline-none"
           />
         </div>
         <div>
@@ -272,7 +272,7 @@ function ProviderCard({
             type="text"
             value={model}
             onChange={(e) => setModel(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-searce-blue focus:outline-none"
+            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-ic-emerald-ink focus:outline-none"
           />
         </div>
       </div>
@@ -281,7 +281,7 @@ function ProviderCard({
         <button
           onClick={save}
           disabled={busy}
-          className="rounded-lg bg-searce-blue px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+          className="rounded-btn bg-gradient-to-br from-ic-emerald to-emerald-500 px-4 py-2 text-sm font-semibold text-[#062018] hover:brightness-[1.08] transition disabled:opacity-50"
         >
           {busy ? "Saving…" : configured ? "Update key" : "Save key"}
         </button>

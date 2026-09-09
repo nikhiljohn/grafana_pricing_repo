@@ -52,13 +52,13 @@ export function PatternList({ patterns }: { patterns: Pattern[] }) {
 
             <div className="text-sm bg-slate-50 border border-slate-100 rounded-lg p-3 mb-3">
               <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-searce-blue mt-0.5 flex-shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-ic-emerald-ink mt-0.5 flex-shrink-0" />
                 <div className="text-slate-700">{p.recommended_action}</div>
               </div>
             </div>
 
             {p.guardrail_available && (
-              <button className="w-full flex items-center justify-center gap-2 text-sm bg-searce-navy text-white rounded-lg px-3 py-2 hover:bg-searce-navy-2 transition">
+              <button className="w-full flex items-center justify-center gap-2 text-sm bg-gradient-to-br from-ic-emerald to-emerald-500 text-[#062018] font-semibold rounded-btn px-3 py-2 hover:brightness-[1.08] transition">
                 <ShieldCheck className="w-4 h-4" />
                 Turn on guardrail — never again
               </button>

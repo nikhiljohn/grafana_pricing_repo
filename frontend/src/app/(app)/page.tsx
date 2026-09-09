@@ -193,7 +193,7 @@ export default function CommandCenterPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 pt-1">
-                    <button className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 dark:bg-slate-600 text-white hover:bg-slate-700 transition-colors">
+                    <button className="text-xs font-semibold px-3 py-1.5 rounded-btn bg-gradient-to-br from-ic-emerald to-emerald-500 text-[#062018] hover:brightness-[1.08] transition">
                       Resolve
                     </button>
                     <button className="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">

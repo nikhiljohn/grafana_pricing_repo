@@ -117,11 +117,61 @@ working-well wins, and CSRE activity are all customer-specific.
 Customers: All Organizations, Netcore, Aarti Industries, ShoppersStop, DesignX,
 PayNimbus, Kiranakart, MediSetu, ShipEasy.
 
+### Design system — ported from the marketing site
+
+The app's visual language is taken **verbatim from the marketing site**
+(`marketing/index.html`, live at
+`storage.googleapis.com/intellicore-cmp-site-77682/index.html`). If you need a
+colour, radius or button treatment, read that file first — it is the reference.
+
+Tokens live in `frontend/src/app/globals.css` under `:root` as `--ic-*`, and are
+exposed to Tailwind as `ic-*` utilities (`bg-ic-panel`, `text-ic-muted`,
+`border-ic-border`) via `tailwind.config.ts`. Because the utilities point at the
+CSS variables, every one of them follows dark mode automatically.
+
+Two accent families, and picking the wrong one is the usual mistake:
+
+- **`--ic-*-ink`** (emerald `#059669`, blue `#0284c7`, …) — for anything drawn on
+  the light page: text, badges, icons, active states. **Emerald-ink is the
+  primary brand accent** — it replaced the old `searce-blue`.
+- **`--ic-*`** vivid (emerald `#34d399`, blue `#38bdf8`, …) — only against dark
+  canvases, where the ink shades go muddy. The site uses these inside its dark
+  diagram cards.
+
+Geometry: 16px cards (Tailwind `rounded-xl` is remapped from 12px to 16px so
+existing cards inherit it), 10px buttons/controls (`rounded-btn`).
+
+Primary buttons are the site's gradient, not a flat fill:
+`bg-gradient-to-br from-ic-emerald to-emerald-500 text-[#062018]`. There are no
+black or navy buttons anywhere in the design — if you see one, it's drift.
+
+Reusable pieces in `globals.css @layer components`: `.ic-nav` (sticky
+translucent header), `.ic-brand-mark`, `.ic-card` / `.ic-card-hover`,
+`.ic-btn*`, `.ic-eyebrow`, `.ic-stat-value`.
+
+### Brand mark
+
+`frontend/src/components/BrandMark.tsx` — one memory-graph glyph, used by the
+favicon (`src/app/icon.svg`), the app header and the login screen, so the
+browser tab and the in-app header always match.
+
+`BrandLockup` includes the site's **CMP hover-bloom**: the acronym expands to
+"Cloud Management Platform" on hover. The three `.cmp-letter` spans must stay
+the only element children of `.cmp-expand` — reveal timing keys off
+`:nth-child` — and the `{" "}` between them is load-bearing (JSX strips the
+inter-element whitespace the site's HTML relies on).
+
+Branding lives in the **header only**. The sidebar deliberately has no wordmark;
+putting one back duplicates the mark a few hundred pixels away.
+
 ### Dark mode
 
 Class-based (`html.dark`). Persisted to `localStorage`. No-flash inline script in
 `layout.tsx` applies the class before React hydrates. `ThemeToggle` component
-in sidebar. 115+ CSS overrides in `globals.css` under `html.dark`.
+in sidebar. `html.dark` overrides the `--ic-*` tokens — including promoting the
+ink accents to their vivid equivalents — so token-based code needs no dark
+variants. A remap layer still covers pages that hardcode `text-slate-*`
+utilities; prefer `ic-*` tokens in new work so that layer can shrink.
 
 ### BYOK AI keys
 

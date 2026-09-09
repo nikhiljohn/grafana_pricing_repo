@@ -183,7 +183,7 @@ export function Donut({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-light text-searce-navy">{label ?? value}</span>
+        <span className="text-3xl font-light text-ic-text">{label ?? value}</span>
         {sublabel && <span className="text-[11px] text-slate-500 mt-0.5">{sublabel}</span>}
       </div>
     </div>
@@ -239,7 +239,7 @@ export function Card({ title, subtitle, action, children, className = "" }: { ti
       {(title || action) && (
         <div className="flex items-start justify-between mb-4">
           <div>
-            {title && <h3 className="text-sm font-semibold text-searce-navy">{title}</h3>}
+            {title && <h3 className="text-sm font-semibold text-ic-text">{title}</h3>}
             {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
           </div>
           {action}
