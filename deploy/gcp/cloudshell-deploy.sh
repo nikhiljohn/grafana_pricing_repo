@@ -48,13 +48,21 @@ echo ""
 
 command -v gcloud >/dev/null || fail "gcloud not found — run this from Cloud Shell."
 
-BUILD_FLAG="--build"
-[[ "$REBUILD" == "no" ]] && BUILD_FLAG=""
-
 # The remote script. Single-quoted heredoc: nothing below is expanded here,
-# except the few values injected via the `export` preamble we prepend.
+# except the values injected via the `export` preamble we prepend.
+#
+# Anything this script reads MUST be either exported in that preamble or
+# given a default below. Referencing an un-exported outer variable here is
+# an unbound-variable abort under `set -u` — which is exactly how the first
+# version of this script took the site down: it referenced $BUILD_FLAG from
+# the outer shell, died on it, and left the stack torn down.
 REMOTE=$(cat <<'REMOTE_EOF'
 set -euo pipefail
+
+# Defensive defaults, so a missing export degrades instead of aborting.
+BRANCH="${BRANCH:-claude/intellicore-cmp-review-j4fbts}"
+REPO_URL="${REPO_URL:-https://github.com/nikhiljohn/grafana_pricing_repo.git}"
+REBUILD="${REBUILD:-yes}"
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 ok()   { printf "${GREEN}✔${NC}  %s\n" "$*"; }
@@ -71,7 +79,7 @@ sudo usermod -aG docker "$(whoami)" 2>/dev/null || true
 # that make `git reset --hard` fail. Reclaim them before touching git.
 sudo chown -R "$(id -u):$(id -g)" ~/intellicore-cmp 2>/dev/null || true
 
-echo "── 1/8 · Safeguard .env.prod ──────────────────────────────────"
+echo "── 1/9 · Safeguard .env.prod ──────────────────────────────────"
 # .env.prod holds every secret, is gitignored, and exists ONLY on this VM.
 # Stash a copy OUTSIDE the repo before any git operation touches the tree.
 ENVSRC=""
@@ -86,8 +94,7 @@ cp -a "$ENVSRC" ~/intellicore-env-backup/.env.prod
 chmod 600 ~/intellicore-env-backup/.env.prod
 ok "Backed up $ENVSRC → ~/intellicore-env-backup/.env.prod"
 
-echo "── 2/8 · Sync code to $BRANCH ─────────────────────────────────"
-REPO_URL="${REPO_URL:-https://github.com/nikhiljohn/grafana_pricing_repo.git}"
+echo "── 2/9 · Sync code to $BRANCH ─────────────────────────────────"
 BOOTSTRAP=0
 if [ ! -d .git ]; then
   # Expected on this VM: it was provisioned by tar/scp, and every one of
@@ -117,7 +124,7 @@ git reset --hard FETCH_HEAD
 git branch -M deploy-head 2>/dev/null || true
 ok "At $(git rev-parse --short HEAD) — $(git log -1 --pretty=%s | cut -c1-60)"
 
-echo "── 3/8 · Restore .env.prod ────────────────────────────────────"
+echo "── 3/9 · Restore .env.prod ────────────────────────────────────"
 # Canonical location is the REPO ROOT: update.sh and the CI pipeline both
 # read ./.env.prod from there, while setup-searce-gcp.sh writes it to
 # deploy/gcp/. Normalise to the root.
@@ -138,7 +145,38 @@ echo "    DOMAIN=$DOMAIN"
 # so nothing binds :443 and the site is unreachable.
 DC="sudo docker compose --env-file .env.prod -f deploy/gcp/docker-compose.prod.yml"
 
-echo "── 4/8 · Tear down cleanly ────────────────────────────────────"
+echo "── 4/9 · Build images — the running site is untouched ─────────"
+# Build BEFORE tearing anything down. A failed build then leaves the live
+# stack serving, instead of taking the site offline and leaving it there.
+# This ordering is the whole lesson from the first run of this script.
+if [ "$REBUILD" = "no" ]; then
+  warn "REBUILD=no — reusing existing images, no build"
+else
+  $DC build || die "Image build FAILED. Nothing was torn down — the site is
+    still serving the previous build. Fix the build and re-run; no recovery
+    needed."
+  ok "Images built"
+fi
+
+echo "── 5/9 · Tear down cleanly ────────────────────────────────────"
+# From here on the site IS down, so any failure below must try to restore
+# service rather than just exit. Hence the trap.
+restore_on_failure() {
+  code=$?
+  [ "$code" = "0" ] && exit 0
+  echo ""
+  warn "Deploy failed after teardown (exit $code) — attempting to restore service"
+  if $DC up -d 2>&1 | tail -5; then
+    warn "Stack restarted with existing images. The site should be back;"
+    warn "the new build may NOT be live. Check: $DC ps"
+  else
+    printf "${RED}✘${NC}  Could not restart. Run manually:\n"
+    echo "      cd ~/intellicore-cmp && $DC up -d"
+  fi
+  exit "$code"
+}
+trap restore_on_failure EXIT
+
 # Down BOTH compose files: the wrong one may be what's currently running.
 # No -v anywhere — that would destroy the Postgres volume.
 sudo docker compose --env-file .env.prod -f docker-compose.yml down --remove-orphans 2>/dev/null || true
@@ -148,8 +186,9 @@ sudo docker rm -f intellicore-postgres intellicore-neo4j intellicore-redis \
   intellicore-backend intellicore-frontend intellicore-edge 2>/dev/null || true
 ok "Old containers removed (volumes untouched)"
 
-echo "── 5/8 · Build & start (this is the slow part) ─────────────────"
-$DC up -d $BUILD_FLAG
+echo "── 6/9 · Start ────────────────────────────────────────────────"
+# Images are already built above, so this is fast.
+$DC up -d
 ok "Stack started"
 
 # The Caddyfile is a read-only BIND MOUNT, so editing it does not change the
@@ -165,7 +204,7 @@ if sudo docker ps --format '{{.Names}}' | grep -q '^intellicore-edge$'; then
   fi
 fi
 
-echo "── 6/8 · Wait for health ──────────────────────────────────────"
+echo "── 7/9 · Wait for health ──────────────────────────────────────"
 for i in $(seq 1 24); do
   if sudo docker inspect -f '{{.State.Health.Status}}' intellicore-backend 2>/dev/null | grep -q healthy; then
     ok "Backend healthy"; break
@@ -176,13 +215,13 @@ for i in $(seq 1 24); do
 done
 echo ""
 
-echo "── 7/8 · Provision admin ──────────────────────────────────────"
+echo "── 8/9 · Provision admin ──────────────────────────────────────"
 # ADMIN_EMAIL / ADMIN_PASSWORD come from .env.prod via the container env,
 # so there is no password to retype. Also clears TOTP enrolment.
 $DC exec -T backend python -m scripts.create_admin \
   || warn "create_admin failed — see backend logs below"
 
-echo "── 8/8 · Verify ───────────────────────────────────────────────"
+echo "── 9/9 · Verify ───────────────────────────────────────────────"
 $DC ps
 echo ""
 
@@ -226,7 +265,7 @@ gcloud compute ssh "${VM_USER}@${VM}" \
   --tunnel-through-iap \
   --project="$PROJECT" \
   --ssh-flag="-o ServerAliveInterval=30" \
-  --command="export BRANCH='${BRANCH}'; export REPO_URL='${REPO_URL:-}'; ${REMOTE}"
+  --command="export BRANCH='${BRANCH}'; export REPO_URL='${REPO_URL:-}'; export REBUILD='${REBUILD}'; ${REMOTE}"
 
 # ── Public reachability, from Cloud Shell ───────────────────────────────────
 bold "── Public check ─────────────────────────────────────────────────────────"
