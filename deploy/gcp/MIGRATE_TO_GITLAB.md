@@ -81,10 +81,44 @@ needed. The script mirror-clones from GitHub, pushes all three branches by
 name, then attempts `main` and verifies every branch SHA on both sides.
 
 **Credentials.** There is no SSH key on the GitLab profile yet, so this runs
-over HTTPS. When prompted for a password, paste a **Personal Access Token** —
-*Edit profile → Access tokens*, scope `write_repository`. To use SSH instead,
-add a key first (*Edit profile → SSH Keys*) and pass
-`GITLAB_URL=git@gitlab.searce.com:intellicore-cmp/intellicore-cmp.git`.
+over HTTPS, which means a **Personal Access Token** with scope
+`write_repository` — *Edit profile → Access tokens*. An account password is
+rejected outright by this instance. The script prompts for the token once
+(hidden) and embeds it in the push URL, so the four pushes don't each ask.
+
+Before cloning anything, it probes the exact endpoint git uses —
+`info/refs?service=git-receive-pack` over HTTP Basic — and prints the result
+for reads and writes separately. That distinction is the whole diagnosis:
+
+| Probe result | Meaning | Fix |
+|---|---|---|
+| read 200, write 200 | Token is good | proceeds |
+| read 200, write 403 | Token is valid but cannot push | scope is `read_repository`, or your role on the project is below Developer |
+| read 401, write 401 | Credential rejected | truncated paste, expired/revoked token, or a token from a different GitLab |
+| read 000, write 000 | No HTTP response at all | VPN/proxy — says nothing about the token |
+
+A trailing newline on a pasted token produces the same "HTTP Basic: Access
+denied" as a wrong one, so the script strips whitespace and reports the token's
+length and `glpat-` prefix (never its value) to catch a bad paste.
+
+For a **project/group access token or a deploy token** the username is the
+token's *name*, not `oauth2` — pass it with `GITLAB_USER=<token-name>`.
+
+To use SSH instead, add a key (*Edit profile → SSH Keys*) and pass
+`GITLAB_URL=git@gitlab.searce.com:intellicore-cmp/intellicore-cmp.git`; the
+token handling is skipped entirely for an SSH target.
+
+Quick manual check of a token, without running the migration:
+
+```bash
+TOK=glpat-xxxxxxxxxxxxxxxxxxxx
+for svc in git-upload-pack git-receive-pack; do
+  printf '%-18s ' "$svc"
+  curl -s -o /dev/null -w '%{http_code}\n' -u "oauth2:$TOK" \
+    "https://gitlab.searce.com/intellicore-cmp/intellicore-cmp.git/info/refs?service=$svc"
+done
+# 200 / 200 → good.  200 / 403 → scope or role.  401 / 401 → token rejected.
+```
 
 ### Establishing `main`
 
