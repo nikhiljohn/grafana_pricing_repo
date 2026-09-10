@@ -144,10 +144,41 @@ if [ "$IS_HTTPS" = yes ]; then
         GITLAB_TOKEN=<your-token> bash deploy/gcp/migrate-to-gitlab.sh"
 
   echo "  Token: ${#GITLAB_TOKEN} chars, prefix '$(printf '%s' "$GITLAB_TOKEN" | cut -c1-6)…'"
+
+  # GitLab prefixes every token type distinctly, and several of them are NOT
+  # git credentials at all. The feed token is the trap: it sits on the very
+  # same settings page as the access tokens, so it is the natural thing to
+  # copy — and it authenticates nothing but RSS/calendar URLs. Reject those
+  # by name here, before the probe reports a bare 401 that looks like a scope
+  # problem and sends you editing scopes that were never wrong.
   case "$GITLAB_TOKEN" in
-    glpat-*) ;;
+    glpat-*|glsoat-*) ;;
+    glft-*)
+      fail "That is a FEED token, not an access token.
+
+    'glft-' is the RSS/Atom/calendar feed token. GitLab shows it on the same
+    page as your access tokens, which is why it gets copied by mistake, but it
+    cannot authenticate git — hence 401 on both read and write.
+
+    You need a Personal Access Token:
+      1. https://${GITLAB_HOST}/-/user_settings/personal_access_tokens
+      2. Click 'Add new token' — do NOT copy the 'Feed token' field further
+         down that page.
+      3. Scope: write_repository. Expiry: whatever you like.
+      4. Create, then copy immediately — it is shown once.
+      5. The result starts 'glpat-' and is 26 characters.
+
+    Then treat the feed token you just pasted as exposed and reset it on that
+    same page — it grants read access to your GitLab feeds." ;;
+    glimt-*|glrt-*|glcbt-*)
+      fail "That token type cannot push to a repository.
+
+    Prefix '$(printf '%s' "$GITLAB_TOKEN" | cut -c1-6)' is an incoming-mail,
+    runner, or CI job token. None of them authenticate a git push from a
+    workstation. Create a Personal Access Token (scope write_repository) at
+      https://${GITLAB_HOST}/-/user_settings/personal_access_tokens" ;;
     glptt-*|gldt-*)
-      warn "That is a project/group or deploy token, not a personal one."
+      warn "That is a pipeline-trigger or deploy token, not a personal one."
       warn "Those authenticate with the token's NAME as the username — pass it:"
       warn "  GITLAB_USER=<token-name> GITLAB_TOKEN=… bash …" ;;
     *)
