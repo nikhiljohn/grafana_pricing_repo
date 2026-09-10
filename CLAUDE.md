@@ -273,9 +273,14 @@ Each org has a distinct narrative to support sales demos:
 
 ---
 
-## Git branch
+## Git remotes and branch
 
 Active development branch: `claude/intellicore-cmp-review-j4fbts`
+
+| Remote | URL | Notes |
+|---|---|---|
+| `gitlab` | `https://gitlab.searce.com/intellicore-cmp/intellicore-cmp.git` | Private. **Canonical.** Default branch `main`, protected. |
+| `origin` | `https://github.com/nikhiljohn/grafana_pricing_repo` | Public. Kept deliberately — `cloudshell-deploy.sh` still sources from it. Do **not** archive it. |
 
 ## Source control & CI/CD
 
@@ -287,9 +292,20 @@ Deploys **push** a tarball to the GCP VM over an IAP tunnel; the VM never pulls
 from GitLab. So the VM needs no deploy token and no network path to the Searce
 perimeter. Never reintroduce a `git fetch` deploy step on the VM.
 
+That applies to the *pipeline*. The manual fallback
+`deploy/gcp/cloudshell-deploy.sh` does have the VM `git fetch` from **GitHub**,
+because neither the VM nor Cloud Shell can reach the Searce perimeter. That is
+why GitHub stays alive — until the pipeline can deploy (it needs a runner,
+`HANDOFF.md` §3) or the script is converted to package-and-ship.
+
 `gitlab.searce.com` is only reachable from inside the Searce network — it
-returns 403 to the public internet. Anything that talks to it must run from the
-VPN. Migration runbook: `deploy/gcp/MIGRATE_TO_GITLAB.md`.
+returns 403 to the public internet, and that includes Cloud Shell, CI sandboxes
+and Claude Code sessions. Anything that talks to it must run from the VPN.
+
+Auth to GitLab needs a `glpat-` PAT — **not** the `glft-` feed token GitLab
+prints on the same settings page. `write_repository` scope pushes code; project
+settings need `api`, and scopes cannot be edited after creation. Migration
+runbook: `deploy/gcp/MIGRATE_TO_GITLAB.md`; token traps: `HANDOFF.md` §5.
 
 ---
 
