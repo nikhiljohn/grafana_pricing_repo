@@ -28,8 +28,11 @@ HTTPS, and getting a valid admin login.
 | Admin user | ✅ Created via `create_admin.py` |
 | **Caddy / HTTPS serving** | ⚠️ **In progress — see §3** |
 | GitHub Actions → GitLab CI port | ✅ Done — all 4 workflows now in `.gitlab-ci.yml`; `.github/` removed |
+| GitLab project created | ✅ `gitlab.searce.com/intellicore-cmp/intellicore-cmp` (private) |
 | Repo pushed to Searce GitLab | ❌ Not done — needs Searce VPN, see `deploy/gcp/MIGRATE_TO_GITLAB.md` |
 | GitLab CI/CD variables | ❌ Not done |
+| GitLab Auto DevOps | ⚠️ Enabled — turn OFF; container registry isn't enabled on the instance, so it can't work anyway |
+| SSH key on GitLab profile | ❌ None — migration uses HTTPS + a Personal Access Token |
 | VM git remote → Searce GitLab | ➖ No longer needed — deploys ship a tarball over IAP, the VM never pulls |
 
 ---
@@ -217,7 +220,7 @@ non-Searce account is rejected with `domain_not_allowed`.
 from outside the Searce perimeter, so this must run from a laptop on the VPN.
 Full runbook: **`deploy/gcp/MIGRATE_TO_GITLAB.md`**.
 ```bash
-export GITLAB_URL="https://gitlab.searce.com/<group>/intellicore-cmp.git"
+export GITLAB_URL="https://gitlab.searce.com/intellicore-cmp/intellicore-cmp.git"
 bash deploy/gcp/migrate-to-gitlab.sh
 ```
 Mirrors all three branches (each carries unique work — the `architecture`

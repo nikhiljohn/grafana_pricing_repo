@@ -61,26 +61,65 @@ The migration script creates `main` from the review branch. Override with
 
 ## 2. Run the migration
 
+The project already exists: **`gitlab.searce.com/intellicore-cmp/intellicore-cmp`**
+(private). It was created **with** a README, so it is *not* empty — it has a
+stub `Initial commit` on `main`. Two consequences shape the migration:
+
+- `git push --mirror` is **not** used. Mirror pushes delete remote refs that
+  are absent locally, which is destructive against a non-empty target. The
+  script pushes named branches instead.
+- Our history is **unrelated** to that stub commit, so putting our tree on
+  `main` is a non-fast-forward. That needs an explicit opt-in.
+
 ```bash
 # On the Searce VPN, from a clone of this repo:
-export GITLAB_URL="https://gitlab.searce.com/<group>/intellicore-cmp.git"
 bash deploy/gcp/migrate-to-gitlab.sh
 ```
 
-First create the target project in GitLab — **New project → Create blank
-project**, and **uncheck "Initialize repository with a README"**. `git push
---mirror` requires an empty target.
+The default target is already the right project, so no `GITLAB_URL` export is
+needed. The script mirror-clones from GitHub, pushes all three branches by
+name, then attempts `main` and verifies every branch SHA on both sides.
 
-When prompted for credentials, use a **Personal Access Token** (Preferences →
-Access Tokens, scope `write_repository`) as the password, not your login
-password.
+**Credentials.** There is no SSH key on the GitLab profile yet, so this runs
+over HTTPS. When prompted for a password, paste a **Personal Access Token** —
+*Edit profile → Access tokens*, scope `write_repository`. To use SSH instead,
+add a key first (*Edit profile → SSH Keys*) and pass
+`GITLAB_URL=git@gitlab.searce.com:intellicore-cmp/intellicore-cmp.git`.
 
-The script mirror-clones from GitHub, pushes every ref with `git push
---mirror`, creates `main`, then verifies each branch SHA matches on both sides
-and fails loudly if any don't.
+### Establishing `main`
 
-Afterwards, set the default branch: **Settings → Repository → Branch defaults
+The first run pushes the branches and then **stops short of `main`**, because
+overwriting the stub commit discards it. Re-run with the opt-in:
+
+```bash
+FORCE_MAIN=yes bash deploy/gcp/migrate-to-gitlab.sh
+```
+
+If that is rejected, it is GitLab's default branch protection. Either:
+
+- **A — allow it once:** *Settings → Repository → Protected branches → `main`
+  → "Allowed to force push" = ON*. Re-run, then switch it back off.
+- **B — start clean:** delete the project, create a new blank one and
+  **uncheck "Initialize repository with a README"**, then re-run. Nothing is
+  lost; the stub commit is only a placeholder README.
+
+Afterwards set the default branch: **Settings → Repository → Branch defaults
 → `main`**.
+
+### Turn Auto DevOps off
+
+The project has **Auto DevOps enabled**, and GitLab warns that the **container
+registry is not enabled on this instance** — so Auto DevOps cannot work here
+regardless. Our `.gitlab-ci.yml` takes precedence the moment it is pushed
+("will be used if no alternative CI configuration file is found"), so this is
+not a blocker, but leave it on and every pipeline listing is confusing.
+
+**Settings → CI/CD → Auto DevOps → off.**
+
+The missing container registry is worth noting for later: our pipeline builds
+images *on the VM* via `docker compose build`, so it needs no registry. Any
+future move to registry-based deploys would need an administrator to enable
+it.
 
 ---
 
@@ -123,6 +162,35 @@ from GitLab, so:
 
 The old `git fetch origin main && git reset --hard` deploy step has been
 replaced accordingly.
+
+### One inconsistency, stated plainly
+
+That is true of the **CI pipeline**. It is *not* true of the manual script
+`deploy/gcp/cloudshell-deploy.sh`, which has the VM `git fetch` from **GitHub**.
+So there are currently two deploy paths with different source assumptions:
+
+| Path | Source of code | Works if GitHub is archived? |
+|---|---|---|
+| `.gitlab-ci.yml` → `deploy:production` | tarball pushed from the runner | **Yes** |
+| `deploy/gcp/cloudshell-deploy.sh` | VM pulls from GitHub | **No** |
+
+The manual script cannot simply be repointed at GitLab: the VM sits in
+`atre-practice-solutionplatform` and there is no evidence it can reach the
+Searce perimeter — `gitlab.searce.com` 403s from everywhere outside. Cloud
+Shell is outside the perimeter too, so it cannot clone from GitLab either.
+
+The resolution is to convert the manual script to package-and-ship, like the
+CI job: build the tarball wherever the operator has the repo (a laptop on the
+VPN) and copy it over IAP. **Do not do this casually** — Docker Compose derives
+its project name from the working directory, and deploying from a *different*
+directory would change the project name and therefore the volume names, which
+presents as a wiped database. Any rewrite must read the existing project name
+off a running container's `com.docker.compose.project` label and pin it with
+`-p`, rather than assuming.
+
+Until that is done: **keep GitHub as-is** and use the manual script only as
+the fallback it currently is. Do not archive GitHub before either the CI
+pipeline is deploying successfully or the manual script is converted.
 
 ---
 

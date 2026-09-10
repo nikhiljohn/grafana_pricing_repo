@@ -14,7 +14,7 @@
 ### 1. Clone and install
 
 ```bash
-git clone https://gitlab.searce.com/<group>/intellicore-cmp.git
+git clone https://gitlab.searce.com/intellicore-cmp/intellicore-cmp.git
 cd intellicore-cmp
 ```
 

@@ -139,7 +139,7 @@ intellicore-cmp/
 **Prereqs**: Docker Desktop, Make, Node 20+ (only if you want to run frontend outside Docker), Python 3.11+ (same).
 
 ```bash
-git clone https://gitlab.searce.com/<group>/intellicore-cmp.git
+git clone https://gitlab.searce.com/intellicore-cmp/intellicore-cmp.git
 cd intellicore-cmp
 cp .env.example .env
 # Edit .env — set ANTHROPIC_API_KEY at minimum

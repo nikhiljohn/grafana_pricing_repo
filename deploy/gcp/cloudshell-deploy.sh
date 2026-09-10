@@ -19,6 +19,19 @@
 # it runs; subsequent runs are plain fetches. .env.prod is backed up outside
 # the repo before any git operation touches the tree.
 #
+# SOURCE OF CODE: this script has the VM pull from GITHUB, not GitLab. That is
+# deliberate for now, and it is the one place the repo still depends on GitHub:
+#   * the VM lives in atre-practice-solutionplatform with no evidence it can
+#     reach gitlab.searce.com (which 403s outside the Searce perimeter), and
+#   * Cloud Shell is outside that perimeter too, so it cannot clone from GitLab.
+# The CI pipeline avoids this entirely by pushing a tarball from the runner.
+# Converting this script the same way is the right fix, but note the hazard:
+# Docker Compose derives its project name from the working directory, so
+# deploying from a different directory changes the volume names and presents as
+# a wiped database. Any rewrite must pin -p to the existing project name, read
+# off a running container's com.docker.compose.project label.
+# See deploy/gcp/MIGRATE_TO_GITLAB.md §4.
+#
 # Overrides:
 #   BRANCH=<branch>     what to deploy (default: the review branch)
 #   REPO_URL=<url>      where to fetch from (default: the GitHub origin)

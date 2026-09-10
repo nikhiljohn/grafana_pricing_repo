@@ -78,10 +78,10 @@ cd ~/intellicore-cmp
 git remote -v                      # check current remote
 
 # Update to GitLab (replace with your actual URL):
-git remote set-url origin https://gitlab.searce.com/<group>/intellicore-cmp.git
+git remote set-url origin https://gitlab.searce.com/intellicore-cmp/intellicore-cmp.git
 
 # For SSH-based (no token needed at pull time):
-git remote set-url origin git@gitlab.searce.com:<group>/intellicore-cmp.git
+git remote set-url origin git@gitlab.searce.com:intellicore-cmp/intellicore-cmp.git
 ```
 
 ---
