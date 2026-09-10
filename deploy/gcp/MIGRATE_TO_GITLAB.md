@@ -267,18 +267,54 @@ pipeline is deploying successfully or the manual script is converted.
 
 ---
 
-## 5. GitLab Runner requirements
+## 5. GitLab Runner — the current blocker
 
-The pipeline needs a runner that can:
+**Observed state:** the project has **no runners available**, and the pipeline
+from the `main` push (`/-/pipelines/47062`) is `pending` and will stay that way.
+`configure-gitlab.sh` reports this on every run. A pending job looks like a
+slow queue rather than a misconfiguration, which is why it is called out here:
+nothing in `.gitlab-ci.yml` can fix it, and no amount of variable-setting will
+either.
 
-- run Docker images (`node:20-alpine`, `python:3.11-slim`,
-  `google/cloud-sdk:alpine`), and
-- reach `oauth2.googleapis.com` / `compute.googleapis.com` to open the IAP
-  tunnel.
+The pipeline needs a runner that can do three things, and the third is the one
+that constrains where it may live:
 
-If Searce's shared runners are network-restricted, register a project runner
-somewhere with egress to Google APIs. A runner that cannot reach Google APIs
-will fail at `gcloud auth activate-service-account`.
+1. run Docker images (`node:20-alpine`, `python:3.11-slim`,
+   `google/cloud-sdk:alpine`);
+2. reach `oauth2.googleapis.com` / `compute.googleapis.com`, to open the IAP
+   tunnel — a runner that cannot will die at
+   `gcloud auth activate-service-account`;
+3. reach `gitlab.searce.com` itself, to pick up jobs at all.
+
+Those last two pull in opposite directions here, which rules out the intuitive
+answer:
+
+| Runner host | Reaches `gitlab.searce.com` | Reaches Google APIs | Verdict |
+|---|---|---|---|
+| The deploy target VM, `intellicore-cmp-v1` | **No** — it sits in `atre-practice-solutionplatform`, outside the Searce perimeter, and the perimeter 403s everything | Yes | **Not viable** |
+| A host inside the Searce network | Yes | Needs egress to Google APIs — verify, don't assume | Correct answer |
+| An operator laptop on the VPN | Yes | Yes | Works, but only while that laptop is awake and connected |
+
+So the runner cannot go on the machine being deployed to. Three routes, in
+order of preference:
+
+- **A — get instance/shared runners enabled for the project.** An ask to
+  whoever administers `gitlab.searce.com`. Worth asking first, and worth asking
+  in the same breath whether they have egress to Google APIs — a shared runner
+  that can't reach them fails at `gcloud auth`, which is a slower way to
+  discover the same problem. The container registry being disabled on this
+  instance suggests a locked-down setup, so don't assume shared runners are
+  simply switchable.
+- **B — a project runner on a Searce-internal host.** The durable answer.
+  Register from *Settings → CI/CD → Runners → New project runner*; it needs
+  Docker and the `docker` executor.
+- **C — a laptop runner, as a stopgap.** Fine for getting a first green
+  pipeline; not a CI system. Jobs queue whenever the laptop sleeps or drops
+  VPN.
+
+Until a runner exists, **deploying via the pipeline is not possible at all**.
+The manual path (§4) is the only working deploy, and it does not touch GitLab —
+see the note there about GitHub still being its source.
 
 ---
 
