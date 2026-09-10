@@ -27,6 +27,9 @@
 #   FORCE_MAIN=yes         force-push `main` over the stub initial commit
 #   CREATE_MAIN=no         skip establishing `main` entirely
 #   GITHUB_URL=<url>       source (default: the GitHub origin)
+#   GITLAB_TOKEN=<pat>     Personal Access Token, scope write_repository.
+#                          Prompted for (hidden) if not set. An account
+#                          password will NOT work on this instance.
 #
 set -euo pipefail
 
@@ -35,6 +38,9 @@ bold() { printf "${BOLD}%s${NC}\n" "$*"; }
 ok()   { printf "${GREEN}✔${NC}  %s\n" "$*"; }
 warn() { printf "${YELLOW}⚠${NC}  %s\n" "$*"; }
 fail() { printf "${RED}✘${NC}  %s\n" "$*"; exit 1; }
+# git prints the remote URL in its errors. If a token is embedded there, that
+# would leak it to the terminal and to any captured log. Redact userinfo.
+scrub() { sed -E 's#(https?://)[^@/[:space:]]*@#\1***@#g'; }
 
 GITHUB_URL="${GITHUB_URL:-https://github.com/nikhiljohn/grafana_pricing_repo.git}"
 GITLAB_URL_FROM_ENV="${GITLAB_URL:+yes}"
@@ -67,6 +73,39 @@ case "$GITLAB_URL" in
 
         unset GITLAB_URL
         bash deploy/gcp/migrate-to-gitlab.sh" ;;
+esac
+
+# ── Credentials ──────────────────────────────────────────────────────────────
+# GitLab rejects account passwords for git over HTTPS ("you're required to use
+# a token instead of a password"). Take the PAT once and embed it in the push
+# URL, so the four pushes below don't each prompt separately.
+
+if [ -z "${GITLAB_TOKEN:-}" ] && [ -e /dev/tty ]; then
+  case "$GITLAB_URL" in
+    https://*)
+      echo "  A GitLab Personal Access Token is required (an account password"
+      echo "  will NOT work). Create one at:"
+      echo "    ${GITLAB_URL%/*/*}/-/user_settings/personal_access_tokens"
+      echo "  Scope: write_repository. Copy it immediately — shown once."
+      echo ""
+      printf "  Paste token (hidden, or press Enter to be prompted per-push): "
+      IFS= read -rs GITLAB_TOKEN < /dev/tty || GITLAB_TOKEN=""
+      echo ""
+      echo "" ;;
+  esac
+fi
+
+# oauth2:<token> is GitLab's documented HTTPS form for a PAT.
+case "$GITLAB_URL" in
+  https://*)
+    if [ -n "${GITLAB_TOKEN:-}" ]; then
+      PUSH_URL="https://oauth2:${GITLAB_TOKEN}@${GITLAB_URL#https://}"
+      # Fail fast rather than falling back to interactive prompts.
+      export GIT_TERMINAL_PROMPT=0
+    else
+      PUSH_URL="$GITLAB_URL"
+    fi ;;
+  *) PUSH_URL="$GITLAB_URL" ;;
 esac
 
 # ── Step 1 · Reachability ────────────────────────────────────────────────────
@@ -138,14 +177,38 @@ echo ""
 # ── Step 3 · Push the branches ───────────────────────────────────────────────
 
 bold "── Step 3/5 · Push branches ─────────────────────────────────────────────"
-echo "  Credentials: you have no SSH key on your GitLab profile yet, so this"
-echo "  uses HTTPS. When prompted for a password, paste a Personal Access"
-echo "  Token — Edit profile → Access tokens, scope: write_repository."
-echo "  (Or add an SSH key and re-run with an SSH GITLAB_URL.)"
+if [ -n "${GITLAB_TOKEN:-}" ]; then
+  echo "  Using the Personal Access Token supplied above (one auth, not one"
+  echo "  prompt per branch)."
+else
+  warn "No token supplied — git will prompt per push, and this instance"
+  warn "rejects account passwords. Expect failures unless you have a"
+  warn "credential helper already holding a valid token."
+fi
 echo ""
 
-git remote add gitlab "$GITLAB_URL" 2>/dev/null || git remote set-url gitlab "$GITLAB_URL"
+git remote add gitlab "$PUSH_URL" 2>/dev/null || git remote set-url gitlab "$PUSH_URL"
 PUSH_FAILED=0
+
+# Authenticate ONCE before pushing three branches. Previously a bad credential
+# produced four separate prompts and four bare "FAILED" lines.
+if ! AUTH_OUT=$(git ls-remote gitlab 2>&1); then
+  printf '%s\n' "$AUTH_OUT" | scrub | sed 's/^/      /'
+  fail "Authentication to GitLab FAILED — nothing was pushed.
+
+    GitLab said your credential was rejected. Checklist:
+      1. Use a Personal Access Token, NOT your account password.
+         ${GITLAB_URL%/*/*}/-/user_settings/personal_access_tokens
+      2. Scope must include write_repository (read_repository is not enough
+         to push).
+      3. Token must not be expired.
+      4. If you typed a username/password at a prompt, that path is disabled
+         on this instance — re-run and paste the token when asked.
+
+    Re-run non-interactively once you have it:
+        GITLAB_TOKEN=<your-token> bash deploy/gcp/migrate-to-gitlab.sh"
+fi
+ok "Authenticated to GitLab"
 
 # Named pushes, NOT --mirror. --mirror deletes remote refs that are absent
 # locally, which on a non-empty target is destructive for anything already
@@ -156,7 +219,7 @@ for b in "${BRANCHES[@]}"; do
     echo "pushed"
   else
     echo "FAILED"
-    printf '%s\n' "$PUSH_ERR" | sed 's/^/        /'
+    printf '%s\n' "$PUSH_ERR" | scrub | sed 's/^/        /'
     PUSH_FAILED=1
   fi
 done
@@ -183,13 +246,13 @@ else
     if MAIN_ERR=$(git push gitlab main 2>&1); then
       ok "Created 'main' from '${MAIN_FROM}'"
     else
-      printf '%s\n' "$MAIN_ERR" | sed 's/^/      /'; PUSH_FAILED=1
+      printf '%s\n' "$MAIN_ERR" | scrub | sed 's/^/      /'; PUSH_FAILED=1
     fi
   elif git merge-base --is-ancestor "$REMOTE_MAIN" main 2>/dev/null; then
     if MAIN_ERR=$(git push gitlab main 2>&1); then
       ok "Fast-forwarded 'main' to '${MAIN_FROM}'"
     else
-      printf '%s\n' "$MAIN_ERR" | sed 's/^/      /'; PUSH_FAILED=1
+      printf '%s\n' "$MAIN_ERR" | scrub | sed 's/^/      /'; PUSH_FAILED=1
     fi
   else
     warn "Remote 'main' is ${REMOTE_MAIN:0:8} — GitLab's stub initial commit."
