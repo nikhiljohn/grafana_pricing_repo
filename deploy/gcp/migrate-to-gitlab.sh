@@ -166,7 +166,8 @@ if [ "$IS_HTTPS" = yes ]; then
          down that page.
       3. Scope: write_repository. Expiry: whatever you like.
       4. Create, then copy immediately — it is shown once.
-      5. The result starts 'glpat-' and is 26 characters.
+      5. The result starts 'glpat-'. Length varies by GitLab version (26 on
+         older releases, ~54 on current ones) — the prefix is what matters.
 
     Then treat the feed token you just pasted as exposed and reset it on that
     same page — it grants read access to your GitLab feeds." ;;
