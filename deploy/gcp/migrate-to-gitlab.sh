@@ -37,6 +37,7 @@ warn() { printf "${YELLOW}⚠${NC}  %s\n" "$*"; }
 fail() { printf "${RED}✘${NC}  %s\n" "$*"; exit 1; }
 
 GITHUB_URL="${GITHUB_URL:-https://github.com/nikhiljohn/grafana_pricing_repo.git}"
+GITLAB_URL_FROM_ENV="${GITLAB_URL:+yes}"
 GITLAB_URL="${GITLAB_URL:-https://gitlab.searce.com/intellicore-cmp/intellicore-cmp.git}"
 MAIN_FROM="${MAIN_FROM:-claude/intellicore-cmp-review-j4fbts}"
 CREATE_MAIN="${CREATE_MAIN:-yes}"
@@ -45,10 +46,28 @@ WORKDIR="${WORKDIR:-/tmp/intellicore-migration}"
 
 bold "── Intellicore CMP → Searce GitLab ──────────────────────────────────────"
 echo "  Source: $GITHUB_URL"
-echo "  Target: $GITLAB_URL"
+if [ -n "${GITLAB_URL_FROM_ENV:-}" ]; then
+  echo "  Target: $GITLAB_URL   (from your GITLAB_URL env var)"
+else
+  echo "  Target: $GITLAB_URL   (script default)"
+fi
 echo ""
 
 command -v git >/dev/null || fail "git not found"
+
+# A GITLAB_URL exported with the docs' <group> placeholder still in it shadows
+# the correct default above and makes every push fail with HTTP 400. Catch it
+# here instead of three failed pushes later.
+case "$GITLAB_URL" in
+  *'<'*|*'>'*)
+    fail "GITLAB_URL contains an unsubstituted placeholder:
+      $GITLAB_URL
+    Your shell has GITLAB_URL exported with '<group>' still in it. The
+    script's own default is already correct, so just clear it:
+
+        unset GITLAB_URL
+        bash deploy/gcp/migrate-to-gitlab.sh" ;;
+esac
 
 # ── Step 1 · Reachability ────────────────────────────────────────────────────
 
@@ -75,6 +94,26 @@ case "$HTTP_CODE" in
     fail "Could not reach ${GITLAB_HOST} at all. Check DNS/VPN." ;;
   *)
     warn "${GITLAB_HOST} returned HTTP ${HTTP_CODE} — continuing, auth may fail" ;;
+esac
+
+# The host being up says nothing about the project path existing. Probe the
+# actual git endpoint: 401 is the healthy answer for a private repo (the path
+# resolved, we just haven't authenticated yet).
+REPO_PROBE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 \
+  "${GITLAB_URL%.git}.git/info/refs?service=git-receive-pack" 2>/dev/null || echo "000")
+case "$REPO_PROBE" in
+  200|401)
+    ok "Target project resolves (HTTP ${REPO_PROBE})" ;;
+  404)
+    fail "Target project NOT FOUND (HTTP 404):
+      $GITLAB_URL
+    Check the namespace/slug, or that your account can see it." ;;
+  400)
+    fail "Target URL rejected (HTTP 400):
+      $GITLAB_URL
+    That usually means a malformed path — e.g. a leftover placeholder." ;;
+  *)
+    warn "Target probe returned HTTP ${REPO_PROBE} — continuing" ;;
 esac
 fi
 
@@ -106,18 +145,19 @@ echo "  (Or add an SSH key and re-run with an SSH GITLAB_URL.)"
 echo ""
 
 git remote add gitlab "$GITLAB_URL" 2>/dev/null || git remote set-url gitlab "$GITLAB_URL"
+PUSH_FAILED=0
 
 # Named pushes, NOT --mirror. --mirror deletes remote refs that are absent
 # locally, which on a non-empty target is destructive for anything already
 # there. These branches don't exist on GitLab yet, so each is a clean create.
 for b in "${BRANCHES[@]}"; do
   printf "    %s ... " "$b"
-  if git push -q gitlab "refs/heads/${b}:refs/heads/${b}" 2>/dev/null; then
+  if PUSH_ERR=$(git push gitlab "refs/heads/${b}:refs/heads/${b}" 2>&1); then
     echo "pushed"
   else
     echo "FAILED"
-    warn "Could not push ${b}. Re-run just that one to see the error:"
-    echo "        cd $WORKDIR && git push gitlab ${b}"
+    printf '%s\n' "$PUSH_ERR" | sed 's/^/        /'
+    PUSH_FAILED=1
   fi
 done
 if [ "$TAG_COUNT" != "0" ]; then
@@ -140,9 +180,17 @@ else
   git branch -f main "refs/heads/${MAIN_FROM}"
 
   if [ -z "$REMOTE_MAIN" ]; then
-    git push -q gitlab main && ok "Created 'main' from '${MAIN_FROM}'"
+    if MAIN_ERR=$(git push gitlab main 2>&1); then
+      ok "Created 'main' from '${MAIN_FROM}'"
+    else
+      printf '%s\n' "$MAIN_ERR" | sed 's/^/      /'; PUSH_FAILED=1
+    fi
   elif git merge-base --is-ancestor "$REMOTE_MAIN" main 2>/dev/null; then
-    git push -q gitlab main && ok "Fast-forwarded 'main' to '${MAIN_FROM}'"
+    if MAIN_ERR=$(git push gitlab main 2>&1); then
+      ok "Fast-forwarded 'main' to '${MAIN_FROM}'"
+    else
+      printf '%s\n' "$MAIN_ERR" | sed 's/^/      /'; PUSH_FAILED=1
+    fi
   else
     warn "Remote 'main' is ${REMOTE_MAIN:0:8} — GitLab's stub initial commit."
     warn "Our history is unrelated to it, so this is a non-fast-forward."
@@ -213,3 +261,8 @@ echo "       confusing, and it cannot work here anyway: the container registry"
 echo "       is not enabled on this instance."
 echo ""
 echo "  Working copy left at: $WORKDIR (safe to delete)"
+
+if [ "${PUSH_FAILED:-0}" != "0" ] || [ "$MISMATCH" -ne 0 ]; then
+  echo ""
+  fail "Migration did NOT fully succeed — see the errors above."
+fi
