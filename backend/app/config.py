@@ -45,13 +45,24 @@ class Settings(BaseSettings):
     # supplied its own key). In production customers Bring Their Own Key via
     # Settings → AI Keys, stored per-tenant and encrypted at rest.
     anthropic_api_key: str = Field(default="")
-    claude_model: str = Field(default="claude-sonnet-4-5")
+    claude_model: str = Field(default="claude-opus-5")
     openai_model: str = Field(default="gpt-4o")
     gemini_model: str = Field(default="gemini-1.5-pro")
 
     # Secret used to encrypt tenant-supplied API keys at rest (pgcrypto).
     # Falls back to jwt_secret when unset so a fresh deploy still works.
     credentials_secret: str = Field(default="")
+
+    # FreshService (ITSM system of record for the Shoppers Stop engagement).
+    # NOTE: SOW §3.1 names "Grafana/Dynatrace" as the ITSM integration
+    # target, which is imprecise — those are monitoring/APM. FreshService
+    # is the real ITSM; the SOW wording needs correcting before signature.
+    freshservice_domain: str = Field(default="")  # <domain>.freshservice.com
+    freshservice_api_key: str = Field(default="")
+    #: Shared secret FreshService signs outbound webhooks with.
+    freshservice_webhook_secret: str = Field(default="")
+    #: Requester on agent-raised tickets — a Searce service mailbox, not a person.
+    freshservice_requester_email: str = Field(default="ms.prodsupport@searce.com")
 
     # Ingestion
     ingest_worker_interval_seconds: int = Field(default=60)
