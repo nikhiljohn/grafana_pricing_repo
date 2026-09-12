@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import (
+    agents,
     auth,
     memory,
     cost,
@@ -73,6 +74,7 @@ def create_app() -> FastAPI:
     app.include_router(security_module.router, prefix="/security", tags=["security"])
     app.include_router(settings_api.router, prefix="/settings", tags=["settings"])
     # FreshService webhook carries its own prefix.
+    app.include_router(agents.router, prefix="/agents", tags=["agents"])
     app.include_router(freshservice.router)
 
     return app

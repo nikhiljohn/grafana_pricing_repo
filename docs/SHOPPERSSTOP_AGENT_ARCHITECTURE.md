@@ -108,7 +108,7 @@ What actually varies is call volume and model tier:
 | Configuration | USD/mo | INR/mo |
 |---|---:|---:|
 | All 16 agents on `claude-opus-5` | **$161** | ~₹14,200 |
-| Streaming on Sonnet 5, reasoning on Opus 5 | $91 | ~₹8,000 |
+| Streaming on Sonnet 5, reasoning on Opus 5 | $95 | ~₹8,000 |
 | All on `claude-sonnet-5` | $65 | ~₹5,700 |
 | All on `claude-haiku-4-5` | $32 | ~₹2,800 |
 
@@ -134,7 +134,7 @@ cloud bill — about **1.3% of cloud spend** — and it is modelled to save
 ~152 engineer-hours/month.
 
 **Recommendation: run everything on `claude-opus-5`.** The gap between
-Opus and the mixed tier is ~$70/month. On an engagement of this size that
+Opus and the mixed tier is ~$67/month. On an engagement of this size that
 is not a number worth trading judgement quality for, and the two agents
 that would move to a cheaper model (Alert Triage, GKE Health) are exactly
 the ones deciding what wakes a human at 03:00. The cheaper tiers are

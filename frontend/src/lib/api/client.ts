@@ -21,6 +21,7 @@ type MockModule = { default: Record<string, unknown> };
  */
 const DOMAIN_LOADERS: Record<string, () => Promise<MockModule>> = {
   "command-center": () => import("./mock/command-center"),
+  agents: () => import("./mock/agents"),
   cloudops: () => import("./mock/cloudops"),
   finops: () => import("./mock/finops"),
   secops: () => import("./mock/secops"),
