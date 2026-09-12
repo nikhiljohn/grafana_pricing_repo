@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useApiData } from "@/lib/api";
+import { inrCompact, PROJECTS } from "@/lib/api/mock/shoppersstop-env";
 
 type FinOpsTab = "cost-intelligence" | "optimization-memory" | "anomalies" | "forecasting";
 
@@ -80,13 +81,36 @@ export default function FinOpsIntelligencePage() {
   const { data: forecast } = useApiData<ForecastPoint[]>("/finops/forecast", []);
   const { data: riskFactors } = useApiData<string[]>("/finops/risk-factors", []);
 
+  /* Headline figures are derived, never hardcoded — the tiles and the
+     tables below must not be able to disagree with each other. */
+  const currentMonth = monthlyTrend.at(-1)?.cost ?? 0;
+  const priorMonth = monthlyTrend.at(-2)?.cost ?? 0;
+  const momPct = priorMonth === 0 ? 0 : Math.round(((currentMonth - priorMonth) / priorMonth) * 100);
+  const forecastNext = forecast[0]?.cost ?? 0;
+
+  /** Sum the "₹1.02L/mo" style savings strings back into rupees. */
+  const savingsOf = (rows: OptimizationRow[]) =>
+    rows.reduce((sum, r) => {
+      const m = r.savings.match(/₹([\d.]+)\s*(L|K|Cr)?/i);
+      if (!m) return sum;
+      const n = parseFloat(m[1]);
+      const unit = (m[2] ?? "").toUpperCase();
+      const mult = unit === "CR" ? 10_000_000 : unit === "L" ? 100_000 : unit === "K" ? 1_000 : 1;
+      return sum + n * mult;
+    }, 0);
+
+  const appliedSavings = savingsOf(optimizations.filter((o) => o.status === "applied"));
+  const availableRows = optimizations.filter((o) => o.status !== "applied");
+  const availableSavings = savingsOf(availableRows);
+  const activeAnomaly = anomalies.find((a) => a.severity === "active");
+
   const maxCost = monthlyTrend.length ? Math.max(...monthlyTrend.map((m) => m.cost)) : 0;
 
   /* annotation positions for the bar chart */
   const annotations: Record<string, { label: string; color: string }> = {
-    May: { label: "CUD applied", color: "#10b981" },
-    Jun: { label: "Functions optimized", color: "#8b5cf6" },
-    Jul: { label: "BigQuery anomaly", color: "#f59e0b" },
+    Jul: { label: "SUD consolidation", color: "#10b981" },
+    Aug: { label: "UAT scale-to-zero", color: "#8b5cf6" },
+    Sep: { label: "Egress anomaly", color: "#f59e0b" },
   };
 
   return (
@@ -108,8 +132,10 @@ export default function FinOpsIntelligencePage() {
             </div>
           </div>
           <select className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 focus:border-emerald-500 focus:outline-none">
-            <option>searce-sandbox</option>
-            <option>production-org</option>
+            <option>All projects (7)</option>
+            {PROJECTS.map((p) => (
+              <option key={p.id}>{p.id}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -122,7 +148,7 @@ export default function FinOpsIntelligencePage() {
             <span className="rounded-full bg-amber-100 px-3 py-0.5 text-sm font-semibold text-amber-700">78 / 100</span>
           </div>
           <span className="text-xs text-slate-400">|</span>
-          <span className="text-sm text-amber-600">Cost anomaly active: BigQuery +340%</span>
+          {activeAnomaly && <span className="text-sm text-amber-600">Cost anomaly active: {activeAnomaly.title}</span>}
         </div>
       </div>
 
@@ -132,26 +158,30 @@ export default function FinOpsIntelligencePage() {
           {/* Current Month */}
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">Current Month</div>
-            <div className="text-2xl font-semibold text-slate-800">$637</div>
-            <div className="mt-1 text-xs text-amber-600">+8% MoM</div>
+            <div className="text-2xl font-semibold text-slate-800">{inrCompact(currentMonth)}</div>
+            <div className={`mt-1 text-xs ${momPct > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+              {momPct > 0 ? "+" : ""}{momPct}% MoM
+            </div>
           </div>
           {/* Forecasted */}
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">Forecasted</div>
-            <div className="text-2xl font-semibold text-slate-800">$702</div>
-            <div className="mt-1 text-xs text-slate-500">based on current trajectory + anomaly</div>
+            <div className="text-2xl font-semibold text-slate-800">{inrCompact(forecastNext)}</div>
+            <div className="mt-1 text-xs text-slate-500">{forecast[0]?.month ?? "next month"}, incl. festive peak</div>
           </div>
           {/* Savings Applied */}
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">Savings Applied</div>
-            <div className="text-2xl font-semibold text-emerald-600">$105/mo</div>
-            <div className="mt-1 text-xs text-slate-500">from 7 recommendations this quarter</div>
+            <div className="text-2xl font-semibold text-emerald-600">{inrCompact(appliedSavings)}/mo</div>
+            <div className="mt-1 text-xs text-slate-500">
+              from {optimizations.filter((o) => o.status === "applied").length} recommendations
+            </div>
           </div>
           {/* Savings Available */}
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">Savings Available</div>
-            <div className="text-2xl font-semibold text-blue-600">$210/mo</div>
-            <div className="mt-1 text-xs text-slate-500">5 unactioned recommendations</div>
+            <div className="text-2xl font-semibold text-blue-600">{inrCompact(availableSavings)}/mo</div>
+            <div className="mt-1 text-xs text-slate-500">{availableRows.length} unactioned recommendations</div>
           </div>
           {/* Budget Usage */}
           <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -195,21 +225,20 @@ export default function FinOpsIntelligencePage() {
                 <span className="text-sm font-semibold text-amber-700">ACTIVE ANOMALY</span>
               </div>
               <h3 className="mb-2 text-lg font-semibold text-slate-800">
-                BigQuery cost spike: +340% in last 4 hours
+                {activeAnomaly?.title ?? "No active anomaly"}
               </h3>
-              <div className="mb-3 rounded-lg bg-white/70 p-4 text-sm text-slate-700 leading-relaxed">
-                <span className="font-medium text-slate-800">Memory:</span> This matches the ETL spike pattern from
-                Jul 15 (30d ago). That incident cost $42 extra and was caused by an unoptimized JOIN on the 2TB{" "}
-                <code className="rounded bg-slate-100 px-1 py-0.5 text-xs font-mono">analytics.events</code> table.
-                Resolution: Added partition filter and optimized JOIN, reducing scan from 2TB to 45GB.
+              <div className="mb-3 rounded-lg bg-white/70 p-4 text-sm leading-relaxed text-slate-700">
+                <span className="font-medium text-slate-800">Memory:</span> {activeAnomaly?.memory}
               </div>
               <div className="mb-4 flex items-center gap-4">
-                <span className="rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
-                  Confidence: 88% same root cause
-                </span>
-                <span className="text-sm text-slate-600">
-                  Suggested fix: Apply same partition filter to current query pipeline
-                </span>
+                {activeAnomaly?.confidence && (
+                  <span className="rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
+                    Confidence: {activeAnomaly.confidence}
+                  </span>
+                )}
+                {activeAnomaly?.suggestedFix && (
+                  <span className="text-sm text-slate-600">Suggested fix: {activeAnomaly.suggestedFix}</span>
+                )}
               </div>
               <div className="flex gap-3">
                 <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors">
@@ -230,7 +259,7 @@ export default function FinOpsIntelligencePage() {
                     <div className="w-32 flex-shrink-0">
                       <div className="text-sm font-medium text-slate-800">{p.name}</div>
                       <div className="text-lg font-semibold text-slate-800">
-                        ${p.cost}
+                        {inrCompact(p.cost)}
                         <span className="text-xs font-normal text-slate-400">/mo</span>
                       </div>
                     </div>
@@ -271,7 +300,7 @@ export default function FinOpsIntelligencePage() {
                         )}
                         {/* Bar */}
                         <div className="flex flex-col items-center justify-end" style={{ height: 160 }}>
-                          <span className="mb-1 text-xs font-medium text-slate-600">${m.cost}</span>
+                          <span className="mb-1 text-xs font-medium text-slate-600">{inrCompact(m.cost)}</span>
                           <div
                             className="w-10 rounded-t-md bg-emerald-500"
                             style={{ height: barH }}
@@ -339,12 +368,12 @@ export default function FinOpsIntelligencePage() {
             <div className="mt-4 flex items-center gap-6 rounded-lg bg-slate-50 px-5 py-3">
               <div className="text-sm text-slate-600">
                 Total savings applied:{" "}
-                <span className="font-semibold text-emerald-600">$105/mo</span>
+                <span className="font-semibold text-emerald-600">{inrCompact(appliedSavings)}/mo</span>
               </div>
               <span className="text-slate-300">|</span>
               <div className="text-sm text-slate-600">
                 Additional available:{" "}
-                <span className="font-semibold text-blue-600">$105/mo</span>
+                <span className="font-semibold text-blue-600">{inrCompact(availableSavings)}/mo</span>
               </div>
             </div>
           </div>
@@ -461,7 +490,7 @@ export default function FinOpsIntelligencePage() {
                 {forecast.map((f) => (
                   <div key={f.month} className="rounded-xl border border-slate-200 p-5">
                     <div className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">{f.month} 2025</div>
-                    <div className="text-2xl font-semibold text-slate-800">${f.cost}</div>
+                    <div className="text-2xl font-semibold text-slate-800">{inrCompact(f.cost)}</div>
                     <div className="mt-2 text-xs text-slate-500 leading-relaxed">{f.note}</div>
                   </div>
                 ))}
@@ -476,10 +505,11 @@ export default function FinOpsIntelligencePage() {
                 </svg>
                 <div>
                   <div className="text-sm font-semibold text-emerald-800">
-                    If all available optimizations are applied, projected annual savings: $1,260
+                    If all available optimizations are applied, projected annual savings:{" "}
+                    {inrCompact((appliedSavings + availableSavings) * 12)}
                   </div>
                   <div className="mt-1 text-xs text-emerald-600">
-                    Based on $105/mo current savings + $105/mo available savings applied from Aug onward
+                    Based on {inrCompact(appliedSavings)}/mo already applied + {inrCompact(availableSavings)}/mo available
                   </div>
                 </div>
               </div>
@@ -498,7 +528,7 @@ export default function FinOpsIntelligencePage() {
                     return (
                       <div key={m.month} className="flex flex-1 flex-col items-center">
                         <div className="flex flex-col items-center justify-end" style={{ height: 160 }}>
-                          <span className="mb-1 text-xs font-medium text-slate-600">${m.cost}</span>
+                          <span className="mb-1 text-xs font-medium text-slate-600">{inrCompact(m.cost)}</span>
                           <div
                             className={`w-8 rounded-t-md ${isForecast ? "bg-emerald-300 border border-dashed border-emerald-500" : "bg-emerald-500"}`}
                             style={{ height: barH }}

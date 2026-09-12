@@ -1,198 +1,214 @@
 /* ------------------------------------------------------------------ */
 /*  Intellicore CMP — FinOps seed data                                */
-/*  Served by apiFetch() when no backend is configured.                */
+/*  Tenant: Shoppers Stop — eCommerce workloads.                      */
+/*  Tower G — FinOps & Cost Management [SOW §4.9].                    */
+/*                                                                     */
+/*  All amounts are INR, matching the SOW's invoicing currency         */
+/*  [SOW §10.2]. Figures are illustrative — the SOW pricing table      */
+/*  (§10.1) is still TBD.                                             */
+/*                                                                     */
+/*  Cost lines total ≈ ₹11.2L/month and reconcile with the asset       */
+/*  inventory in ./assets.ts. Reports are produced on the 1st and      */
+/*  15th of each month [SOW §3.1, §4.9].                              */
 /* ------------------------------------------------------------------ */
 
 const data: Record<string, unknown> = {
+  /** Run rate across all 7 GCP projects, in INR. */
   "/finops/monthly-trend": [
-    { month: "Feb", cost: 480 },
-    { month: "Mar", cost: 520 },
-    { month: "Apr", cost: 510 },
-    { month: "May", cost: 560 },
-    { month: "Jun", cost: 590 },
-    { month: "Jul", cost: 637 },
+    { month: "Apr", cost: 982000 },
+    { month: "May", cost: 1014000 },
+    { month: "Jun", cost: 1071000 },
+    { month: "Jul", cost: 1043000 },
+    { month: "Aug", cost: 1098000 },
+    { month: "Sep", cost: 1121200 },
   ],
 
   "/finops/costs": [
     {
-      name: "CloudOps",
-      cost: 368,
-      breakdown: "Compute $280, Networking $58, Storage $30",
-      sparkData: [290, 310, 320, 340, 355, 368],
+      name: "GKE & Cloud Run",
+      cost: 568200,
+      breakdown: "Prod cluster ₹4.12L, non-prod ₹96K, Autopilot ₹38K, Cloud Run ₹22.2K",
+      sparkData: [487000, 502000, 531000, 519000, 549000, 568200],
+      sparkColor: "#6366f1",
+      memory:
+        "Largest single line, and growing with node-pool headroom held for sale events. A 1-year CUD on the production node pool is the biggest untaken saving — usage has been stable for 6 months.",
+    },
+    {
+      name: "Databases (Cloud SQL)",
+      cost: 231000,
+      breakdown: "Magento ×4 ₹1.90L, operational ₹41K",
+      sparkData: [223000, 226000, 228000, 228000, 230000, 231000],
       sparkColor: "#3b82f6",
       memory:
-        "Committed use discounts saved $67/mo on project A since applying in May. Compute costs stabilized after right-sizing in April.",
+        "Flat and predictable. Note the 8.4 upgrade before Dec 2026 [SOW §4.5] is a migration cost, not a run-rate change — budget the engineering hours, not the licence.",
     },
     {
-      name: "FinOps overhead",
-      cost: 0,
-      breakdown: "Platform cost absorbed in MRR",
-      sparkData: [0, 0, 0, 0, 0, 0],
-      sparkColor: "#94a3b8",
-      memory: "No direct cost. FinOps tooling and analysis overhead is included in Searce managed services MRR.",
-    },
-    {
-      name: "Cloud Security",
-      cost: 42,
-      breakdown: "SCC Premium, Wiz",
-      sparkData: [40, 41, 42, 42, 42, 42],
-      sparkColor: "#10b981",
-      memory: "Stable, no anomalies. SCC Premium enabled since Feb. Wiz license fixed cost, renews in Q1.",
-    },
-    {
-      name: "DevOps",
-      cost: 86,
-      breakdown: "Cloud Build, Artifact Registry, Functions",
-      sparkData: [95, 98, 96, 94, 98, 86],
-      sparkColor: "#8b5cf6",
-      memory:
-        "Switched to 2nd gen Functions in June, saved $12/mo on cold starts. Build minutes stable after caching improvements.",
-    },
-    {
-      name: "AIOps",
-      cost: 28,
-      breakdown: "Vertex AI, BigQuery ML",
-      sparkData: [18, 20, 22, 24, 25, 28],
+      name: "Compute / Windows VMs",
+      cost: 165000,
+      breakdown: "5 Windows VMs ₹1.42L, Jenkins ₹18.2K, jump host ₹4.8K",
+      sparkData: [165000, 165000, 165000, 165000, 165000, 165000],
       sparkColor: "#f59e0b",
       memory:
-        "Active anomaly on BigQuery (see above). Vertex AI spend growing with increased model training runs. Review reserved slots by Q4.",
+        "Windows licensing makes these the most expensive compute per vCPU in the estate. The Dec 2026 GKE migration [SOW §4.7] retires 3 of 5 — roughly ₹85K/mo — which is the single largest planned saving in the engagement.",
+    },
+    {
+      name: "Storage & CDN",
+      cost: 74000,
+      breakdown: "Campaign + product imagery, Standard class",
+      sparkData: [61000, 64000, 69000, 66000, 71000, 74000],
+      sparkColor: "#10b981",
+      memory:
+        "Rises ahead of every campaign as creative is staged, then stays up because nothing lifecycles it out. Prior retail accounts recovered 20–30% with a Nearline rule on assets older than 90 days.",
+    },
+    {
+      name: "Cache (Redis)",
+      cost: 52000,
+      breakdown: "Memorystore 16 GB HA",
+      sparkData: [52000, 52000, 52000, 52000, 52000, 52000],
+      sparkColor: "#ef4444",
+      memory:
+        "Fixed. Sized for sale-day peak rather than steady state — correct trade-off for ss.com, since a cache miss storm is the documented first step in the cascading-failure pattern.",
+    },
+    {
+      name: "Networking & Edge",
+      cost: 31000,
+      breakdown: "Nitrogen LB + Cloud Armor, 3 VPCs",
+      sparkData: [28000, 29000, 30000, 29000, 30000, 31000],
+      sparkColor: "#8b5cf6",
+      memory:
+        "Tracks traffic. Cloud Armor rule count has no material cost impact — do not trade security rules for ₹1–2K.",
     },
   ],
 
   "/finops/optimizations": [
     {
-      recommendation: "Committed use discount on Compute Engine",
-      appliedDate: "May 12",
-      savings: "$67/mo",
-      status: "applied" as const,
-      memory: "ROI breakeven reached in 3 weeks. 1-year CUD on n2-standard-8 for project-a production workloads.",
-    },
-    {
-      recommendation: "Switch Cloud Functions to 2nd gen",
-      appliedDate: "Jun 3",
-      savings: "$12/mo",
-      status: "applied" as const,
-      memory:
-        "Cold start p99 also improved 2.1s to 340ms. Migrated 14 functions across 3 services with zero downtime.",
-    },
-    {
-      recommendation: "Delete 3 unattached persistent disks",
-      appliedDate: "Jun 15",
-      savings: "$18/mo",
-      status: "applied" as const,
-      memory:
-        "Disks were orphaned after VM migration in May. 2x 200GB SSD + 1x 500GB standard. No snapshots referenced them.",
-    },
-    {
-      recommendation: "Right-size clens-dev to e2-standard-4",
-      appliedDate: "Jul 27",
-      savings: "$8/mo",
-      status: "applied" as const,
-      memory:
-        "Applied after CPU spike incident on Jul 25. Peak usage was only 22% on previous e2-standard-8. Downsized with zero performance impact.",
-    },
-    {
-      recommendation: "Apply partition filter to BigQuery ETL",
+      recommendation: "1-year CUD on production GKE node pool",
       appliedDate: null,
-      savings: "est. $42/mo",
+      savings: "est. ₹1.02L/mo",
+      status: "available" as const,
+      memory:
+        "Usage stable for 6 months at or above the commit floor. CUD planning is in scope [SOW §4.9]; the purchase itself is Client-executed — Searce does not negotiate or procure commitments [SOW §4.9, out-of-scope].",
+    },
+    {
+      recommendation: "Retire 3 Windows VMs post-GKE migration",
+      appliedDate: null,
+      savings: "est. ₹85.2K/mo",
       status: "pending" as const,
       memory:
-        "Same fix resolved Jul 15 spike. Current ETL pipeline scans full 2TB table on each run. Adding partition filter would reduce scan to ~45GB.",
+        "Contingent on the Dec 2026 migration [SOW §4.7]. Target end-state is 2–3 VMs retained. Saving lands the month after cutover, not at project start.",
     },
     {
-      recommendation: "Cloud SQL committed use discount",
+      recommendation: "Nearline lifecycle on campaign assets > 90 days",
       appliedDate: null,
-      savings: "est. $22/mo",
+      savings: "est. ₹18.5K/mo",
       status: "available" as const,
       memory:
-        "Requires 1-yr commitment, payback in 4 months. db-custom-4-16384 instance running 24/7 for 11 months. Usage pattern is stable.",
+        "1.4 TB of expired campaign creative in Standard class. Needs a Client call on retention for legal/brand reasons before it can be applied — lifecycle policy management is in scope [SOW §4.3].",
     },
     {
-      recommendation: "Lifecycle policies on 14 Storage buckets",
-      appliedDate: null,
-      savings: "est. $12/mo",
-      status: "available" as const,
+      recommendation: "Right-size non-production cluster off-hours",
+      appliedDate: "Aug 22",
+      savings: "₹31K/mo",
+      status: "applied" as const,
       memory:
-        "Standard class with <1 access/month identified for Nearline. 8 of 14 buckets are compliance-required hot storage (excluded). 6 eligible buckets total 1.8TB.",
+        "UAT scaled to zero between 21:00 and 07:00 IST. No impact on the UAT test window, which runs inside business hours. Two UAT environments in scope [SOW §4.2].",
+    },
+    {
+      recommendation: "Delete 6 orphaned persistent disks",
+      appliedDate: "Aug 8",
+      savings: "₹9.4K/mo",
+      status: "applied" as const,
+      memory:
+        "Left behind by earlier VM rebuilds in ss-ecom-dev. No snapshot referenced them. Verified with the Client before deletion.",
+    },
+    {
+      recommendation: "Sustained use discount review across 7 projects",
+      appliedDate: "Jul 30",
+      savings: "₹12.8K/mo",
+      status: "applied" as const,
+      memory:
+        "SUD applies automatically but only where workloads are not fragmented across too many small instances. Consolidating 4 small dev VMs into 2 moved them over the SUD threshold.",
     },
   ],
 
   "/finops/anomalies": [
     {
-      title: "BigQuery cost spike: +340% in last 4 hours",
+      title: "Cloud Storage egress +214% over 36 hours",
       severity: "active" as const,
-      timeAgo: "4 hours ago",
-      service: "BigQuery",
-      extra: "$42 estimated overspend",
-      memory:
-        "This matches the ETL spike pattern from Jul 15 (30d ago). That incident cost $42 extra and was caused by an unoptimized JOIN on the 2TB analytics.events table. The query scanned the full table instead of using the _PARTITIONDATE filter. Resolution on Jul 15: Added partition filter and optimized JOIN, reducing scan from 2TB to 45GB. Processing time dropped from 8min to 22sec.",
-      confidence: "88% same root cause",
-      suggestedFix: "Apply same partition filter to current query pipeline. The offending query is in the nightly ETL DAG (airflow-prod/dags/etl_analytics.py, line 142).",
-      timeline: [
-        "Jul 30 02:00 — ETL DAG triggered (normal schedule)",
-        "Jul 30 02:04 — BigQuery scan exceeded 1TB threshold",
-        "Jul 30 02:12 — Cost anomaly detected by Intellicore",
-        "Jul 30 02:15 — Pattern matched to Jul 15 incident (88% confidence)",
-      ],
-    },
-    {
-      title: "Compute Engine egress +85% WoW",
-      severity: "resolved" as const,
-      timeAgo: "5 days ago",
-      service: "Compute Engine",
-      extra: "Resolved in 2h",
-      memory:
-        "Cross-region replication job was running without compression between us-central1 and europe-west1. The backup sync for project-b was transferring ~180GB/day uncompressed. Resolution: Added gzip compression to the replication pipeline, reducing transfer to ~35GB/day. Egress normalized within 2 hours of applying the fix. Ongoing monitoring confirms stable egress since.",
-      confidence: null,
-      suggestedFix: null,
-      timeline: [
-        "Jul 25 08:00 — Egress anomaly detected (+85% vs 7-day avg)",
-        "Jul 25 08:30 — Root cause identified: uncompressed cross-region replication",
-        "Jul 25 09:15 — Compression applied to replication pipeline",
-        "Jul 25 10:00 — Egress normalized, anomaly resolved",
-      ],
-    },
-    {
-      title: "Cloud Storage class mismatch",
-      severity: "false-positive" as const,
-      timeAgo: "14 days ago",
+      timeAgo: "6 hours ago",
       service: "Cloud Storage",
-      extra: "Partial action taken",
+      extra: "≈ ₹48K projected overspend this cycle",
       memory:
-        "Flagged 14 Standard class buckets with <1 access/month as candidates for Nearline. Analysis showed 8 of 14 are compliance-required hot storage (SOC2 audit logs, PCI transaction records) that must remain in Standard class per policy. Adjusted recommendation: 6 buckets moved to Nearline ($12/mo saved), 8 kept as Standard with documented justification. Updated detection rules to exclude compliance-tagged buckets.",
+        "Campaign creative for the festive sale is being served directly from the ss-ecom-assets bucket rather than through the CDN, so every image request bills as egress. Memory: the identical pattern appeared before the Aug campaign and was resolved by pointing the campaign CMS at the CDN origin instead of the bucket URL. That fix cut egress 78% within two hours.",
+      confidence: "84% same root cause",
+      suggestedFix:
+        "Repoint campaign asset URLs at the CDN origin. The CMS template still holds direct bucket links — same template, same line as the Aug incident.",
+      timeline: [
+        "Sep 10 18:00 — Festive campaign creative uploaded to ss-ecom-assets",
+        "Sep 11 09:20 — Egress crossed 2σ above 7-day baseline",
+        "Sep 12 04:10 — Intellicore raised cost anomaly; pattern matched to Aug campaign (84%)",
+        "Sep 12 04:12 — Ticket raised to Client CMS owner via ITSM",
+      ],
+    },
+    {
+      title: "Non-production cluster ran at full scale overnight",
+      severity: "resolved" as const,
+      timeAgo: "9 days ago",
+      service: "GKE",
+      extra: "Resolved, ₹31K/mo recurring saving",
+      memory:
+        "UAT node pools were never scaled down outside test hours. Applied a scheduled scale-to-zero between 21:00 and 07:00 IST after confirming with the Client that UAT testing runs in business hours only. Saving is recurring rather than one-off.",
       confidence: null,
       suggestedFix: null,
       timeline: [
-        "Jul 16 — 14 buckets flagged for storage class mismatch",
-        "Jul 17 — Analysis revealed 8 compliance-required buckets",
-        "Jul 18 — 6 eligible buckets moved to Nearline",
-        "Jul 18 — Detection rules updated to exclude compliance tags",
+        "Sep 2 — Idle-capacity pattern detected across 14 consecutive nights",
+        "Sep 3 — Client confirmed UAT is business-hours only",
+        "Sep 3 — Scheduled scale-to-zero applied",
+        "Sep 4 — Saving verified against next billing export",
+      ],
+    },
+    {
+      title: "Cloud SQL storage growth flagged on ss-magento-db-01",
+      severity: "false-positive" as const,
+      timeAgo: "17 days ago",
+      service: "Cloud SQL",
+      extra: "No action — expected growth",
+      memory:
+        "Flagged as runaway growth at 780 GB of 1024 GB. Investigation showed it tracks catalogue expansion ahead of the festive season and matches the same curve as the previous two years. Detection rebaselined against seasonal catalogue load rather than a flat threshold. Disk headroom still needs a resize decision before December — raised separately as a P3.",
+      confidence: null,
+      suggestedFix: null,
+      timeline: [
+        "Aug 26 — Storage growth crossed flat threshold",
+        "Aug 27 — Compared against FY24 and FY25 festive curves — within 4%",
+        "Aug 27 — Threshold rebaselined to seasonal model",
+        "Aug 28 — Separate P3 raised for pre-December disk resize",
       ],
     },
   ],
 
   "/finops/forecast": [
     {
-      month: "Aug",
-      cost: 680,
-      note: "Assumes BigQuery anomaly resolved and partition filter applied. Compute stable with existing CUDs.",
-    },
-    {
-      month: "Sep",
-      cost: 650,
-      note: "CUD savings fully amortized + Cloud SQL CUD applied. Functions optimization running full month.",
-    },
-    {
       month: "Oct",
-      cost: 620,
-      note: "All available recommendations applied. Storage lifecycle policies in effect for full billing cycle.",
+      cost: 1187000,
+      note: "Festive sale traffic peaks. Assumes egress anomaly fixed and node-pool headroom held through the sale window — do not right-size during a sale.",
+    },
+    {
+      month: "Nov",
+      cost: 1142000,
+      note: "Post-festive normalisation. Nearline lifecycle assumed applied from mid-month once Client confirms retention.",
+    },
+    {
+      month: "Dec",
+      cost: 1058000,
+      note: "First month reflecting the Windows VM retirement, if the GKE migration lands on the December target [SOW §4.7]. Slips to Jan if it does not.",
     },
   ],
 
   "/finops/risk-factors": [
-    "BigQuery usage trending +15% MoM from increased ML training data. May need reserved slots by Q4 if trend continues.",
-    "Vertex AI spend growing with new model experiments. Current on-demand pricing acceptable below $50/mo, review if exceeded.",
-    "Cloud SQL instance approaching 80% storage capacity. May need disk resize by Sep (one-time cost, no ongoing increase).",
+    "The Dec 2026 Windows VM migration carries ₹85K/mo of forecast saving. If it slips, the FY forecast slips with it — this is the single largest dependency in the cost model.",
+    "ss-magento-db-01 is at 76% of provisioned storage and growing with the catalogue. A resize is needed before December; it is a one-time step change, not a rate change.",
+    "GKE node-pool headroom held for sale events is deliberate over-provisioning. It looks like waste in any generic right-sizing report — do not action it without checking the sale calendar [SOW §7.2 requires 48h notice of sale events].",
+    "PITR on ss-ops-db-01 is currently disabled. Enabling it to meet the §4.5 restore commitment will add CloudSQL disk cost — small, but it should not arrive as a surprise on the 15th report.",
   ],
 };
 

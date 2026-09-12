@@ -87,6 +87,45 @@ export interface Pipeline {
   cost: string;
 }
 
+/** GKE / Cloud Run estate — Tower B. */
+export interface KubernetesCluster {
+  name: string;
+  project: string;
+  mode: 'Standard' | 'Autopilot';
+  env: 'Production' | 'Non-Production';
+  version: string;
+  nodes: number;
+  pods: number;
+  /** Node-pool utilisation, percent. */
+  cpu: number;
+  memory: number;
+  status: 'healthy' | 'warning' | 'critical';
+  cost: string;
+  notes: string;
+  lastEvent: string;
+}
+
+/** Cloud SQL estate — Tower C. */
+export interface DatabaseInstance {
+  name: string;
+  engine: string;
+  tier: string;
+  /** Logical databases carried by the instance. */
+  hosts: string;
+  ha: boolean;
+  pitr: boolean;
+  connections: number;
+  maxConnections: number;
+  cpu: number;
+  storageUsedGb: number;
+  storageGb: number;
+  status: 'healthy' | 'warning' | 'critical';
+  cost: string;
+  /** Set when a version upgrade is contractually required. */
+  upgradeTo: string | null;
+  lastEvent: string;
+}
+
 /* ── FinOps ─────────────────────────────────────────────────────────── */
 
 export interface CostByPillar {

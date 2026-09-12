@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { useApiData } from "@/lib/api";
-import type { VmInstance, Incident, ServerlessFunction, Pipeline } from "@/lib/api";
+import type {
+  VmInstance,
+  Incident,
+  ServerlessFunction,
+  Pipeline,
+  KubernetesCluster,
+  DatabaseInstance,
+} from "@/lib/api";
+import { PROJECTS } from "@/lib/api/mock/shoppersstop-env";
 
 type WorkloadTab = "all" | "compute" | "kubernetes" | "databases" | "serverless" | "data-ai";
 type SubTab = "overview" | "analysis";
@@ -33,7 +41,8 @@ export default function CloudOpsIntelligencePage() {
   const [topTab, setTopTab] = useState<WorkloadTab>("all");
   const [subTab, setSubTab] = useState<SubTab>("overview");
   const [analysisCategory, setAnalysisCategory] = useState<AnalysisCategory>("security");
-  const [expandedInstance, setExpandedInstance] = useState<string | null>("pgsql");
+  // Opens the Magento primary — the instance carrying the connection-pool risk.
+  const [expandedInstance, setExpandedInstance] = useState<string | null>("ss-magento-db-01");
 
   return (
     <div className="min-h-screen bg-white text-slate-800">
@@ -54,8 +63,10 @@ export default function CloudOpsIntelligencePage() {
             </div>
           </div>
           <select className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 focus:border-sky-500 focus:outline-none">
-            <option>searce-sandbox</option>
-            <option>production-org</option>
+            <option>All projects (7)</option>
+            {PROJECTS.map((p) => (
+              <option key={p.id}>{p.id}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -236,6 +247,35 @@ function StatCard({ label, value, sub, borderColor }: { label: string; value: st
       <p className="mt-1 text-2xl font-bold text-slate-800">{value}</p>
       {sub && <p className="mt-0.5 text-xs text-slate-400">{sub}</p>}
     </div>
+  );
+}
+
+/** Inline utilisation bar — green under 60%, amber to 80%, red above. */
+function UtilBar({ pct }: { pct: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 w-16 rounded-full bg-slate-100">
+        <div
+          className={`h-1.5 rounded-full ${pct > 80 ? "bg-red-400" : pct > 60 ? "bg-amber-400" : "bg-green-400"}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      {pct}%
+    </div>
+  );
+}
+
+function StatusPill({ status }: { status: "healthy" | "warning" | "critical" }) {
+  const styles = {
+    healthy: { chip: "bg-green-50 text-green-700", dot: "bg-green-500", label: "Healthy" },
+    warning: { chip: "bg-amber-50 text-amber-700", dot: "bg-amber-400", label: "Warning" },
+    critical: { chip: "bg-red-50 text-red-700", dot: "bg-red-500", label: "Critical" },
+  }[status];
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${styles.chip}`}>
+      <span className={`inline-block h-1.5 w-1.5 rounded-full ${styles.dot}`} />
+      {styles.label}
+    </span>
   );
 }
 
@@ -449,15 +489,27 @@ function AllWorkloadsOverview() {
 /* ================================================================== */
 function ComputeOverview() {
   const { data: vmInstances } = useApiData<VmInstance[]>("/cloudops/compute-instances", []);
+  const { data: incidents } = useApiData<Incident[]>("/cloudops/incidents", []);
+
+  const running = vmInstances.filter((v) => v.status !== "stopped");
+  const avg = (pick: (v: VmInstance) => number) =>
+    running.length === 0 ? 0 : Math.round(running.reduce((s, v) => s + pick(v), 0) / running.length);
+  const windowsCount = vmInstances.filter((v) => v.type.includes("Windows")).length;
+  const computeIncidents = incidents.filter((i) => i.workload === "Compute");
+
   return (
     <div className="space-y-8">
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="Instances" value="23" />
-        <StatCard label="Status" value="21 / 2" sub="Running / Stopped" />
-        <StatCard label="Monthly Cost" value="$368" borderColor="border-green-200" />
-        <StatCard label="Avg CPU" value="42%" />
-        <StatCard label="Avg Memory" value="61%" />
+        <StatCard label="Instances" value={String(vmInstances.length)} />
+        <StatCard
+          label="Status"
+          value={`${running.length} / ${vmInstances.length - running.length}`}
+          sub="Running / Stopped"
+        />
+        <StatCard label="Windows VMs" value={String(windowsCount)} sub="Migrate by Dec 2026" borderColor="border-amber-200" />
+        <StatCard label="Avg CPU" value={`${avg((v) => v.cpu)}%`} />
+        <StatCard label="Avg Memory" value={`${avg((v) => v.memory)}%`} />
         <StatCard label="Public IPs" value="0" sub="All private" />
       </div>
 
@@ -530,25 +582,26 @@ function ComputeOverview() {
       </div>
 
       {/* Operational Memory */}
-      <div>
-        <SectionHeading>Operational Memory</SectionHeading>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-5 space-y-3">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-block rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">Resolved</span>
-            <div>
-              <p className="text-sm text-slate-700"><span className="font-medium">3d ago</span> — CPU utilization 95% sustained on <span className="font-medium">clens-dev</span></p>
-              <p className="text-xs text-slate-400">Auto-scaled to e2-standard-4, load balanced. Duration: 8 min.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">False positive</span>
-            <div>
-              <p className="text-sm text-slate-700"><span className="font-medium">21d ago</span> — Network egress anomaly 170k+ on <span className="font-medium">bastion-host</span></p>
-              <p className="text-xs text-slate-400">Traffic analyzed — legitimate backup job, alert threshold adjusted. Duration: 4 min.</p>
-            </div>
+      {computeIncidents.length > 0 && (
+        <div>
+          <SectionHeading>Operational Memory</SectionHeading>
+          <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-5">
+            {computeIncidents.map((i) => (
+              <div key={`${i.time}-${i.resource}`} className="flex items-start gap-3">
+                <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${i.statusColor}`}>{i.status}</span>
+                <div>
+                  <p className="text-sm text-slate-700">
+                    <span className="font-medium">{i.time}</span> — {i.issue} on <span className="font-medium">{i.resource}</span>
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {i.resolution} Duration: {i.duration}.
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -557,15 +610,127 @@ function ComputeOverview() {
 /*  KUBERNETES > OVERVIEW                                              */
 /* ================================================================== */
 function KubernetesOverview() {
-  return (
-    <div className="flex flex-col items-center justify-center py-32">
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-        <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-        </svg>
+  const { data: clusters } = useApiData<KubernetesCluster[]>("/cloudops/kubernetes", []);
+  const { data: incidents } = useApiData<Incident[]>("/cloudops/incidents", []);
+
+  if (clusters.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32">
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+          <svg className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+          </svg>
+        </div>
+        <h2 className="mb-2 text-lg font-semibold text-slate-700">No Kubernetes clusters found</h2>
+        <p className="text-sm text-slate-500">Run an asset scan to discover GKE clusters.</p>
       </div>
-      <h2 className="mb-2 text-lg font-semibold text-slate-700">No Kubernetes clusters found</h2>
-      <p className="text-sm text-slate-500">Run an asset scan to discover EKS and GKE clusters.</p>
+    );
+  }
+
+  const totalPods = clusters.reduce((sum, c) => sum + c.pods, 0);
+  const totalNodes = clusters.reduce((sum, c) => sum + c.nodes, 0);
+  const needsAttention = clusters.filter((c) => c.status !== "healthy").length;
+  const k8sIncidents = incidents.filter((i) => i.workload === "Kubernetes");
+
+  return (
+    <div className="space-y-8">
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <StatCard label="Clusters" value={String(clusters.length)} />
+        <StatCard
+          label="Health"
+          value={needsAttention === 0 ? "All healthy" : `${needsAttention} warning`}
+          borderColor={needsAttention === 0 ? "border-green-200" : "border-amber-200"}
+        />
+        <StatCard label="Pods" value={String(totalPods)} sub="Across all clusters" />
+        <StatCard label="Managed nodes" value={String(totalNodes)} sub="Autopilot excluded" />
+        <StatCard label="Service mesh" value="Istio" sub="Host routing + TLS" />
+        <StatCard label="P1 response SLO" value="30 min" sub="Tower B" />
+      </div>
+
+      {/* Cluster table */}
+      <div>
+        <SectionHeading>Cluster Inventory</SectionHeading>
+        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50">
+                {["Cluster", "Project", "Mode", "Version", "Nodes", "Pods", "CPU %", "Memory %", "Status", "Cost/mo"].map((h) => (
+                  <th key={h} className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {clusters.map((c) => (
+                <tr key={c.name} className="border-b border-slate-100 last:border-0">
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <p className="text-sm font-medium text-slate-700">{c.name}</p>
+                    <p className="text-xs text-slate-400">{c.notes}</p>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{c.project}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{c.mode}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{c.version}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{c.mode === "Autopilot" ? "—" : c.nodes}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{c.pods}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                    <UtilBar pct={c.cpu} />
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                    <UtilBar pct={c.memory} />
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <StatusPill status={c.status} />
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{c.cost}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Live signal per cluster */}
+      <div>
+        <SectionHeading>Cluster Signal</SectionHeading>
+        <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-5">
+          {clusters.map((c) => (
+            <div key={c.name} className="flex items-start gap-3">
+              <span
+                className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                  c.status === "healthy" ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
+                }`}
+              >
+                {c.status === "healthy" ? "Healthy" : "Watch"}
+              </span>
+              <p className="text-sm text-slate-700">
+                <span className="font-medium">{c.name}</span> — {c.lastEvent}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Operational Memory */}
+      {k8sIncidents.length > 0 && (
+        <div>
+          <SectionHeading>Operational Memory</SectionHeading>
+          <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-5">
+            {k8sIncidents.map((i) => (
+              <div key={`${i.time}-${i.resource}`} className="flex items-start gap-3">
+                <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${i.statusColor}`}>{i.status}</span>
+                <div>
+                  <p className="text-sm text-slate-700">
+                    <span className="font-medium">{i.time}</span> — {i.issue} on <span className="font-medium">{i.resource}</span>
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {i.resolution} Duration: {i.duration}.
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -580,98 +745,158 @@ function DatabasesOverview({
   expandedInstance: string | null;
   setExpandedInstance: (v: string | null) => void;
 }) {
+  const { data: databases } = useApiData<DatabaseInstance[]>("/cloudops/databases", []);
+  const { data: incidents } = useApiData<Incident[]>("/cloudops/incidents", []);
+
+  if (databases.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32">
+        <h2 className="mb-2 text-lg font-semibold text-slate-700">No database instances found</h2>
+        <p className="text-sm text-slate-500">Run an asset scan to discover Cloud SQL instances.</p>
+      </div>
+    );
+  }
+
+  const haCount = databases.filter((d) => d.ha).length;
+  const pitrCount = databases.filter((d) => d.pitr).length;
+  const attention = databases.filter((d) => d.status !== "healthy").length;
+  const pendingUpgrade = databases.filter((d) => d.upgradeTo !== null).length;
+  const totalStorage = databases.reduce((s, d) => s + d.storageGb, 0);
+  const dbIncidents = incidents.filter((i) => i.workload === "Database");
+
+  const bars = [
+    { label: "HA / regional", count: haCount },
+    { label: "PITR enabled", count: pitrCount },
+    { label: "Encrypted at rest", count: databases.length },
+    { label: "Pending version upgrade", count: pendingUpgrade, invert: true },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Stat Tiles */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="Instances" value="1" />
-        <StatCard label="Monthly Cost" value="$15" borderColor="border-green-200" />
-        <StatCard label="Open Findings" value="2" borderColor="border-red-200" />
-        <StatCard label="Total Storage" value="10 GB" borderColor="border-blue-200" />
-        <StatCard label="Multi-AZ" value="0" sub="HA configured" />
-        <StatCard label="Public Access" value="0" sub="All private" />
+        <StatCard label="Instances" value={String(databases.length)} />
+        <StatCard
+          label="Health"
+          value={attention === 0 ? "All healthy" : `${attention} warning`}
+          borderColor={attention === 0 ? "border-green-200" : "border-amber-200"}
+        />
+        <StatCard label="Total storage" value={`${totalStorage} GB`} borderColor="border-blue-200" />
+        <StatCard label="HA configured" value={`${haCount}/${databases.length}`} />
+        <StatCard label="Public access" value="0" sub="All private" />
+        <StatCard label="P1 response SLO" value="15 min" sub="Tower C" />
       </div>
 
       {/* Progress Bars */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: "Encrypted at rest", ratio: "1/1", pct: 100, color: "bg-green-500" },
-          { label: "Multi-AZ / Regional", ratio: "0/1", pct: 0, color: "bg-amber-500" },
-          { label: "PITR enabled", ratio: "0/1", pct: 0, color: "bg-amber-500" },
-          { label: "Pending maintenance", ratio: "0/1", pct: 0, color: "bg-amber-500" },
-        ].map((bar) => (
-          <div key={bar.label} className="rounded-lg border border-slate-200 bg-white p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm text-slate-600">{bar.label}</span>
-              <span className={`text-sm font-medium ${bar.pct === 100 ? "text-green-600" : "text-slate-400"}`}>{bar.ratio}</span>
+        {bars.map((bar) => {
+          const pct = Math.round((bar.count / databases.length) * 100);
+          const good = bar.invert ? bar.count === 0 : pct === 100;
+          return (
+            <div key={bar.label} className="rounded-lg border border-slate-200 bg-white p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm text-slate-600">{bar.label}</span>
+                <span className={`text-sm font-medium ${good ? "text-green-600" : "text-slate-400"}`}>
+                  {bar.count}/{databases.length}
+                </span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-slate-100">
+                <div className={`h-2 rounded-full ${good ? "bg-green-500" : "bg-amber-500"}`} style={{ width: `${pct}%` }} />
+              </div>
             </div>
-            <div className="h-2 w-full rounded-full bg-slate-100">
-              <div className={`h-2 rounded-full ${bar.color}`} style={{ width: `${bar.pct}%` }} />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Instance Overview */}
       <div>
         <SectionHeading>Instance Overview</SectionHeading>
-        <div className="rounded-lg border border-slate-200 bg-white">
-          <button
-            onClick={() => setExpandedInstance(expandedInstance === "pgsql" ? null : "pgsql")}
-            className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-slate-50"
-          >
-            <div className="flex items-center gap-3">
-              <svg
-                className={`h-4 w-4 text-slate-400 transition-transform ${expandedInstance === "pgsql" ? "rotate-90" : ""}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-              <div>
-                <p className="font-medium text-slate-800">pgsql</p>
-                <p className="text-xs text-slate-400">GCP &middot; POSTGRES_18 &middot; db-f1-micro &middot; ZONAL</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-green-600">$15/mo</span>
-              <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-600">2 findings</span>
-            </div>
-          </button>
+        <div className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
+          {databases.map((db) => {
+            const open = expandedInstance === db.name;
+            const connPct = Math.round((db.connections / db.maxConnections) * 100);
+            return (
+              <div key={db.name}>
+                <button
+                  onClick={() => setExpandedInstance(open ? null : db.name)}
+                  className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-slate-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg
+                      className={`h-4 w-4 text-slate-400 transition-transform ${open ? "rotate-90" : ""}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <div>
+                      <p className="font-medium text-slate-800">{db.name}</p>
+                      <p className="text-xs text-slate-400">
+                        {db.engine} &middot; {db.tier} &middot; {db.ha ? "REGIONAL" : "ZONAL"} &middot; {db.hosts}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium text-slate-600">{db.cost}/mo</span>
+                    <StatusPill status={db.status} />
+                  </div>
+                </button>
 
-          {expandedInstance === "pgsql" && (
-            <div className="border-t border-slate-200 bg-slate-50 px-5 py-4">
-              <div className="ml-7 grid grid-cols-3 gap-4">
-                <div className="rounded-md border border-slate-200 bg-white p-3">
-                  <p className="text-xs text-slate-400">Security</p>
-                  <p className="mt-1 text-lg font-bold text-slate-800">2<span className="text-sm font-normal text-slate-400">/8</span></p>
-                </div>
-                <div className="rounded-md border border-slate-200 bg-white p-3">
-                  <p className="text-xs text-slate-400">HA / DR</p>
-                  <p className="mt-1 text-lg font-bold text-slate-800">0<span className="text-sm font-normal text-slate-400">/4</span></p>
-                </div>
-                <div className="rounded-md border border-slate-200 bg-white p-3">
-                  <p className="text-xs text-slate-400">Findings</p>
-                  <p className="mt-1 text-lg font-bold text-red-500">2</p>
-                </div>
+                {open && (
+                  <div className="border-t border-slate-200 bg-slate-50 px-5 py-4">
+                    <div className="ml-7 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                      <div className="rounded-md border border-slate-200 bg-white p-3">
+                        <p className="text-xs text-slate-400">Connections</p>
+                        <p className={`mt-1 text-lg font-bold ${connPct > 80 ? "text-red-500" : "text-slate-800"}`}>
+                          {db.connections}
+                          <span className="text-sm font-normal text-slate-400">/{db.maxConnections}</span>
+                        </p>
+                      </div>
+                      <div className="rounded-md border border-slate-200 bg-white p-3">
+                        <p className="text-xs text-slate-400">CPU</p>
+                        <p className="mt-1 text-lg font-bold text-slate-800">{db.cpu}%</p>
+                      </div>
+                      <div className="rounded-md border border-slate-200 bg-white p-3">
+                        <p className="text-xs text-slate-400">Storage</p>
+                        <p className="mt-1 text-lg font-bold text-slate-800">
+                          {db.storageUsedGb}
+                          <span className="text-sm font-normal text-slate-400">/{db.storageGb} GB</span>
+                        </p>
+                      </div>
+                      <div className="rounded-md border border-slate-200 bg-white p-3">
+                        <p className="text-xs text-slate-400">Upgrade due</p>
+                        <p className="mt-1 text-lg font-bold text-amber-600">{db.upgradeTo ?? "—"}</p>
+                      </div>
+                    </div>
+                    <p className="ml-7 mt-3 text-xs text-slate-500">{db.lastEvent}</p>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })}
         </div>
       </div>
 
       {/* Operational Memory */}
-      <div>
-        <SectionHeading>Operational Memory</SectionHeading>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 inline-block rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">Resolved</span>
-            <div>
-              <p className="text-sm text-slate-700"><span className="font-medium">7d ago</span> — Connection pool max (100) hit on <span className="font-medium">pgsql</span></p>
-              <p className="text-xs text-slate-400">Pool size increased to 200, connection leak fixed in application code. Duration: 18 min.</p>
-            </div>
+      {dbIncidents.length > 0 && (
+        <div>
+          <SectionHeading>Operational Memory</SectionHeading>
+          <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-5">
+            {dbIncidents.map((i) => (
+              <div key={`${i.time}-${i.resource}`} className="flex items-start gap-3">
+                <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${i.statusColor}`}>{i.status}</span>
+                <div>
+                  <p className="text-sm text-slate-700">
+                    <span className="font-medium">{i.time}</span> — {i.issue} on <span className="font-medium">{i.resource}</span>
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {i.resolution} Duration: {i.duration}.
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

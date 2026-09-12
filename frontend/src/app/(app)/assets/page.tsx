@@ -5,9 +5,12 @@ import { useApiData } from "@/lib/api";
 
 type ServiceType =
   | "VM Instances"
-  | "EC2 Instances"
+  | "GKE Clusters"
   | "Cloud SQL Instances"
-  | "Cloud Run Services";
+  | "Cloud Run Services"
+  | "Redis Instances"
+  | "Storage Buckets"
+  | "Load Balancers";
 
 type ResourceState = "RUNNING" | "SUSPENDED" | "UNKNOWN";
 
@@ -24,9 +27,12 @@ interface Resource {
 
 const SERVICE_BADGE_COLORS: Record<ServiceType, { bg: string; text: string }> = {
   "VM Instances": { bg: "bg-emerald-100", text: "text-emerald-700" },
-  "EC2 Instances": { bg: "bg-orange-100", text: "text-orange-700" },
+  "GKE Clusters": { bg: "bg-indigo-100", text: "text-indigo-700" },
   "Cloud SQL Instances": { bg: "bg-blue-100", text: "text-blue-700" },
   "Cloud Run Services": { bg: "bg-teal-100", text: "text-teal-700" },
+  "Redis Instances": { bg: "bg-rose-100", text: "text-rose-700" },
+  "Storage Buckets": { bg: "bg-amber-100", text: "text-amber-700" },
+  "Load Balancers": { bg: "bg-violet-100", text: "text-violet-700" },
 };
 
 const STATE_BADGE_COLORS: Record<ResourceState, { bg: string; text: string; dot: string }> = {
