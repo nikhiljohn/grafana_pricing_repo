@@ -91,7 +91,14 @@ services:
       REDIS_URL: redis://redis:6379/0
       JWT_SECRET: ${JWT_SECRET:?set in .env.prod}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-sonnet-4-5}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-opus-5}
+      # FreshService — ITSM system of record. The webhook secret has no
+      # default on purpose: the receiver fails closed when it is unset,
+      # so a blank value disables the endpoint rather than opening it.
+      FRESHSERVICE_DOMAIN: ${FRESHSERVICE_DOMAIN:-}
+      FRESHSERVICE_API_KEY: ${FRESHSERVICE_API_KEY:-}
+      FRESHSERVICE_WEBHOOK_SECRET: ${FRESHSERVICE_WEBHOOK_SECRET:-}
+      FRESHSERVICE_REQUESTER_EMAIL: ${FRESHSERVICE_REQUESTER_EMAIL:-ms.prodsupport@searce.com}
       TENANT_MODE: ${TENANT_MODE:-single}
       CORS_ORIGINS: https://${DOMAIN:?set in .env.prod}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
