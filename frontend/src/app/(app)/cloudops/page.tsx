@@ -655,7 +655,7 @@ function KubernetesOverview() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
-                {["Cluster", "Project", "Mode", "Version", "Nodes", "Pods", "CPU %", "Memory %", "Status", "Cost/mo"].map((h) => (
+                {["Cluster", "Project", "Mode", "Nodes", "Pods", "CPU %", "Memory %", "Status", "Cost/mo"].map((h) => (
                   <th key={h} className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">{h}</th>
                 ))}
               </tr>
@@ -663,13 +663,14 @@ function KubernetesOverview() {
             <tbody>
               {clusters.map((c) => (
                 <tr key={c.name} className="border-b border-slate-100 last:border-0">
-                  <td className="whitespace-nowrap px-4 py-3">
+                  <td className="px-4 py-3">
                     <p className="text-sm font-medium text-slate-700">{c.name}</p>
-                    <p className="text-xs text-slate-400">{c.notes}</p>
+                    <p className="text-xs text-slate-400">
+                      {c.version} &middot; {c.notes}
+                    </p>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{c.project}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{c.mode}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{c.version}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{c.mode === "Autopilot" ? "—" : c.nodes}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{c.pods}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">

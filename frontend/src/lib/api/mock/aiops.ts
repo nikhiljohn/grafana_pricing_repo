@@ -1,7 +1,20 @@
 /* ------------------------------------------------------------------ */
 /*  Intellicore CMP — AIOps seed data                                 */
-/*  Served by apiFetch() when no backend is configured.  Keyed by the  */
-/*  endpoint path each page requests via useApiData().                 */
+/*  Tenant: Shoppers Stop — eCommerce workloads.                      */
+/*                                                                     */
+/*  This is the layer that compresses squad hours. Each agent below    */
+/*  maps to one service tower and automates the recurring, SOP-driven  */
+/*  work that tower currently spends L1 hours on. The per-tower hour   */
+/*  model lives in docs/SHOPPERSSTOP_TOWER_AUTOMATION.md — change      */
+/*  both together.                                                     */
+/*                                                                     */
+/*  BYOK IS MANDATORY. Every agent here is contingent on the Client    */
+/*  supplying and maintaining a valid Anthropic / OpenAI / Gemini API  */
+/*  key [SOW §3.2, §4.10]. With no key, AI Hub features do not run and */
+/*  the towers fall back to fully manual operation — which is the      */
+/*  420-hour baseline, not the compressed one.                         */
+/*                                                                     */
+/*  Served by apiFetch() when no backend is configured.                */
 /* ------------------------------------------------------------------ */
 
 import {
@@ -25,8 +38,8 @@ const data: Record<string, unknown> = {
   "/aiops/stats": [
     {
       label: "AI Agents Active",
-      value: "3",
-      sub: null,
+      value: "7",
+      sub: "one per service tower",
       icon: Bot,
       color: "text-blue-600",
       bg: "bg-blue-50",
@@ -34,9 +47,19 @@ const data: Record<string, unknown> = {
       pulse: true,
     },
     {
-      label: "Auto-remediations (30d)",
-      value: "23",
-      sub: "0 regressions",
+      label: "Engineer-hours saved (30d)",
+      value: "148",
+      sub: "against a 420 hr/mo baseline",
+      icon: TrendingUp,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      border: "border-emerald-200",
+      pulse: false,
+    },
+    {
+      label: "Auto-resolved at L1 (30d)",
+      value: "214",
+      sub: "0 escalations reopened",
       icon: ShieldCheck,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
@@ -45,8 +68,8 @@ const data: Record<string, unknown> = {
     },
     {
       label: "Tokens Used (30d)",
-      value: "847K",
-      sub: "$2.40 total cost",
+      value: "1.24M",
+      sub: "₹684 — billed to Client key (BYOK)",
       icon: Zap,
       color: "text-amber-600",
       bg: "bg-amber-50",
@@ -55,7 +78,7 @@ const data: Record<string, unknown> = {
     },
     {
       label: "Memory Entries",
-      value: "156",
+      value: "203",
       sub: "patterns, incidents, learnings",
       icon: Brain,
       color: "text-violet-600",
@@ -63,90 +86,125 @@ const data: Record<string, unknown> = {
       border: "border-violet-200",
       pulse: false,
     },
-    {
-      label: "Success Rate",
-      value: "96%",
-      sub: "across all AI actions",
-      icon: TrendingUp,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
-      pulse: false,
-    },
   ],
 
   "/aiops/agents": [
     {
-      name: "Security Auto-Remediation Agent",
+      name: "Tower A — Alert Triage Agent",
       status: "Active",
       statusColor: "bg-emerald-500",
       description:
-        "Monitoring 342 findings. 23 auto-remediated in 30d. Currently watching: SSH security group creation events.",
-      lastAction: "Restricted SSH group to VPN CIDR (2h ago)",
-      confidence: 85,
+        "Consumes Grafana and Dynatrace alerts across all 7 projects, classifies against Memory, opens the ITSM ticket with a proposed priority, and closes the ones that self-resolve. The L1 seat stops watching dashboards and only receives what survives triage.",
+      lastAction: "Classified LB egress spike as a catalogue feed export — closed without paging (12h ago)",
+      confidence: 89,
     },
     {
-      name: "Cost Anomaly Agent",
+      name: "Tower B — GKE Health Agent",
+      status: "Active",
+      statusColor: "bg-emerald-500",
+      description:
+        "Watches pod restarts, node pressure and autoscaling events on both clusters plus Autopilot. Anything GKE repairs itself is logged, not paged. Escalates only cascading-failure signatures — the documented ss.com risk.",
+      lastAction: "Autopilot pod eviction rescheduled in 90s — logged, no human action (9d ago)",
+      confidence: 91,
+    },
+    {
+      name: "Tower C — Database SOP Agent",
+      status: "Active",
+      statusColor: "bg-emerald-500",
+      description:
+        "Runs the weekly archival and backup-integrity SOPs inside the maintenance window, verifies the output, and escalates only on failure. Also tracks connection-pool and storage trend lines for early warning.",
+      lastAction: "Weekly archival verified across 5 instances — 38 min, no escalation (4d ago)",
+      confidence: 94,
+    },
+    {
+      name: "Tower D — Deployment Agent",
+      status: "Active",
+      statusColor: "bg-emerald-500",
+      description:
+        "Reads the pre-approved release note, validates pre-conditions, runs the Jenkins pipeline inside the 02:00–05:00 window, executes the release-specific Magaz pod commands, then runs post-deploy health checks. Pages a human only when a check fails.",
+      lastAction: "magento-release-r48 deployed + Magaz restart, 0 errors (Sep 11, 02:14)",
+      confidence: 87,
+    },
+    {
+      name: "Tower E — Windows VM SOP Agent",
+      status: "Active",
+      statusColor: "bg-emerald-500",
+      description:
+        "Executes the weekly restart of all 5 production Windows VMs and the post-restart curl validation per SOP, plus the nightly card-archival script. Pure SOP execution — this one needs no model at all, and retires with the Dec 2026 GKE migration.",
+      lastAction: "5 VMs restarted + curl checks green by 02:41 (4d ago)",
+      confidence: 97,
+    },
+    {
+      name: "Tower F — Security Triage Agent",
       status: "Investigating",
       statusColor: "bg-amber-500",
       description:
-        "Detected BigQuery +340% spike. Correlating with Memory: matches Jul 15 ETL pattern (88% confidence). Awaiting human approval for fix.",
-      lastAction: "Flagged anomaly, generated fix recommendation (4h ago)",
-      confidence: 88,
+        "Ranks all 65+ CSPM checks by exploitability against this estate rather than by raw severity, so the engineer works a top-N list instead of reviewing everything. Currently correlating the Keycloak CVE with the unconfirmed auth replacement decision.",
+      lastAction: "Ranked Keycloak CVE above 6 higher-CVSS findings — live auth path (3h ago)",
+      confidence: 86,
     },
     {
-      name: "Predictive Operations Agent",
+      name: "Tower G — FinOps Digest Agent",
       status: "Active",
       statusColor: "bg-emerald-500",
       description:
-        "Monitoring 11 metrics across 5 instances. 1 critical anomaly (bastion-host egress). 4 trending toward breach in 22d.",
-      lastAction: "Updated trend prediction for clens-dev CPU (12h ago)",
-      confidence: 92,
+        "Drafts the bi-monthly cost report due on the 1st and 15th, with anomaly narratives and right-sizing recommendations already written up. The analyst edits and sends rather than authoring from raw billing data.",
+      lastAction: "Drafted the 15 Sep report; flagged the storage egress anomaly as the lead item (6h ago)",
+      confidence: 90,
     },
   ],
 
   "/aiops/activity": [
     {
-      time: "2h ago",
-      agent: "Security Agent",
-      action: "Auto-restricted SSH group 'launch-wizard-111' to VPN CIDR",
-      result: "Success",
-      resultColor: "text-emerald-600",
-      resultBg: "bg-emerald-50",
-      icon: CheckCircle2,
-    },
-    {
-      time: "4h ago",
-      agent: "Cost Agent",
-      action: "Detected BigQuery anomaly, generated remediation plan",
-      result: "Awaiting approval",
+      time: "3h ago",
+      agent: "Tower F — Security Triage",
+      action: "Re-ranked Keycloak 22.0.1 CVE to top of queue — sits on the live auth path for ss.com",
+      result: "Escalated to L2",
       resultColor: "text-amber-600",
       resultBg: "bg-amber-50",
       icon: Clock,
     },
     {
-      time: "8h ago",
-      agent: "Predictive Agent",
-      action: "Bastion-host egress classified as false positive (72% confidence)",
-      result: "Flagged for review",
-      resultColor: "text-orange-600",
-      resultBg: "bg-orange-50",
-      icon: Eye,
+      time: "6h ago",
+      agent: "Tower G — FinOps Digest",
+      action: "Drafted 15 Sep bi-monthly cost report with storage egress anomaly as lead item",
+      result: "Awaiting analyst review",
+      resultColor: "text-amber-600",
+      resultBg: "bg-amber-50",
+      icon: Clock,
     },
     {
-      time: "1d ago",
-      agent: "Security Agent",
-      action: "Disabled inactive IAM user test-user@searce.com",
-      result: "Success",
+      time: "12h ago",
+      agent: "Tower A — Alert Triage",
+      action: "Classified ss-nitrogen-lb-prod egress spike (3.1σ) as scheduled catalogue export",
+      result: "Closed without paging",
       resultColor: "text-emerald-600",
       resultBg: "bg-emerald-50",
       icon: CheckCircle2,
     },
     {
+      time: "1d ago",
+      agent: "Tower C — Database SOP",
+      action: "Projected ss-magento-db-01 connections to reach max in 9 days at current growth",
+      result: "P3 raised proactively",
+      resultColor: "text-emerald-600",
+      resultBg: "bg-emerald-50",
+      icon: Eye,
+    },
+    {
       time: "2d ago",
-      agent: "Cost Agent",
-      action: "Applied committed use discount recommendation to project Sea-Sbox",
-      result: "Success",
+      agent: "Tower B — GKE Health",
+      action: "Node pool memory at 81% — recommended pre-sale scale-up before the festive window",
+      result: "Applied by L1",
+      resultColor: "text-emerald-600",
+      resultBg: "bg-emerald-50",
+      icon: CheckCircle2,
+    },
+    {
+      time: "4d ago",
+      agent: "Tower E — Windows VM SOP",
+      action: "Weekly restart ×5 + post-restart curl validation per SOP",
+      result: "All healthy, zero touch",
       resultColor: "text-emerald-600",
       resultBg: "bg-emerald-50",
       icon: CheckCircle2,
@@ -154,104 +212,111 @@ const data: Record<string, unknown> = {
   ],
 
   "/aiops/quick-queries": [
-    "What changed in the last 24h?",
-    "What's our biggest cost risk?",
-    "Which findings should I fix first?",
-    "Show me deployment patterns",
+    "Are we ready for the festive sale?",
+    "What breaks if I upgrade MySQL to 8.4?",
+    "Which findings actually matter on the checkout path?",
+    "Why did the last release roll back?",
   ],
 
   "/aiops/tools": [
     {
       icon: Activity,
-      title: "Anomaly Narrative",
-      desc: "AI explains anomalies in plain English with Memory context",
-      usage: 12,
-      usageLabel: "analyses run",
+      title: "Pre-Sale Readiness Report",
+      desc: "Go/no-go before each sale event: node headroom vs expected load, DB connection headroom, open blast-radius findings",
+      usage: 4,
+      usageLabel: "sale events assessed",
     },
     {
-      icon: ShieldAlert,
-      title: "Policy Engine",
-      desc: "Natural language → IAM/firewall policies",
-      usage: 8,
-      usageLabel: "policies generated",
+      icon: GitCompare,
+      title: "MySQL 8.4 Dependency Map",
+      desc: "Which services break if a schema changes — across Magento, SSO, Keycloak and CMS",
+      usage: 6,
+      usageLabel: "impact analyses run",
     },
     {
       icon: AlertTriangle,
       title: "Incident Assistant",
-      desc: "Correlates current incident with Memory of past resolutions",
-      usage: 23,
+      desc: "Correlates a live incident with Memory of past resolutions on this estate",
+      usage: 31,
       usageLabel: "incidents assisted",
     },
     {
-      icon: DollarSign,
-      title: "Cost Optimization Advisor",
-      desc: "Recommendations with ROI from past applications",
-      usage: 7,
-      usageLabel: "optimizations applied",
+      icon: ShieldAlert,
+      title: "Remediation Playbook",
+      desc: "Exact gcloud / Terraform per finding, scoped to the affected project",
+      usage: 18,
+      usageLabel: "playbooks generated",
     },
     {
-      icon: GitCompare,
-      title: "Drift Analysis",
-      desc: "Detects config drift and correlates with incidents",
-      usage: 3,
-      usageLabel: "drifts detected",
+      icon: DollarSign,
+      title: "Cost Advisor",
+      desc: "Right-sizing with ROI from past applications, and 30/60/90-day forecasts",
+      usage: 11,
+      usageLabel: "recommendations issued",
     },
     {
       icon: ClipboardCheck,
       title: "Compliance Reporter",
-      desc: "Generates compliance reports with remediation history",
-      usage: 2,
+      desc: "One-click PCI-DSS, ISO 27001, CIS and NIST reports with live findings as evidence",
+      usage: 5,
       usageLabel: "reports generated",
     },
   ],
 
   "/aiops/daily-tokens": [
-    12, 18, 45, 28, 34, 22, 15, 42, 38, 27, 19, 55, 31, 24, 48, 36, 29, 17,
-    41, 33, 26, 52, 21, 37, 44, 30, 23, 47, 35, 20,
+    31, 44, 38, 52, 41, 22, 18, 47, 55, 49, 36, 61, 43, 25, 21, 58, 46, 39,
+    64, 51, 28, 24, 69, 57, 42, 48, 33, 27, 72, 59,
   ],
 
+  /** BYOK — these tokens bill to the Client's own LLM key [SOW §4.10]. */
   "/aiops/cost-by-feature": [
-    { feature: "Auto-remediation", tokens: "312K", cost: "$0.94", pct: 37, color: "bg-blue-500" },
-    { feature: "Query Infrastructure", tokens: "245K", cost: "$0.74", pct: 29, color: "bg-violet-500" },
-    { feature: "Anomaly Analysis", tokens: "156K", cost: "$0.47", pct: 18, color: "bg-amber-500" },
-    { feature: "Policy Generation", tokens: "89K", cost: "$0.27", pct: 11, color: "bg-emerald-500" },
-    { feature: "Reports", tokens: "45K", cost: "$0.14", pct: 5, color: "bg-slate-400" },
+    { feature: "Alert triage (Tower A)", tokens: "412K", cost: "₹227", pct: 33, color: "bg-blue-500" },
+    { feature: "Security triage (Tower F)", tokens: "298K", cost: "₹164", pct: 24, color: "bg-rose-500" },
+    { feature: "Incident assistance", tokens: "211K", cost: "₹116", pct: 17, color: "bg-violet-500" },
+    { feature: "Cost narratives (Tower G)", tokens: "149K", cost: "₹82", pct: 12, color: "bg-amber-500" },
+    { feature: "Deployment validation (Tower D)", tokens: "112K", cost: "₹62", pct: 9, color: "bg-emerald-500" },
+    { feature: "Reports", tokens: "58K", cost: "₹33", pct: 5, color: "bg-slate-400" },
   ],
 
   "/aiops/audit-trail": [
     {
-      time: "2h ago",
-      decision: "Auto-restrict SSH security group",
-      reasoning: "Matched known over-permissive pattern. Memory confidence 91%. No prior regressions from this action type.",
-      outcome: "Executed",
-      outcomeColor: "text-emerald-600",
-    },
-    {
-      time: "4h ago",
-      decision: "Flag BigQuery cost anomaly",
-      reasoning: "Spend exceeded 3-sigma threshold. Memory matched Jul 15 ETL incident (88%). Auto-fix available but cost > $50 — requires approval.",
-      outcome: "Awaiting approval",
+      time: "3h ago",
+      decision: "Escalate Keycloak CVE above 6 higher-CVSS findings",
+      reasoning:
+        "Ranked by exploitability against this estate, not raw CVSS. Keycloak sits on the live ss.com auth path; the higher-CVSS findings are in non-production. SOW §4.8 puts the Keycloak upgrade in scope explicitly.",
+      outcome: "Escalated to L2",
       outcomeColor: "text-amber-600",
     },
     {
-      time: "8h ago",
-      decision: "Classify bastion egress as false positive",
-      reasoning: "Traffic pattern matches scheduled backup window. Confidence 72% — below auto-execute threshold. Flagged for human review.",
-      outcome: "Flagged",
-      outcomeColor: "text-orange-600",
+      time: "12h ago",
+      decision: "Close LB egress alert without paging",
+      reasoning:
+        "Signature matched the scheduled catalogue feed export seen 4 times in 90d, all benign. Source subnet matched the export job, not the payment path. Memory confidence 91%. Threshold rebaselined rather than re-alerting.",
+      outcome: "Closed automatically",
+      outcomeColor: "text-emerald-600",
     },
     {
       time: "1d ago",
-      decision: "Disable inactive IAM user",
-      reasoning: "No login for 90+ days. No active service account keys. Memory shows 4 prior successful deactivations with 0 rollbacks.",
-      outcome: "Executed",
+      decision: "Raise P3 on ss-magento-db-01 before any breach",
+      reasoning:
+        "Connections growing 14%/week against a 500 ceiling — nine days of headroom. Raising early puts it in a maintenance window instead of a 03:00 P1. Prior occurrence on this instance took 31 min to clear reactively.",
+      outcome: "Ticket raised",
       outcomeColor: "text-emerald-600",
     },
     {
       time: "2d ago",
-      decision: "Apply CUD recommendation",
-      reasoning: "12-month usage pattern stable. Projected savings $1,240/yr. Memory: 3 prior CUD applications, all within 5% of projected savings.",
-      outcome: "Executed",
+      decision: "Recommend pre-sale node scale-up, do not auto-apply",
+      reasoning:
+        "Memory at 81% with two nodes of headroom. Scaling is in scope [SOW §4.4] but changes cost, and all Searce-initiated changes need Client approval [SOW §3.2]. Recommended rather than executed.",
+      outcome: "Approved and applied by L1",
+      outcomeColor: "text-emerald-600",
+    },
+    {
+      time: "4d ago",
+      decision: "Execute weekly Windows VM restart unattended",
+      reasoning:
+        "Pure SOP execution with a deterministic curl validation step and an explicit rollback. 5 VMs, documented sequence, inside the agreed window. No model judgement involved — the agent runs the runbook.",
+      outcome: "Executed, all healthy",
       outcomeColor: "text-emerald-600",
     },
   ],

@@ -86,9 +86,9 @@ const allOrgs: CustomerSnapshot = {
     {
       severity: "amber",
       pillar: "CloudOps",
-      title: "ShoppersStop — checkout-service egress anomalous (3.3σ) ahead of sale",
+      title: "ShoppersStop — production GKE node pool at 81% memory before the festive window",
       memory:
-        "Memory: a similar 3.3σ egress on Jun 2 was a false positive (backup job, 72% conf). This signature differs — likely real. Flagged before the sale window to prevent a checkout outage.",
+        "Memory: the ss.com cascade always starts at the checkout route, and reactive autoscale runs 6–8 min too slow. Pre-scaling 2 nodes ahead of the push contained it 4 times out of 4. Recommendation raised, awaiting Client approval.",
     },
     {
       severity: "blue",
@@ -128,7 +128,7 @@ const allOrgs: CustomerSnapshot = {
   ],
   csreActivity: [
     { label: "Last review", value: "2h ago — Netcore & Aarti by Searce CSRE" },
-    { label: "Next scheduled review", value: "Tomorrow 10:00 AM IST — ShoppersStop pre-sale readiness" },
+    { label: "Next scheduled review", value: "Tomorrow 10:00 AM IST — ShoppersStop festive readiness" },
     { label: "Open tickets", value: "6 across 5 accounts" },
     { label: "Recommendations applied this month", value: "14 across 8 accounts" },
     { label: "Estimated savings from recommendations", value: "₹7.8L/mo across the book" },
@@ -262,65 +262,80 @@ const aarti: CustomerSnapshot = {
 };
 
 /* ── ShoppersStop ────────────────────────────────────────────────── */
+/*
+ * Live tenant. Every item traces to the eCommerce Cloud Managed
+ * Services SOW (v1.0, effective 1 Oct 2026): 7 GCP projects, 3 GKE
+ * clusters, 5 Cloud SQL MySQL instances and 5 Windows VMs across
+ * seven service towers. Detail lives in ./shoppersstop-env.ts.
+ */
 const shoppersStop: CustomerSnapshot = {
   scores: [
-    { pillar: "CloudOps", score: 72, status: "warning", note: "egress anomaly active" },
-    { pillar: "FinOps", score: 88, status: "healthy", note: "" },
-    { pillar: "Cloud Security", score: 93, status: "healthy", note: "" },
-    { pillar: "DevOps", score: 91, status: "healthy", note: "" },
-    { pillar: "AIOps", score: null, status: "active", note: "1 agent running" },
+    { pillar: "CloudOps", score: 74, status: "warning", note: "node pool 81% before sale window" },
+    { pillar: "FinOps", score: 79, status: "warning", note: "storage egress anomaly active" },
+    { pillar: "Cloud Security", score: 81, status: "warning", note: "Keycloak CVE on live auth path" },
+    { pillar: "DevOps", score: 88, status: "healthy", note: "11 releases, 0 window breaches" },
+    { pillar: "AIOps", score: null, status: "active", note: "7 agents — one per tower" },
   ],
   attention: [
     {
-      severity: "amber",
-      pillar: "CloudOps",
-      title: "checkout-service egress anomalous (3.3σ) — 18 hours before weekend sale window",
+      severity: "red",
+      pillar: "Cloud Security",
+      title: "Keycloak 22.0.1 authentication-bypass CVEs on the live ss.com auth path",
       memory:
-        "Memory: a similar 3.3σ egress spike on Jun 2 was a backup job (false positive, 72% conf). This signature differs — traffic source is the payment gateway subnet, not the backup subnet. Likely real. Pre-sale flag prevents a checkout outage during the high-stakes window.",
+        "Memory: ranked above 6 higher-CVSS findings because those sit in non-production. SOW §4.8 puts Keycloak upgrade assistance in scope; §9 item 8 leaves the replacement auth service unconfirmed — that decision should not gate patching a live CVE.",
     },
     {
       severity: "amber",
       pillar: "CloudOps",
-      title: "Redis cache hit rate dropped to 61% — 18% below baseline",
+      title: "Production node pool at 81% memory with the festive window approaching",
       memory:
-        "Memory: cache hit rate dips correlate with sale-day traffic onboarding in 2 of 3 prior sale events. Warm cache with predicted hot-key set before 10 PM tonight. Confidence: 83%.",
+        "Memory: the ss.com cascade always starts at the checkout route, and reactive autoscale runs 6–8 minutes too slow. Pre-scaling 2 nodes ahead of the push contained it 4 times out of 4. Recommendation raised, awaiting Client approval per SOW §3.2.",
+    },
+    {
+      severity: "amber",
+      pillar: "FinOps",
+      title: "Campaign creative served from the bucket instead of the CDN — ≈₹48K overspend",
+      memory:
+        "Memory: identical to the August campaign. The CMS template still carries direct bucket URLs — same template, same line. Repointing at the CDN origin cut egress 78% within two hours last time.",
     },
     {
       severity: "blue",
-      pillar: "FinOps",
-      title: "Cloud CDN egress for sale campaign assets will exceed budget by ~12%",
+      pillar: "CloudOps",
+      title: "MySQL 8.0.37 → 8.4 required across all 5 instances before December 2026",
       memory:
-        "Memory: Diwali 2024 sale had the same CDN overage pattern. Switching regional caches from asia-south1 to multi-region cut overage by 40%. Same config available as a one-click change.",
+        "Memory: a contractual deadline [SOW §4.5], not a recommendation. The dependency map matters more than the upgrade — Magento, SSO, Keycloak and CMS all touch the auth path. UAT rehearsal is scheduled; both 90-day deploy failures carried schema changes.",
     },
   ],
   changes: [
-    { pillar: "CloudOps", detail: "8 GKE pods scaled ahead of sale. Checkout-service egress anomaly flagged. Redis hit rate dip detected." },
-    { pillar: "FinOps", detail: "₹1.9L spend MTD. CDN costs tracking 12% over for sale assets. Compute well within budget." },
-    { pillar: "Cloud Security", detail: "Zero new critical findings. WAF rules updated for sale weekend threat signatures." },
-    { pillar: "DevOps", detail: "22 deployments — all sale-feature releases. 0 failures. Feature flags all verified." },
-    { pillar: "AIOps", detail: "329 tokens today. Pre-sale capacity planning agent active. 2 recommendations surfaced." },
+    { pillar: "CloudOps", detail: "Node pool scaled 7 → 9 ahead of the push. Autopilot eviction self-resolved in 90s. 5 Windows VMs restarted per SOP." },
+    { pillar: "FinOps", detail: "₹11.2L MTD across 7 projects. Storage egress anomaly active. UAT scale-to-zero now saving ₹31K/mo." },
+    { pillar: "Cloud Security", detail: "Keycloak CVE escalated to L2. TLS secret for ss.com expires in 24 days. WAF refreshed for festive signatures." },
+    { pillar: "DevOps", detail: "magento-release-r48 deployed 02:14 with Magaz restart, 0 errors. All 11 releases inside the 02:00–05:00 window." },
+    { pillar: "AIOps", detail: "7 agents active, 214 items auto-resolved at L1 this month. 148 engineer-hours saved against baseline." },
   ],
   patterns: [
-    { pattern: "Pre-sale egress anomaly", firstSeen: "90d ago", occurrences: 3, lastResolution: "Monitor + CDN config", confidence: 72 },
-    { pattern: "Redis cache miss on sale day", firstSeen: "60d ago", occurrences: 2, lastResolution: "Pre-warm hot-key set", confidence: 83 },
-    { pattern: "CDN budget overage on campaigns", firstSeen: "120d ago", occurrences: 2, lastResolution: "Multi-region cache switch", confidence: 78 },
-    { pattern: "GKE scale-up lag on traffic burst", firstSeen: "30d ago", occurrences: 1, lastResolution: "Pre-provision node pool", confidence: 86 },
+    { pattern: "Autopilot pod eviction (benign)", firstSeen: "90d ago", occurrences: 11, lastResolution: "Log only, never page", confidence: 95 },
+    { pattern: "Windows VM memory creep", firstSeen: "90d ago", occurrences: 5, lastResolution: "Restart forward into window", confidence: 79 },
+    { pattern: "Checkout cascade under burst", firstSeen: "75d ago", occurrences: 4, lastResolution: "Pre-scale node pool", confidence: 93 },
+    { pattern: "Catalogue export egress false positive", firstSeen: "60d ago", occurrences: 4, lastResolution: "Rebaseline by source subnet", confidence: 91 },
+    { pattern: "Magento connection-pool growth", firstSeen: "60d ago", occurrences: 3, lastResolution: "Reap idle connections", confidence: 88 },
+    { pattern: "Schema-bearing release rollback", firstSeen: "56d ago", occurrences: 2, lastResolution: "UAT rehearsal first", confidence: 86 },
   ],
   workingWell: [
-    "Pre-sale capacity planning triggered 18h early — GKE pools pre-provisioned, checkout ready for peak.",
-    "WAF updated for sale weekend threat signatures — 3 scraper IPs already blocked proactively.",
-    "FinOps: CDN overage caught early — multi-region cache fix queued, will save ~₹28K on this sale.",
-    "DevOps: all 22 sale-feature releases deployed with 0 failures. Feature flags verified for rollout.",
+    "All 11 releases in 90 days ran inside the 02:00–05:00 window. Zero window breaches.",
+    "Autopilot evictions no longer page anyone — 11 occurrences absorbed at L1, removing a recurring source of overnight noise.",
+    "The checkout cascade was contained before user impact: 9 min response, 22 min resolution, both inside the P1 SLO.",
+    "UAT scale-to-zero and SUD consolidation are now saving ₹43.8K/mo with no impact on the test window.",
   ],
   csreActivity: [
-    { label: "Last review", value: "1h ago — Pre-sale readiness check by CSRE CloudOps lead" },
-    { label: "Next scheduled review", value: "Tomorrow 10:00 AM IST — Pre-sale readiness (scheduled with ShoppersStop IT)" },
-    { label: "Open tickets", value: "2 (egress investigation, CDN config change)" },
-    { label: "Recommendations applied this month", value: "4 (GKE scale, WAF rules, Redis warm, CDN)" },
-    { label: "Estimated savings from recommendations", value: "₹68K on this sale cycle" },
+    { label: "Last review", value: "1h ago — Festive readiness check by CSRE CloudOps lead" },
+    { label: "Next scheduled review", value: "Monthly wellness / CAB — with Subhasish Mishra (eCommerce Infrastructure Lead)" },
+    { label: "Open tickets", value: "4 (Keycloak CVE, node pre-scale, storage egress, PITR on ss-ops-db-01)" },
+    { label: "Recommendations applied this month", value: "3 applied, 3 available (₹1.06L/mo unactioned)" },
+    { label: "Engineer-hours saved by AI this month", value: "148 hrs against a 420 hr baseline" },
   ],
-  timeline: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-  incidentSummary: "2 incidents in 30d · 99.96% uptime · 19 min total downtime",
+  timeline: [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+  incidentSummary: "5 incidents in 30d · 99.94% uptime · 1 P1 (22 min), all inside SLO",
 };
 
 /* ── DesignX ─────────────────────────────────────────────────────── */
